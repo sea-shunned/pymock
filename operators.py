@@ -75,3 +75,57 @@ def neighbourMutationAdapt(parent, MUTPB, gen_length, argsortdists, L, int_links
 			parent[index] = replaceLink(argsortdists, int_links_indices[index], parent[index], L)
 
 	return parent
+
+def neighbourHyperMutation_all(parent, MUTPB, gen_length, argsortdists, L, int_links_indices, nn_rankings, hyper_mut):
+	first_term = (MUTPB / gen_length)
+
+	# Using a comprehension for this bit is faster
+	mutprobs = [(first_term + ((nn_rankings[int_links_indices[index]][value] / gen_length) ** 2))*hyper_mut for index,value in enumerate(parent)]
+
+	print(mutprobs,"\n")
+
+	# Now just loop over the probabilities
+	# As we're using assignment, can't really do this part in a comprehension!
+	for index, mutprob in enumerate(mutprobs):
+		if random.random() < mutprob:
+			# a,b = int_links_indices[index],parent[index]
+			parent[index] = replaceLink(argsortdists, int_links_indices[index], parent[index], L)
+
+	return parent
+
+def neighbourHyperMutation_spec(parent, MUTPB, gen_length, argsortdists, L, int_links_indices, nn_rankings, hyper_mut, new_genes):
+	first_term = (MUTPB / gen_length)
+
+	### Need to fix this to apply the high rate to only the new genes
+	# See notebook
+
+	# Using a comprehension for this bit is faster
+	mutprobs = [(first_term + ((nn_rankings[int_links_indices[index]][value] / gen_length) ** 2))*hyper_mut for index,value in enumerate(parent)]
+
+	print(mutprobs,"\n")
+
+	# Now just loop over the probabilities
+	# As we're using assignment, can't really do this part in a comprehension!
+	for index, mutprob in enumerate(mutprobs):
+		if random.random() < mutprob:
+			# a,b = int_links_indices[index],parent[index]
+			parent[index] = replaceLink(argsortdists, int_links_indices[index], parent[index], L)
+
+	return parent
+
+def neighbourFairMutation(parent, MUTPB, gen_length, argsortdists, L, int_links_indices, nn_rankings, raised_mut):
+	first_term = (MUTPB / gen_length)
+
+	# Using a comprehension for this bit is faster
+	mutprobs = [(first_term + ((nn_rankings[int_links_indices[index]][value] / gen_length) ** 2))*raised_mut for index,value in enumerate(parent)]
+
+	print(mutprobs,"\n")
+
+	# Now just loop over the probabilities
+	# As we're using assignment, can't really do this part in a comprehension!
+	for index, mutprob in enumerate(mutprobs):
+		if random.random() < mutprob:
+			# a,b = int_links_indices[index],parent[index]
+			parent[index] = replaceLink(argsortdists, int_links_indices[index], parent[index], L)
+
+	return parent

@@ -139,6 +139,7 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 	# Calculate HV of initialised population
 	HV.append(hypervolume(pop, HV_ref))
 
+	### Start actual EA ###
 	ea_start = time.time()
 	for gen in range(1, NUM_GEN):
 		# Shuffle population
