@@ -82,7 +82,7 @@ def neighbourHyperMutation_all(parent, MUTPB, gen_length, argsortdists, L, int_l
 	# Using a comprehension for this bit is faster
 	mutprobs = [(first_term + ((nn_rankings[int_links_indices[index]][value] / gen_length) ** 2))*hyper_mut for index,value in enumerate(parent)]
 
-	print(mutprobs,"\n")
+	# print(mutprobs,"\n")
 
 	# Now just loop over the probabilities
 	# As we're using assignment, can't really do this part in a comprehension!
@@ -100,8 +100,12 @@ def neighbourHyperMutation_spec(parent, MUTPB, gen_length, argsortdists, L, int_
 	# See notebook
 
 	# Using a comprehension for this bit is faster
-	mutprobs = [(first_term + ((nn_rankings[int_links_indices[index]][value] / gen_length) ** 2))*hyper_mut for index,value in enumerate(parent)]
+	mutprobs = [first_term + ((nn_rankings[int_links_indices[index]][value] / gen_length) ** 2) for index,value in enumerate(parent)]
 
+	print(mutprobs)
+	new_probs = [mut_value * hyper_mut for mut_value in mutprobs[-len(new_genes):]]
+	print(new_probs)
+	mutprobs[-len(new_genes):] = new_probs
 	print(mutprobs,"\n")
 
 	# Now just loop over the probabilities
@@ -119,7 +123,7 @@ def neighbourFairMutation(parent, MUTPB, gen_length, argsortdists, L, int_links_
 	# Using a comprehension for this bit is faster
 	mutprobs = [(first_term + ((nn_rankings[int_links_indices[index]][value] / gen_length) ** 2))*raised_mut for index,value in enumerate(parent)]
 
-	print(mutprobs,"\n")
+	# print(mutprobs,"\n")
 
 	# Now just loop over the probabilities
 	# As we're using assignment, can't really do this part in a comprehension!

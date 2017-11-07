@@ -1,8 +1,7 @@
-from sklearn.cluster import KMeans
 import numpy as np
 import random # So we can show where the functions are from better
 import precompute
-from math import floor
+# from math import floor
 
 
 #### New initialisation ####

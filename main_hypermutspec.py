@@ -22,8 +22,9 @@ import time
 
 
 # Run outside of multiprocessing scope
-creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
-creator.create("Individual", list, fitness=creator.Fitness)
+# creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
+# creator.create("Individual", list, fitness=creator.Fitness)
+## Only need to do the above once, which we do with main_base.py
 
 # @profile # for line_profiler
 def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs):
@@ -139,8 +140,19 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 	# Calculate HV of initialised population
 	HV.append(hypervolume(pop, HV_ref))
 
-	### Start actual EA ###
-	# ea_start = time.time()
+
+	### Adaptive hyperparameter parameters ###
+	window_size = 3				# Moving average of gradients to look at
+	initial_gens = 10			# Number of generations to wait until measuring
+	init_grad_switch = True		# To calculate initial gradient only once
+	new_delta_window = 5		# Number of generations to let new delta take effect before triggering new
+	adapt_gens = [0]			# Initialise list for tracking which gens we trigger adaptive delta
+	HV = []						# Initialise HV list
+	grads = [0]					# Initialise gradient list
+
+
+	### Start actual EA ### 
+	ea_start = time.time()
 	for gen in range(1, NUM_GEN):
 		# Shuffle population
 		random.shuffle(pop)
@@ -166,7 +178,6 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 
 		# Evaluate fitness of those that are missing a value
 		invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-		# The above and below are pointless/contradictory
 
 		assert len(invalid_ind) == num_indivs, "Some individuals are unchanged?"
 
@@ -176,18 +187,68 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 
 		pop = toolbox.select(pop + offspring, NUM_INDIVS)
 
-		# print("\n")
-
 		# print("Gen:",gen)
 		curr_HV = hypervolume(pop, HV_ref)
 		HV.append(curr_HV)
 
+		### Adaptive Delta Trigger ###
+		if delta_int_links != 0:
+				if gen > initial_gens:
+					if init_grad_switch:
+						init_grad = (HV[-1] - HV[0]) / len(HV)
+						init_grad_switch = False
+
+					grads.append((curr_HV - HV[-(window_size+1)]) / window_size)
+
+					# Just in case, capture the error (unlikely to happen with large datasets)
+					try:
+						curr_ratio = grads[-2]/grads[-1]
+
+					except ZeroDivisionError:
+						print("Gradient zero division error, using 0.0001")
+						curr_ratio = grads[-2]/0.0001
+
+					if gen >= adapt_gens[-1] + new_delta_window:
+						if ((np.around(curr_ratio, decimals=2) == 1
+							or np.around(curr_ratio, decimals=2) == 0) 
+							and grads[-1] < 0.5 * init_grad):
+							adapt_gens.append(gen)
+
+							# Re-do the relevant precomputation
+							toolbox.unregister("evaluate")
+							toolbox.unregister("mutate")
+
+							# Reset the partial clust counter to ceate new base clusters
+							classes.PartialClust.id_value = count()
+
+							# Reduce delta value
+							relev_links_len_old = relev_links_len
+							delta_int_links -= 5
+
+							print("Adaptive Delta engaged! Going down to delta =", delta_int_links)
+
+							# Re-do the relevant precomputation
+							relev_links_len = initialisation.relevantLinks(delta_int_links, classes.Dataset.num_examples)
+							base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
+							part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
+							conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
+							reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
+						
+							newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
+							for indiv in pop:
+								indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
+
+							# Re-register the relevant functions with changed arguments
+							toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs)
+							toolbox.register("mutate", operators.neighbourHyperMutation_spec, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings, hyper_mut=hyper_mut, new_genes=newly_unfixed_indices)
+
+
 		record = stats.compile(pop)
 		logbook.record(gen=gen, evals=len(invalid_ind), **record)
 
-	# ea_end = time.time()
-	# ea_time = ea_end - ea_start
-	# print("EA time:", ea_time)
+	ea_end = time.time()
+	ea_time = ea_end - ea_start
+	print("EA time:", ea_time)
 	print("Final population hypervolume is %f" % hypervolume(pop, HV_ref))
 
 	# print(logbook)
