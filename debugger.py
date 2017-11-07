@@ -1,4 +1,4 @@
-# import os
+import os
 import pandas as pd
 import csv
 # import matplotlib.pyplot as plt
@@ -13,32 +13,26 @@ import time
 import random
 
 
+basepath = os.getcwd()
+print(basepath)
 # Set paths for datasets
-synth_data_folder = "/home/cshand/Documents/Delta-MOCK-master/Datasets/synthetic_datasets/"
-# real_data_folder = "/home/cshand/Documents/Delta-MOCK-master/Datasets/UKC_datasets/"
+data_folder = basepath+"/data/"
+synth_data_folder = data_folder+"synthetic_datasets/"
+real_data_folder = data_folder+"UKC_datasets/"
 
-data_example = "/home/cshand/Documents/Delta-MOCK-master/Sources/data_example/"
-
-# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
+synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+# synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
 # real_data_files = glob.glob(real_data_folder+'*.txt')
 
-# example_path = glob.glob(data_example+"smi*.data")
 
-results_basepath = "/home/cshand/Documents/PhD_MOCK/adaptive_delta/results/"
-
-# print(len(synth_data_files),len(real_data_files), type(synth_data_files))
+results_folder = basepath+"/results/"
 
 # data_files = synth_data_files + real_data_files
 # synth_data_files.clear()
 # real_data_files.clear()
 
-# print(len(data_files))
-
 # data_files = synth_data_files[:3] + real_data_files[:1]
 data_files = synth_data_files
-# data_files = example_path
-# print(data_files)
 
 file_path = data_files[0]
 print(file_path)
@@ -50,7 +44,7 @@ seeds = [random.randint(0,10000)*i for i in range(num_runs)]
 
 # Set range of delta values to test for each file
 # delta_vals = [i for i in range(90,100,5) for _ in range(num_runs)]
-delta_vals = [i for i in range(0,97,5)]
+delta_vals = [i for i in range(80,97,5)]
 # delta_vals = [90]
 
 print("Delta values to test:", delta_vals)
@@ -169,9 +163,9 @@ for index_d, delta in enumerate(delta_vals):
 	HV_vals[delta] = HV
 
 	# Modify the below for specific dataset folder
-	# np.savetxt(results_basepath+classes.Dataset.data_name+"_eaf_"+str(delta)+".csv", final_obj_values, delimiter=" ")
+	# np.savetxt(results_folder+classes.Dataset.data_name+"_eaf_"+str(delta)+".csv", final_obj_values, delimiter=" ")
 
 # Save anything that was aggregated over the delta values
 # print(HV_vals)
 
-HV_vals.to_csv(results_basepath+classes.Dataset.data_name+"_hv.csv", index=False)
+HV_vals.to_csv(results_folder+classes.Dataset.data_name+"_hv.csv", index=False)
