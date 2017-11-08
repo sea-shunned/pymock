@@ -62,6 +62,7 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 	# DEAP has a built-in selection tool for NSGA2
 	toolbox.register("select", tools.selNSGA2)
 	# For multiprocessing
+	print("Number of CPUs:",cpu_count())
 	pool = multiprocessing.Pool(processes = cpu_count()-2)
 	toolbox.register("map", pool.map)
 	# toolbox.register("starmap", pool.starmap)
@@ -185,8 +186,8 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 		record = stats.compile(pop)
 		logbook.record(gen=gen, evals=len(invalid_ind), **record)
 
-	# ea_end = time.time()
-	# ea_time = ea_end - ea_start
+	ea_end = time.time()
+	ea_time = ea_end - ea_start
 	# print("EA time:", ea_time)
 	print("Final population hypervolume is %f" % hypervolume(pop, HV_ref))
 

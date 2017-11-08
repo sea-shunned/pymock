@@ -14,7 +14,7 @@ import random
 
 
 basepath = os.getcwd()
-print(basepath)
+
 # Set paths for datasets
 data_folder = basepath+"/data/"
 synth_data_folder = data_folder+"synthetic_datasets/"
@@ -35,7 +35,7 @@ results_folder = basepath+"/results/"
 data_files = synth_data_files
 
 file_path = data_files[0]
-print(file_path)
+# print(file_path)
 
 num_runs = 3
 seeds = [random.randint(0,10000)*i for i in range(num_runs)]
