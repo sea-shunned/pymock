@@ -20,8 +20,8 @@ data_folder = basepath+"/data/"
 synth_data_folder = data_folder+"synthetic_datasets/"
 real_data_folder = data_folder+"UKC_datasets/"
 
-# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
+synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+# synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
 # real_data_files = glob.glob(real_data_folder+'*.txt')
 
 
