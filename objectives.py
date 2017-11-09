@@ -87,8 +87,10 @@ def objVAR(chains, part_clust, base_members, base_centres, superclusts):
 
 # 	for superclust, chain in enumerate(chains):
 
-# 		sub_res = base_centres[chain]-centres[superclust]		
-# 		print(base_members[chain])
+# 		sub_res = base_centres[chain]-centres[superclust]
+# 		# print(sub_res.shape, base_members[chain].shape, base_members[chain].squeeze().shape)
+# 		# if base_members[chain].shape[0]==1:
+# 		# 	print(base_members[chain], base_members[chain].squeeze())
 # 		wcss_vec[superclust] = np.einsum('i,i->',np.einsum('ij,ij->i',sub_res,sub_res),base_members[chain].squeeze())
 
 # 	return np.sum(wcss_vec) + variances
@@ -108,7 +110,9 @@ def evalMOCK(genotype, part_clust, reduced_clust_nums, conn_array, max_conn, num
 
 	CNN = objCNN(chains, superclusts, cnn_pairs, conn_array, max_conn)
 	VAR = objVAR(chains, part_clust, base_members, base_centres, superclusts)
-	# VAR4 = objVAR3(chains, part_clust, base_members, base_centres, superclusts)
+	
+	# VAR2 = objVAR3(chains, part_clust, base_members, base_centres, superclusts)
+	# print(np.isclose(VAR,VAR2), VAR, VAR2)
 
 	# Edge cases with large datasets, as single cluster solutions get given a 0 score
 	if CNN < 0.00001: # Value that Garza/Handl uses, presumably to smooth small values
