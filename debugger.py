@@ -37,14 +37,14 @@ data_files = synth_data_files
 file_path = data_files[0]
 # print(file_path)
 
-num_runs = 3
+num_runs = 2
 # seeds = [random.randint(0,10000)*i for i in range(num_runs)]
-seeds = [10, 100, 1000]
+seeds = [10, 1000]
 # Pickle (save) the seeds here
 
 # Set range of delta values to test for each file
 # delta_vals = [i for i in range(90,100,5) for _ in range(num_runs)]
-delta_vals = [i for i in range(80,97,5)]
+delta_vals = [i for i in range(0,97,30)]
 # delta_vals = [90]
 
 print("Delta values to test:", delta_vals)
