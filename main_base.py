@@ -205,6 +205,7 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 	classes.PartialClust.id_value = count()
 
 	final_pop_metrics = evaluation.finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len)
+	print(final_pop_metrics)
 
 	# Now add the VAR and CNN values for each individual
 	# We can probably actually do this in one step, as we're doing a for loop over each indiv anyway
