@@ -64,7 +64,7 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 	# For multiprocessing
 	print("Number of CPUs:",cpu_count())
 	pool = multiprocessing.Pool(processes = cpu_count())
-	toolbox.register("map", pool.map, chunksize=2)
+	toolbox.register("map", pool.map, chunksize=20)
 	# toolbox.register("starmap", pool.starmap)
 
 	# They do use a stats module which I'll need to look at
