@@ -38,7 +38,7 @@ file_path = data_files[0]
 # print(file_path)
 
 num_runs = 3
-seeds = [random.randint(0,10000)*i for i in range(num_runs)]
+seeds = [10, 100, 1000]
 # seeds = [100]
 # Pickle (save) the seeds here
 
