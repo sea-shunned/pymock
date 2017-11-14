@@ -160,11 +160,6 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 			toolbox.mutate(ind1)
 			toolbox.mutate(ind2)
 
-		### The below takes longer! Odd, surely it should be faster if we do it right # was this due to profiling?
-		# mapped_off = pool.starmap(toolbox.mate,zip(offspring[::2], offspring[1::2]))
-		# offspring = [gen for i in mapped_off for gen in i]
-		# offspring = toolbox.map(toolbox.mutate,offspring)
-
 		# Evaluate fitness of those that are missing a value
 		invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
 		# The above and below are pointless/contradictory
