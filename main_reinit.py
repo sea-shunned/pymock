@@ -27,15 +27,15 @@ import time
 ## Only need to do the above once, which we do with main_base.py
 
 # @profile # for line_profiler
-def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs):
-	# print("Delta:",delta_int_links)
+def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs):
+	# print("Delta:",delta_val)
 
 	######## Parameters ########
 	# Population size
 	# num_indivs = 100
 
 	# Reduced genotype length
-	relev_links_len = initialisation.relevantLinks(delta_int_links, classes.Dataset.num_examples)
+	relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
 
 	#### relev_links_len needs a rename to more accurately describe that it is the reduced genotype length
 
@@ -198,7 +198,7 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 		HV.append(curr_HV)
 
 		### Adaptive Delta Trigger ###
-		if delta_int_links != 0:
+		if delta_val != 0:
 				if gen > initial_gens:
 					if init_grad_switch:
 						init_grad = (HV[-1] - HV[0]) / len(HV)
@@ -229,12 +229,12 @@ def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, ms
 
 							# Reduce delta value
 							relev_links_len_old = relev_links_len
-							delta_int_links -= 5
+							delta_val -= 5
 
-							print("Adaptive Delta engaged! Going down to delta =", delta_int_links)
+							print("Adaptive Delta engaged! Going down to delta =", delta_val)
 
 							# Re-do the relevant precomputation
-							relev_links_len = initialisation.relevantLinks(delta_int_links, classes.Dataset.num_examples)
+							relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
 							base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
 							part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
 							conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn

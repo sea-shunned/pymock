@@ -135,7 +135,7 @@ with open(filename, "wb") as fp:
 # 	# else:
 # 	# 	continue
 
-# hv = pd.read_csv(data_folder+"/"+data_name+"_delta"+str(delta_int_links)+"_hv.csv")
+# hv = pd.read_csv(data_folder+"/"+data_name+"_delta"+str(delta_val)+"_hv.csv")
 
 # Plot results
 

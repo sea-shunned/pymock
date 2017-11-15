@@ -20,8 +20,8 @@ creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
 creator.create("Individual", list, fitness=creator.Fitness)
 
 # @profile # for line_profiler
-def main(data_path, delta_int_links):
-	# print("Delta:",delta_int_links)
+def main(data_path, delta_val):
+	# print("Delta:",delta_val)
 
 	# If labels are present (will move to a argparse thing eventually)
 	labels = True
@@ -37,7 +37,7 @@ def main(data_path, delta_int_links):
 	num_indivs = 100
 
 	# Reduced genotype length
-	relev_links_len = initialisation.relevantLinks(delta_int_links, classes.Dataset.num_examples)
+	relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
 	# fixed_links_len = num_examples - relev_links_len
 
 	#### relev_links_len needs a rename to more accurately describe that it is the reduced genotype length
@@ -72,7 +72,7 @@ def main(data_path, delta_int_links):
 	reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
 
 	print("\n")	
-	print("Delta:", delta_int_links)
+	print("Delta:", delta_val)
 	print("Max Conn:", max_conn)
 	print("No. base clusters:",len(base_clusters), len(part_clust))
 	print("Reduced clust nums:", len(reduced_clust_nums))
@@ -89,14 +89,14 @@ def main(data_path, delta_int_links):
 
 	classes.PartialClust.id_value = count()
 
-	delta_int_links = 80
-	relev_links_len = initialisation.relevantLinks(delta_int_links, classes.Dataset.num_examples)
+	delta_val = 80
+	relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
 	base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
 	part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
 	conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
 	reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
 
-	print("Delta:", delta_int_links)
+	print("Delta:", delta_val)
 	print("Max Conn:", max_conn)
 	print("No. base clusters:",len(base_clusters), len(part_clust))
 	print("Reduced clust nums:", len(reduced_clust_nums))

@@ -26,15 +26,15 @@ creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
 creator.create("Individual", list, fitness=creator.Fitness)
 
 # @profile # for line_profiler
-def main(data, data_dict, delta_int_links, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs):
-	# print("Delta:",delta_int_links)
+def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs):
+	# print("Delta:",delta_val)
 
 	######## Parameters ########
 	# Population size
 	# num_indivs = 100
 
 	# Reduced genotype length
-	relev_links_len = initialisation.relevantLinks(delta_int_links, classes.Dataset.num_examples)
+	relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
 
 	#### relev_links_len needs a rename to more accurately describe that it is the reduced genotype length
 

@@ -14,13 +14,13 @@ def baseGenotype(mst_genotype, int_links_indices, relev_links_len):
 	# print("Decoded length:",len(base_clusters))
 	return base_genotype, base_clusters
 
-def relevantLinks(delta_int_links, num_examples):
+def relevantLinks(delta_val, num_examples):
 	# Length of the relevant links (symbol: capital gamma)
-	# relev_links_len = int(np.ceil(((100-delta_int_links)/100)*num_examples))
+	# relev_links_len = int(np.ceil(((100-delta_val)/100)*num_examples))
 	# # Length of the fixed links (symbol: capital delta)
 	# fixed_links_len = num_examples - relev_links_len
 	# return relev_links_len
-	return int(np.ceil(((100-delta_int_links)/100)*num_examples))
+	return int(np.ceil(((100-delta_val)/100)*num_examples))
 
 def unfixedInterestLinks(int_links_indices, fixed_links):
 	int_links_valid = int_links_indices.copy()
