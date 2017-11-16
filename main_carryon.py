@@ -64,7 +64,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	toolbox.register("select", tools.selNSGA2)
 	# For multiprocessing
 	pool = multiprocessing.Pool(processes = cpu_count()-2)
-	toolbox.register("map", pool.map)
+	toolbox.register("map", pool.map, chunksize=20)
 	# toolbox.register("starmap", pool.starmap)
 
 	# They do use a stats module which I'll need to look at
@@ -194,55 +194,58 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		### Adaptive Delta Trigger ###
 		# First check delta != 0
 		if delta_val != 0:
-				if gen > initial_gens:
-					if init_grad_switch:
-						init_grad = (HV[-1] - HV[0]) / len(HV)
-						init_grad_switch = False
+			# Only proceed if we're after the initial safe period
+			if gen == initial_gens:
+				print(HV)
+				print(len(HV))
+				init_grad = (HV[-1] - HV[0]) / len(HV)
+				# init_grad_switch = False
 
-					grads.append((curr_HV - HV[-(window_size+1)]) / window_size)
+			elif gen > initial_gens:
+				grads.append((curr_HV - HV[-(window_size+1)]) / window_size)
 
-					# Just in case, capture the error (unlikely to happen with large datasets)
-					try:
-						curr_ratio = grads[-2]/grads[-1]
+				# Just in case, capture the error (unlikely to happen with large datasets)
+				try:
+					curr_ratio = grads[-2]/grads[-1]
 
-					except ZeroDivisionError:
-						print("Gradient zero division error, using 0.0001")
-						curr_ratio = grads[-2]/0.0001
+				except ZeroDivisionError:
+					print("Gradient zero division error, using 0.0001")
+					curr_ratio = grads[-2]/0.0001
 
-					if gen >= adapt_gens[-1] + new_delta_window:
-						if ((np.around(curr_ratio, decimals=2) == 1
-							or np.around(curr_ratio, decimals=2) == 0) 
-							and grads[-1] < 0.5 * init_grad):
-							adapt_gens.append(gen)
+				if gen >= adapt_gens[-1] + new_delta_window:
+					if ((np.around(curr_ratio, decimals=2) == 1
+						or np.around(curr_ratio, decimals=2) == 0) 
+						and grads[-1] < 0.5 * init_grad):
+						adapt_gens.append(gen)
 
-							# Re-do the relevant precomputation
-							toolbox.unregister("evaluate")
-							toolbox.unregister("mutate")
+						# Re-do the relevant precomputation
+						toolbox.unregister("evaluate")
+						toolbox.unregister("mutate")
 
-							# Reset the partial clust counter to ceate new base clusters
-							classes.PartialClust.id_value = count()
+						# Reset the partial clust counter to ceate new base clusters
+						classes.PartialClust.id_value = count()
 
-							# Reduce delta value
-							relev_links_len_old = relev_links_len
-							delta_val -= 5
+						# Reduce delta value
+						relev_links_len_old = relev_links_len
+						delta_val -= 5
 
-							print("Adaptive Delta engaged! Going down to delta =", delta_val)
+						print("Adaptive Delta engaged at gen %d! Going down to delta =%d" % (gen, delta_val))
 
-							# Re-do the relevant precomputation
-							relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
-							base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
-							part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
-							conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
-							reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
-						
+						# Re-do the relevant precomputation
+						relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
+						base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
+						part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
+						conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
+						reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
+					
 
-							# Re-register the relevant functions with changed arguments
-							toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs)
-							toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
+						# Re-register the relevant functions with changed arguments
+						toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
+						toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
 
-							newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
-							for indiv in pop:
-								indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
+						newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
+						for indiv in pop:
+							indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
 
 		record = stats.compile(pop)
 		logbook.record(gen=gen, evals=len(invalid_ind), **record)
@@ -272,5 +275,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# Or just comprehension it for the fitness values?
 
 	# print(logbook)
+
+	# Print a graph here to show the hypervolume and when we get triggers
+	# search folders for the old code for this
 
 	return pop, logbook, VAR_init, CNN_init, HV, ea_time, final_pop_metrics, HV_ref

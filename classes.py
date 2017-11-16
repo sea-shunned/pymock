@@ -166,7 +166,6 @@ def partialClustering(base_clusters, data, data_dict, argsortdists, L):
 	PartialClust.base_members = np.asarray([obj.num_members for obj in part_clust.values()])[:,None]
 	PartialClust.base_centres = np.asarray([obj.centroid for obj in part_clust.values()]).squeeze()
 
-
 	print("No. base clusters:",len(part_clust))
 	print("Length cnn pair list:",len(cnn_pairs))
 	# print(cnn_pairs)

@@ -21,8 +21,8 @@ data_folder = basepath+"/data/"
 synth_data_folder = data_folder+"synthetic_datasets/"
 real_data_folder = data_folder+"UKC_datasets/"
 
-# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
+synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+# synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
 # real_data_files = glob.glob(real_data_folder+'*.txt')
 
 
@@ -45,7 +45,7 @@ seeds = [10, 1000]
 
 # Set range of delta values to test for each file
 # delta_vals = [i for i in range(90,100,5) for _ in range(num_runs)]
-delta_vals = [i for i in range(0,97,45)]
+delta_vals = [i for i in range(90,97,5)]
 # delta_vals = [90]
 
 print("Delta values to test:", delta_vals)
@@ -140,7 +140,8 @@ for index_d, delta in enumerate(delta_vals):
 			first_run = False
 
 		start_time = time.time()
-		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
+		# pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
+		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		end_time = time.time()
 		print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
 		if first_run:
