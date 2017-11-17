@@ -7,6 +7,7 @@ import evaluation
 import numpy as np
 from itertools import count
 import random
+from graph_funcs import plotHV_adaptdelta
 
 # For multiprocessing
 from os import cpu_count
@@ -200,6 +201,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 				print(len(HV))
 				init_grad = (HV[-1] - HV[0]) / len(HV)
 				# init_grad_switch = False
+				print(init_grad)
 
 			elif gen > initial_gens:
 				grads.append((curr_HV - HV[-(window_size+1)]) / window_size)
@@ -211,6 +213,9 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 				except ZeroDivisionError:
 					print("Gradient zero division error, using 0.0001")
 					curr_ratio = grads[-2]/0.0001
+
+				print(grads[-1])
+				print(curr_ratio)
 
 				if gen >= adapt_gens[-1] + new_delta_window:
 					if ((np.around(curr_ratio, decimals=2) == 1
@@ -278,5 +283,9 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 	# Print a graph here to show the hypervolume and when we get triggers
 	# search folders for the old code for this
+
+	# ax = plotHV_adaptdelta(HV, adapt_gens)
+	# plt.show()
+	plotHV_adaptdelta(HV, adapt_gens)
 
 	return pop, logbook, VAR_init, CNN_init, HV, ea_time, final_pop_metrics, HV_ref

@@ -98,6 +98,19 @@ def plotHV(csv_path):
 	plt.legend()
 	plt.show()
 
+def plotHV_adaptdelta(HV, adapt_gens):
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+
+	# plt.plot()
+	max_HV = np.max(HV)
+	ax.plot(range(0, len(HV)), HV, 'g-')
+	for gen in adapt_gens:
+		ax.plot(gen, [0,max_HV], 'r--' )
+
+	plt.show()
+
+	# return ax
 
 if __name__ == '__main__':
 	results_path = "/home/cshand/Documents/PhD_MOCK/adaptive_delta/results/"
