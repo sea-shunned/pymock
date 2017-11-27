@@ -1,34 +1,44 @@
-if delta_val != 0:
+# if delta_val != 0:
 
-	if gen == initial_gens:
-		init_grad = (HV[-1] - HV[0]) / len(HV)
-
-
-	elif gen > initial_gens:
-		pass
+# 	if gen == initial_gens:
+# 		init_grad = (HV[-1] - HV[0]) / len(HV)
 
 
+# 	elif gen > initial_gens:
+# 		pass
 
+
+delta_val = 90
 block_trigger_gens = 10
 adapt_gens = [0]
+window_size = 3
 
-HV.append(hypervolume(pop, HV_ref))
+# HV = list(range(0,50,4))
 
-if delta_val != 0:
-	if gen >= (adapt_gens[-1] + block_trigger_gens):
+HV = list(range(1990,2001,1))
 
-		if gen == (adapt_gens[-1] + block_trigger_gens):
-			ref_grad = (HV[-1] - HV[0]) / len(HV)
-			print("Here at the equals bit",gen)
+for gen in range(1,100):
+	if delta_val != 0:
+		if gen >= (adapt_gens[-1] + block_trigger_gens):
 
-		print("Here after first if at",gen)
+			if gen == (adapt_gens[-1] + block_trigger_gens):
+				ref_grad = (HV[-1] - HV[0]) / len(HV)
+				print("Here at the equals bit",gen)
+				print(ref_grad)
+				continue
 
-		curr_grad = (curr_HV - HV[-(window_size+1)]) / window_size
+			print("Here after first if at",gen)
 
-		if curr_grad < 0.5 * ref_grad:
-			print("Here inside the trigger at",gen)
-			adapt_gens.append(gen)
+			curr_grad = (HV[-1] - HV[-(window_size+1)]) / window_size
+			# print(curr_grad)
 
-			# Reset our block (to ensure it isn't the initial default)
-			block_trigger_gens = 5
+			if curr_grad < 0.5 * ref_grad:
+				print("Here inside the trigger at",gen)
+				adapt_gens.append(gen)
 
+				# Reset our block (to ensure it isn't the initial default)
+				block_trigger_gens = 5
+
+	HV.append(HV[-1]+0.25)
+
+print(adapt_gens)
