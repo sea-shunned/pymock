@@ -102,11 +102,19 @@ def plotHV_adaptdelta(HV, adapt_gens):
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 
-	# plt.plot()
-	max_HV = np.max(HV)
+	# print(HV)
+	print(adapt_gens)
+
+	# This is to create some nicer max/min limits for the y-xis (HV)
+	max_HV = round(np.ceil(np.max(HV)), -1)
+	min_HV = round(np.floor(np.min(HV)), -1)
+
 	ax.plot(range(0, len(HV)), HV, 'g-')
 	for gen in adapt_gens:
-		ax.plot(gen, [0,max_HV], 'r--' )
+		ax.plot([gen,gen], [0,max_HV+10], 'r--' )
+
+	# -10 and +10 to avoid issues with rounding, to give some distance for our max and min
+	ax.set_ylim([min_HV-10,max_HV+10])
 
 	plt.show()
 
