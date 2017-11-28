@@ -204,8 +204,6 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 				print("Here at the equals bit",gen)
 				print("Initial gradient:", init_grad)
 
-			print("Here after first if at",gen)
-
 			elif gen > initial_gens:
 				print("Here in elif at", gen)
 				grads.append((curr_HV - HV[-(window_size+1)]) / window_size)

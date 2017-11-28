@@ -209,34 +209,34 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					# Reset our block (to ensure it isn't the initial default)
 					block_trigger_gens = 5
 
-						# Re-do the relevant precomputation
-						toolbox.unregister("evaluate")
-						toolbox.unregister("mutate")
+					# # Re-do the relevant precomputation
+					# toolbox.unregister("evaluate")
+					# toolbox.unregister("mutate")
 
-						# Reset the partial clust counter to ceate new base clusters
-						classes.PartialClust.id_value = count()
+					# # Reset the partial clust counter to ceate new base clusters
+					# classes.PartialClust.id_value = count()
 
-						# Reduce delta value
-						relev_links_len_old = relev_links_len
-						delta_val -= 5
+					# # Reduce delta value
+					# relev_links_len_old = relev_links_len
+					# delta_val -= 5
 
-						print("Adaptive Delta engaged at gen %d! Going down to delta = %d" % (gen, delta_val))
+					# print("Adaptive Delta engaged at gen %d! Going down to delta = %d" % (gen, delta_val))
 
-						# Re-do the relevant precomputation
-						relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
-						base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
-						part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
-						conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
-						reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
-					
+					# # Re-do the relevant precomputation
+					# relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
+					# base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
+					# part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
+					# conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
+					# reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
+				
 
-						# Re-register the relevant functions with changed arguments
-						toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
-						toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
+					# # Re-register the relevant functions with changed arguments
+					# toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
+					# toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
 
-						newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
-						for indiv in pop:
-							indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
+					# newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
+					# for indiv in pop:
+					# 	indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
 
 		record = stats.compile(pop)
 		logbook.record(gen=gen, evals=len(invalid_ind), **record)
