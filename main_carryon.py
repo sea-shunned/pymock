@@ -239,9 +239,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 						# If this is our first trigger
 						if adapt_gens[-2] == 0:
 							init_grad = (HV[-1] - HV[initial_gens-1]) / adapt_gens[-1]-initial_gens
-
-
-						print("New initial gradient:",init_grad)
+							print("New initial gradient:",init_grad)
 
 						else:
 							init_grad = (HV[-1] - HV[adapt_gens[-2]])
