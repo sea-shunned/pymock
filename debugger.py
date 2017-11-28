@@ -142,9 +142,14 @@ for index_d, delta in enumerate(delta_vals):
 			first_run = False
 
 		start_time = time.time()
+		
 		# pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
+		
 		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
+		print("\n")
+		
 		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon_newtrig.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
+		
 		end_time = time.time()
 		print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
 		if first_run:

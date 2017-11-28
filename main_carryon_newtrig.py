@@ -195,10 +195,10 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 				if gen == (adapt_gens[-1] + block_trigger_gens):
 					ref_grad = (HV[-1] - HV[0]) / len(HV)
-					print("Here at the equals bit",gen)
-					print("Initial gradient:", ref_grad)
+					# print("Here at the equals bit",gen)
+					print("Reference gradient:", ref_grad, "at", gen)
 
-				print("Here after first if at",gen)
+				# print("Here after first if at",gen)
 
 				curr_grad = (curr_HV - HV[-(window_size+1)]) / window_size
 

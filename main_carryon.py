@@ -201,11 +201,11 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 				# print(len(HV))
 				init_grad = (HV[-1] - HV[0]) / len(HV)
 				# init_grad_switch = False
-				print("Here at the equals bit",gen)
+				# print("Here at the equals bit",gen)
 				print("Initial gradient:", init_grad)
 
 			elif gen > initial_gens:
-				print("Here in elif at", gen)
+				# print("Here in elif at", gen)
 				grads.append((curr_HV - HV[-(window_size+1)]) / window_size)
 
 				# print(gen)
@@ -239,6 +239,9 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 						# If this is our first trigger
 						if adapt_gens[-2] == 0:
 							init_grad = (HV[-1] - HV[initial_gens-1]) / adapt_gens[-1]-initial_gens
+
+
+						print("New initial gradient:",init_grad)
 
 						else:
 							init_grad = (HV[-1] - HV[adapt_gens[-2]])
