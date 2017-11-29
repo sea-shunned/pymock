@@ -41,7 +41,7 @@ seeds = [11, 1000]
 # Pickle (save) the seeds here
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(0,100,90)]
+delta_vals = [i for i in range(90,97,5)]
 
 print("Delta values to test:", delta_vals)
 print("Number of runs per delta value:", num_runs)
