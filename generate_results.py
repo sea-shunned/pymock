@@ -14,6 +14,7 @@ import precompute
 
 # Import strategies here
 import main_base
+import main_carryon
 
 
 # Get our current wd as the base path
@@ -57,6 +58,8 @@ num_indivs = 100
 # Or do I want to put this stuff here? Eh.
 
 df_cols = ["VAR", "CNN", "Run"]
+
+funcs = [main_base.main, main_carryon.main]
 
 for file_path in data_files:
 	import classes # May need to put this here to ensure counts etc. are reset - TEST THIS
@@ -141,13 +144,12 @@ for file_path in data_files:
 				first_run = False
 
 			for func in funcs:
-
-			start_time = time.time()
-			pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(*args)
-			end_time = time.time()
-			print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
-			if first_run:
-				HV_ref = HV_ref_temp
+				start_time = time.time()
+				pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(*args)
+				end_time = time.time()
+				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
+				if first_run:
+					HV_ref = HV_ref_temp
 
 			###### Put the above into a loop over strategies (functions)
 

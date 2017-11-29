@@ -273,7 +273,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 	# ax = plotHV_adaptdelta(HV, adapt_gens)
 	# plt.show()
-	plotHV_adaptdelta(HV, adapt_gens[1:]) #### Still need [1:]?
+	# plotHV_adaptdelta(HV, adapt_gens[1:]) #### Still need [1:]?
 
 
 	return pop, logbook, VAR_init, CNN_init, HV, ea_time, final_pop_metrics, HV_ref
