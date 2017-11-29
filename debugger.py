@@ -27,12 +27,7 @@ synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
 # synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
 # real_data_files = glob.glob(real_data_folder+'*.txt')
 
-
 results_folder = basepath+"/results/"
-
-# data_files = synth_data_files + real_data_files
-# synth_data_files.clear()
-# real_data_files.clear()
 
 # data_files = synth_data_files[:3] + real_data_files[:1]
 data_files = synth_data_files
@@ -123,6 +118,7 @@ print("Precomputation done!")
 # argsortdists, nn_rankings, mst_genotype, int_links_indices
 
 
+
 HV_ref = None
 HV_vals = pd.DataFrame(columns=delta_vals)
 
@@ -143,7 +139,7 @@ for index_d, delta in enumerate(delta_vals):
 
 		start_time = time.time()
 		
-		# pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
+		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		
 		# pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon_old.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		# print("\n")

@@ -5,43 +5,41 @@ import csv
 import numpy as np
 import pickle
 import glob
-import main_base
-import classes
-import precompute
 import time
-
 import random
 
-#### Might need to put the DEAP stuff here as if we import multiple scripts we define an indiv multple times
+# MOCK files needed for precomputation
+import classes
+import precompute
 
+# Import strategies here
+import main_base
+
+
+# Get our current wd as the base path
+basepath = os.getcwd()
 
 # Set paths for datasets
-synth_data_folder = "/home/cshand/Documents/Delta-MOCK-master/Datasets/synthetic_datasets/"
-real_data_folder = "/home/cshand/Documents/Delta-MOCK-master/Datasets/UKC_datasets/"
+data_folder = basepath+"/data/"
+synth_data_folder = data_folder+"synthetic_datasets/"
+real_data_folder = data_folder+"UKC_datasets/"
 
-synth_data_files = glob.glob(synth_data_folder+'tevc_20_*.data')
-real_data_files = glob.glob(real_data_folder+'*.txt')
+synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+# synth_data_files = glob.glob(synth_data_folder+'tevc_50_40_7_*.data')
+# synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
+# real_data_files = glob.glob(real_data_folder+'*.txt')
 
-results_basepath = "/home/cshand/Documents/PhD_MOCK/adaptive_delta/results/"
-
-# print(len(synth_data_files),len(real_data_files), type(synth_data_files))
-
-# data_files = synth_data_files + real_data_files
-# synth_data_files.clear()
-# real_data_files.clear()
-
-# print(len(data_files))
+results_folder = basepath+"/results/"
 
 # data_files = synth_data_files[:3] + real_data_files[:1]
-data_files = synth_data_files[:2]
-print(data_files)
+data_files = synth_data_files
 
-num_runs = 4
-seeds = [random.randint(0,10000)*i for i in range(num_runs)]
+num_runs = 2
+# seeds = [random.randint(0,10000)*i for i in range(num_runs)]
+seeds = [11, 1000]
 # Pickle (save) the seeds here
 
 # Set range of delta values to test for each file
-# delta_vals = [i for i in range(90,100,5) for _ in range(num_runs)]
 delta_vals = [i for i in range(0,100,90)]
 
 print("Delta values to test:", delta_vals)
@@ -52,6 +50,7 @@ print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs)
 ## Below will be kept in the actual main function
 ## But just put here for a checklist
 # Check that 100 indivs and 100 generations is OK
+############ Should try to add num_indivs and num_gens here
 L = 10
 num_indivs = 100
 # Check crossover probability
@@ -64,14 +63,6 @@ for file_path in data_files:
 	classes.Dataset.data_name = file_path.split("/")[-1].split(".")[0]
 	print("Testing:",classes.Dataset.data_name)
 
-	results_path = results_basepath+classes.Dataset.data_name[:-15]+"/"
-
-	try:
-		os.mkdir(results_path)
-
-	except FileExistsError:
-		pass
-
 	# USE A TRY EXCEPT HERE TO CREATE A DATA FOLDER
 	# '_'.join()
 	# ['_'.join(file.split("/")[-1].split("_")[:-4]) for file in files]
@@ -82,7 +73,6 @@ for file_path in data_files:
 
 	# Read the data into an array
 	data = np.genfromtxt(file_path, delimiter="\t", skip_header=4)
-	# print(data.shape)
 
 	# Set the values for the data
 	classes.Dataset.num_examples = head[0] # Num examples
@@ -105,7 +95,6 @@ for file_path in data_files:
 	# start_time = time.time()
 	distarray = precompute.compDists(data, data)
 	# end_time = time.time()
-	# print("sklearn took",end_time-start_time,"seconds")
 	distarray = precompute.normaliseDistArray(distarray)
 	print("Distance array done!")
 
@@ -122,20 +111,23 @@ for file_path in data_files:
 	int_links_indices = precompute.interestLinksIndices(degree_int)
 	print("DI done!")
 	print("Precomputation done!")
-	# Which of the above do I need to pass?
-	# argsortdists, nn_rankings, mst_genotype, int_links_indices
-	
-	### To add here ###
-	#HV_ref
+
 	HV_ref = None
 
-	# for run, delta in enumerate(delta_vals):
-	for delta in delta_vals:
+	for index_d, delta in enumerate(delta_vals):
+		# Create tuple of arguments
+		args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs
+
+		###### Arguments to add? ######
+		# Amount we reduce delta by
+		# Number of generations
 
 		# Initialise df
 		# df = pd.DataFrame(columns=df_cols)
 
-		arr = np.zeros((num_indivs*num_runs,len(df_cols)))
+		final_obj_values = np.zeros((num_indivs*num_runs,len(df_cols)))
+
+		##### What numbers do I want and where???? #####
 
 		for run in range(num_runs):
 			random.seed(seeds[run])
@@ -148,12 +140,22 @@ for file_path in data_files:
 			else:
 				first_run = False
 
+			for func in funcs:
+
 			start_time = time.time()
-			pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
+			pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(*args)
 			end_time = time.time()
 			print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
 			if first_run:
 				HV_ref = HV_ref_temp
+
+			###### Put the above into a loop over strategies (functions)
+
+			###### Create a folder for graphs, and save the graphs we make into that
+			###### Best to do that here and just have the graph func return a graph
+				# Easier to aggregate here
+				# Easier to save graphs for individual runs from within the main func, or aggregate over a single run with multiple funcs here
+
 
 			# print(final_pop_metrics,"\n")
 
@@ -164,7 +166,7 @@ for file_path in data_files:
 			# This is overwriting
 			ind = num_indivs*run
 
-			arr[ind:ind+num_indivs,0:3] = [indiv.fitness.values+(run,) for indiv in pop]
+			final_obj_values[ind:ind+num_indivs,0:3] = [indiv.fitness.values+(run+1,) for indiv in pop]
 
 		# Modify the below for specific dataset folder
-		np.savetxt(results_path+classes.Dataset.data_name[:-15]+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")
+		# np.savetxt(results_path+classes.Dataset.data_name[:-15]+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")
