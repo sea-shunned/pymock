@@ -136,20 +136,14 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	record = stats.compile(pop)
 	logbook.record(gen=0, evals=len(pop), **record)
 
-	HV = []
-
 	# Calculate HV of initialised population
+	HV = []
 	HV.append(hypervolume(pop, HV_ref))
-
 
 	### Adaptive hyperparameter parameters ###
 	window_size = 3				# Moving average of gradients to look at
-	initial_gens = 10			# Number of generations to wait until measuring
-	init_grad_switch = True		# To calculate initial gradient only once
-	new_delta_window = 5		# Number of generations to let new delta take effect before triggering new
+	block_trigger_gens = 10		# Number of generations to wait until measuring
 	adapt_gens = [0]			# Initialise list for tracking which gens we trigger adaptive delta
-	HV = []						# Initialise HV list
-	grads = [0]					# Initialise gradient list
 
 
 	### Start actual EA ### 
@@ -189,89 +183,58 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		pop = toolbox.select(pop + offspring, NUM_INDIVS)
 
 		# print("Gen:",gen)
-		curr_HV = hypervolume(pop, HV_ref)
-		HV.append(curr_HV) # put into one, TEST THIS
+		HV.append(hypervolume(pop, HV_ref)) # put into one, TEST THIS
 
 		### Adaptive Delta Trigger ###
-		# First check delta != 0
 		if delta_val != 0:
-			# Only proceed if we're after the initial safe period
-			if gen == initial_gens:
-				# print(HV)
-				# print(len(HV))
-				init_grad = (HV[-1] - HV[0]) / len(HV)
-				# init_grad_switch = False
-				# print("Here at the equals bit",gen)
-				print("Initial gradient:", init_grad)
+			if gen >= (adapt_gens[-1] + block_trigger_gens):
 
-			elif gen > initial_gens:
-				# print("Here in elif at", gen)
-				grads.append((curr_HV - HV[-(window_size+1)]) / window_size)
+				if gen == (adapt_gens[-1] + block_trigger_gens):
+					ref_grad = (HV[-1] - HV[adapt_gens[-1]]) / len(HV)
+					# print("Here at the equals bit",gen)
+					print("Reference gradient:", ref_grad, "at", gen)
+					continue
 
-				# print(gen)
-				# print(curr_HV, HV[-(window_size+1)])
-				# print(HV)
+				# print("Here after first if at",gen)
 
-				# Just in case, capture the error (unlikely to happen with large datasets)
-				try:
-					curr_ratio = grads[-2]/grads[-1]
+				curr_grad = (HV[-1] - HV[-(window_size+1)]) / window_size
+				print(curr_grad)
 
-				except ZeroDivisionError:
-					print("Gradient zero division error, using 0.0001")
-					curr_ratio = grads[-2]/0.0001
+				if curr_grad <= 0.5 * ref_grad:
+					print("Here inside the trigger at",gen)
+					adapt_gens.append(gen)
 
-				# print(grads[-1])
-				# print(curr_ratio,"\n")
+					# Reset our block (to ensure it isn't the initial default)
+					block_trigger_gens = 5
 
-				# try:
-				# 	_ = adapt_gens[-1]
-				# except IndexError:
-				# 	_ = 0
+					# Re-do the relevant precomputation
+					toolbox.unregister("evaluate")
+					toolbox.unregister("mutate")
 
-				if gen >= adapt_gens[-1] + new_delta_window:
-					if ((np.around(curr_ratio, decimals=2) == 1
-						or np.around(curr_ratio, decimals=2) == 0) 
-						and grads[-1] < 0.5 * init_grad):
+					# Reset the partial clust counter to ceate new base clusters
+					classes.PartialClust.id_value = count()
 
-						print("Here inside the trigger at",gen)
-						adapt_gens.append(gen)
+					# Reduce delta value
+					relev_links_len_old = relev_links_len
+					delta_val -= 5
 
-						# If this is our first trigger
-						if adapt_gens[-2] == 0:
-							init_grad = (HV[-1] - HV[initial_gens-1]) / adapt_gens[-1]-initial_gens
-							print("New initial gradient:",init_grad)
+					print("Adaptive Delta engaged at gen %d! Going down to delta = %d" % (gen, delta_val))
 
-						else:
-							init_grad = (HV[-1] - HV[adapt_gens[-2]])
+					# Re-do the relevant precomputation
+					relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
+					base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
+					part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
+					conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
+					reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
+				
 
-						# # Re-do the relevant precomputation
-						# toolbox.unregister("evaluate")
-						# toolbox.unregister("mutate")
+					# Re-register the relevant functions with changed arguments
+					toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
+					toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
 
-						# # Reset the partial clust counter to ceate new base clusters
-						# classes.PartialClust.id_value = count()
-
-						# # Reduce delta value
-						# relev_links_len_old = relev_links_len
-						# delta_val -= 5
-
-						# print("Adaptive Delta engaged at gen %d! Going down to delta = %d" % (gen, delta_val))
-
-						# # Re-do the relevant precomputation
-						# relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
-						# base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
-						# part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
-						# conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
-						# reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
-					
-
-						# # Re-register the relevant functions with changed arguments
-						# toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
-						# toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
-
-						# newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
-						# for indiv in pop:
-						# 	indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
+					newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
+					for indiv in pop:
+						indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
 
 		record = stats.compile(pop)
 		logbook.record(gen=gen, evals=len(invalid_ind), **record)
@@ -281,6 +244,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	print("EA time:", ea_time)
 	print("Final population hypervolume is %f" % hypervolume(pop, HV_ref))
 
+	print(HV)
 	print("Triggered gens:",adapt_gens)
 
 	# print(logbook)
@@ -309,6 +273,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 	# ax = plotHV_adaptdelta(HV, adapt_gens)
 	# plt.show()
-	# plotHV_adaptdelta(HV, adapt_gens[1:]) #### Still need [1:]?
+	plotHV_adaptdelta(HV, adapt_gens[1:]) #### Still need [1:]?
+
 
 	return pop, logbook, VAR_init, CNN_init, HV, ea_time, final_pop_metrics, HV_ref

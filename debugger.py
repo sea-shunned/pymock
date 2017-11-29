@@ -13,7 +13,7 @@ import random
 
 import main_base
 import main_carryon
-import main_carryon_newtrig
+import main_carryon_old
 
 basepath = os.getcwd()
 
@@ -22,8 +22,8 @@ data_folder = basepath+"/data/"
 synth_data_folder = data_folder+"synthetic_datasets/"
 real_data_folder = data_folder+"UKC_datasets/"
 
-# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-synth_data_files = glob.glob(synth_data_folder+'tevc_50_40_7_*.data')
+synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+# synth_data_files = glob.glob(synth_data_folder+'tevc_50_40_7_*.data')
 # synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
 # real_data_files = glob.glob(real_data_folder+'*.txt')
 
@@ -145,10 +145,10 @@ for index_d, delta in enumerate(delta_vals):
 		
 		# pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		
-		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
-		print("\n")
+		# pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon_old.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
+		# print("\n")
 		
-		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon_newtrig.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
+		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		
 		end_time = time.time()
 		print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
