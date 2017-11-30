@@ -118,6 +118,7 @@ for file_path in data_files:
 	HV_ref = None
 
 	for index_d, delta in enumerate(delta_vals):
+		print("Testing delta =",delta)
 		# Create tuple of arguments
 		args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs
 

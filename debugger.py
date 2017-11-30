@@ -141,7 +141,7 @@ for index_d, delta in enumerate(delta_vals):
 		start_time = time.time()
 		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		end_time = time.time()
-		print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
+		print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)\n")
 
 		# pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon_old.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		# print("\n")
@@ -150,7 +150,7 @@ for index_d, delta in enumerate(delta_vals):
 		start_time = time.time()
 		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		end_time = time.time()
-		print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
+		print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)\n")
 		
 		if first_run:
 			HV_ref = HV_ref_temp

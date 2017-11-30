@@ -190,7 +190,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 				# print("Here after first if at",gen)
 
 				curr_grad = (HV[-1] - HV[-(window_size+1)]) / window_size
-				# print(curr_grad)
+				print(curr_grad, ref_grad)
 
 				if curr_grad <= 0.5 * ref_grad:
 					print("Here inside the trigger at gen",gen)
