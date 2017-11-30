@@ -144,9 +144,9 @@ for file_path in data_files:
 				first_run = False
 
 			for func in funcs:
-				print("Starting", func)
+				print("Run",run,"with ",func.__name__)
 				start_time = time.time()
-				pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(*args)
+				pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = func(*args)
 				end_time = time.time()
 				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)\n")
 				if first_run:
