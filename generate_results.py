@@ -46,7 +46,7 @@ delta_vals = [i for i in range(90,97,5)]
 print("Delta values to test:", delta_vals)
 print("Number of runs per delta value:", num_runs)
 print("Number of datasets:", len(data_files))
-print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs)
+print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs,"\n")
 
 ## Below will be kept in the actual main function
 ## But just put here for a checklist
@@ -113,7 +113,7 @@ for file_path in data_files:
 	degree_int = precompute.degreeInterest(mst_genotype, L, nn_rankings, distarray)
 	int_links_indices = precompute.interestLinksIndices(degree_int)
 	print("DI done!")
-	print("Precomputation done!")
+	print("Precomputation done!\n")
 
 	HV_ref = None
 
@@ -144,7 +144,7 @@ for file_path in data_files:
 				first_run = False
 
 			for func in funcs:
-				print("Run",run,"with ",func.__name__)
+				print("Run",run,"with ",func.__globals__["__file__"].split("/")[-1])
 				start_time = time.time()
 				pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = func(*args)
 				end_time = time.time()
@@ -158,7 +158,6 @@ for file_path in data_files:
 			###### Best to do that here and just have the graph func return a graph
 				# Easier to aggregate here
 				# Easier to save graphs for individual runs from within the main func, or aggregate over a single run with multiple funcs here
-
 
 			# print(final_pop_metrics,"\n")
 

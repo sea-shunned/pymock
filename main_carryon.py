@@ -21,7 +21,6 @@ from deap.benchmarks.tools import hypervolume
 # To measure sections
 import time
 
-
 # Run outside of multiprocessing scope
 # creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
 # creator.create("Individual", list, fitness=creator.Fitness)
@@ -29,14 +28,10 @@ import time
 
 # @profile # for line_profiler
 def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs):
-	# print("Delta:",delta_val)
-
-	######## Parameters ########
-	# Population size
-	# num_indivs = 100
 
 	# Reduced genotype length
 	relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
+	print("Genotype length:",relev_links_len)
 
 	#### relev_links_len needs a rename to more accurately describe that it is the reduced genotype length
 
@@ -46,9 +41,6 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
 	conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
 	reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
-
-	# print("Relevant links length:",relev_links_len)
-	# print(int_links_indices[:relev_links_len])
 
 	######## Population Initialisation ########
 	toolbox = base.Toolbox()
@@ -71,10 +63,10 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# They do use a stats module which I'll need to look at
 	# Perhaps integrate the gap statistic/rand index evaluation stuff into it?
 
+	######## Parameters ########
 	NUM_GEN = 100 # 100 in Garza/Handl
 	# CXPB = 1.0 # 1.0 in Garza/Handl i.e. always crossover
 	MUTPB = 1.0 # 1.0 in Garza/Handl i.e. always enter mutation, indiv link prob is calculated there
-	NUM_INDIVS = 100 # 100 in Garza/Handl
 	
 	init_pop_start = time.time()
 	pop = toolbox.population()
@@ -180,7 +172,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		for ind, fit in zip(invalid_ind, fitnesses):
 			ind.fitness.values = fit
 
-		pop = toolbox.select(pop + offspring, NUM_INDIVS)
+		pop = toolbox.select(pop + offspring, num_indivs)
 
 		# print("Gen:",gen)
 		HV.append(hypervolume(pop, HV_ref)) # put into one, TEST THIS
@@ -192,16 +184,16 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 				if gen == (adapt_gens[-1] + block_trigger_gens):
 					ref_grad = (HV[-1] - HV[adapt_gens[-1]]) / len(HV)
 					# print("Here at the equals bit",gen)
-					print("Reference gradient:", ref_grad, "at", gen)
+					print("Reference gradient:", ref_grad, "at gen", gen)
 					continue
 
 				# print("Here after first if at",gen)
 
 				curr_grad = (HV[-1] - HV[-(window_size+1)]) / window_size
-				print(curr_grad)
+				# print(curr_grad)
 
 				if curr_grad <= 0.5 * ref_grad:
-					print("Here inside the trigger at",gen)
+					print("Here inside the trigger at gen",gen)
 					adapt_gens.append(gen)
 
 					# Reset our block (to ensure it isn't the initial default)
@@ -222,12 +214,12 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 					# Re-do the relevant precomputation
 					relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
+					print("Genotype length:",relev_links_len)
 					base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
 					part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
 					conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
 					reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
 				
-
 					# Re-register the relevant functions with changed arguments
 					toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
 					toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
@@ -244,7 +236,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	print("EA time:", ea_time)
 	print("Final population hypervolume is %f" % hypervolume(pop, HV_ref))
 
-	print(HV)
+	# print(HV)
 	print("Triggered gens:",adapt_gens)
 
 	# print(logbook)

@@ -48,7 +48,7 @@ delta_vals = [i for i in range(90,97,5)]
 print("Delta values to test:", delta_vals)
 print("Number of runs per delta value:", num_runs)
 print("Number of datasets:", len(data_files))
-print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs)
+print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs,"\n")
 
 ## Below will be kept in the actual main function
 ## But just put here for a checklist
@@ -113,7 +113,7 @@ print("MST done! (Took",end_time-start_time,"seconds)")
 degree_int = precompute.degreeInterest(mst_genotype, L, nn_rankings, distarray)
 int_links_indices = precompute.interestLinksIndices(degree_int)
 print("DI done!")
-print("Precomputation done!")
+print("Precomputation done!\n")
 # Which of the above do I need to pass?
 # argsortdists, nn_rankings, mst_genotype, int_links_indices
 
@@ -142,11 +142,11 @@ for index_d, delta in enumerate(delta_vals):
 		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		end_time = time.time()
 		print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
-				
+
 		# pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon_old.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		# print("\n")
 		
-		print("Run",run,"with main_base")
+		print("Run",run,"with main_carryon")
 		start_time = time.time()
 		pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_carryon.main(data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs)
 		end_time = time.time()
