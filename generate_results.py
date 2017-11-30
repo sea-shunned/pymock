@@ -144,10 +144,11 @@ for file_path in data_files:
 				first_run = False
 
 			for func in funcs:
+				print("Starting", func)
 				start_time = time.time()
 				pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = main_base.main(*args)
 				end_time = time.time()
-				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
+				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)\n")
 				if first_run:
 					HV_ref = HV_ref_temp
 
