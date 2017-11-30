@@ -174,7 +174,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 		pop = toolbox.select(pop + offspring, num_indivs)
 
-		print([ind.fitness.values for ind in pop])
+		print(np.sum([ind.fitness.values for ind in pop]))
 
 		# print("Gen:",gen)
 		HV.append(hypervolume(pop, HV_ref)) # put into one, TEST THIS
