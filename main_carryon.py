@@ -174,6 +174,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 		pop = toolbox.select(pop + offspring, num_indivs)
 
+		print([ind.fitness.values for ind in pop])
+
 		# print("Gen:",gen)
 		HV.append(hypervolume(pop, HV_ref)) # put into one, TEST THIS
 
@@ -236,7 +238,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	print("EA time:", ea_time)
 	print("Final population hypervolume is %f" % hypervolume(pop, HV_ref))
 
-	# print(HV)
+	print(HV)
 	print("Triggered gens:",adapt_gens)
 
 	# print(logbook)
