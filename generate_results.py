@@ -37,11 +37,12 @@ data_files = synth_data_files
 
 num_runs = 2
 # seeds = [random.randint(0,10000)*i for i in range(num_runs)]
-seeds = [11, 1000]
+seeds = [12, 1000]
+assert len(seeds) == num_runs
 # Pickle (save) the seeds here
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(90,97,5)]
+delta_vals = [i for i in range(95,97,15)]
 
 print("Delta values to test:", delta_vals)
 print("Number of runs per delta value:", num_runs)

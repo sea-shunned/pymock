@@ -174,6 +174,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 		pop = toolbox.select(pop + offspring, num_indivs)
 
+		print([indiv for indiv in pop])
 		print(np.sum([ind.fitness.values for ind in pop]))
 
 		# print("Gen:",gen)
@@ -227,6 +228,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
 
 					newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
+					# print(newly_unfixed_indices)
 					for indiv in pop:
 						indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
 
