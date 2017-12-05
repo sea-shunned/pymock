@@ -27,7 +27,7 @@ import time
 ## Only need to do the above once, which we do with main_base.py
 
 # @profile # for line_profiler
-def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs):
+def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce):
 
 	# Reduced genotype length
 	relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
@@ -64,9 +64,9 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# Perhaps integrate the gap statistic/rand index evaluation stuff into it?
 
 	######## Parameters ########
-	NUM_GEN = 100 # 100 in Garza/Handl
+	# NUM_GEN = 100 # 100 in Garza/Handl
 	# CXPB = 1.0 # 1.0 in Garza/Handl i.e. always crossover
-	MUTPB = 1.0 # 1.0 in Garza/Handl i.e. always enter mutation, indiv link prob is calculated there
+	# MUTPB = 1.0 # 1.0 in Garza/Handl i.e. always enter mutation, indiv link prob is calculated there
 	
 	init_pop_start = time.time()
 	pop = toolbox.population()
@@ -137,10 +137,9 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	block_trigger_gens = 10		# Number of generations to wait until measuring
 	adapt_gens = [0]			# Initialise list for tracking which gens we trigger adaptive delta
 
-
 	### Start actual EA ### 
 	ea_start = time.time()
-	for gen in range(1, NUM_GEN):
+	for gen in range(1, num_gens):
 		# Shuffle population
 		random.shuffle(pop)
 
@@ -174,9 +173,6 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 		pop = toolbox.select(pop + offspring, num_indivs)
 
-		# print([indiv for indiv in pop])
-		print(np.sum([ind.fitness.values for ind in pop]))
-
 		# print("Gen:",gen)
 		HV.append(hypervolume(pop, HV_ref)) # put into one, TEST THIS
 
@@ -193,14 +189,14 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 				# print("Here after first if at",gen)
 
 				curr_grad = (HV[-1] - HV[-(window_size+1)]) / window_size
-				print(curr_grad, ref_grad)
+				# print(curr_grad, ref_grad)
 
 				if curr_grad <= 0.5 * ref_grad:
 					print("Here inside the trigger at gen",gen)
 					adapt_gens.append(gen)
 
-					# Reset our block (to ensure it isn't the initial default)
-					block_trigger_gens = 5
+					# Reset our block (to ensure it isn't the initial default if we want it to change)
+					# block_trigger_gens = 10
 
 					# Re-do the relevant precomputation
 					toolbox.unregister("evaluate")
@@ -211,7 +207,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 					# Reduce delta value
 					relev_links_len_old = relev_links_len
-					delta_val -= 5
+					delta_val -= delta_reduce
 
 					print("Adaptive Delta engaged at gen %d! Going down to delta = %d" % (gen, delta_val))
 
@@ -258,6 +254,9 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 	final_pop_metrics = evaluation.finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len)
 
+	# print(list(final_pop_metrics["Num Clusters"]))
+	# print(list(evaluation.numClusters(pop, mst_genotype, int_links_indices, relev_links_len)))
+
 	# Now add the VAR and CNN values for each individual
 	# We can probably actually do this in one step, as we're doing a for loop over each indiv anyway
 	# Or just comprehension it for the fitness values?
@@ -269,7 +268,6 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 	# ax = plotHV_adaptdelta(HV, adapt_gens)
 	# plt.show()
-	# plotHV_adaptdelta(HV, adapt_gens[1:]) #### Still need [1:]?
-
+	# plotHV_adaptdelta(HV, adapt_gens[1:])
 
 	return pop, logbook, VAR_init, CNN_init, HV, ea_time, final_pop_metrics, HV_ref

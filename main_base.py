@@ -7,6 +7,7 @@ import evaluation
 import numpy as np
 from itertools import count
 import random
+from graph_funcs import plotHV_adaptdelta
 
 # For multiprocessing
 from os import cpu_count
@@ -25,7 +26,7 @@ creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
 creator.create("Individual", list, fitness=creator.Fitness)
 
 # @profile # for line_profiler
-def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs):
+def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce):
 
 	# Reduced genotype length
 	relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
@@ -62,10 +63,10 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# Perhaps integrate the gap statistic/rand index evaluation stuff into it?
 
 	######## Parameters ########
-	NUM_GEN = 100 # 100 in Garza/Handl
+	# NUM_GEN = 100 # 100 in Garza/Handl
 	# CXPB = 1.0 # 1.0 in Garza/Handl i.e. always crossover
-	MUTPB = 1.0 # 1.0 in Garza/Handl i.e. always enter mutation, indiv link prob is calculated there
-	NUM_INDIVS = 100 # 100 in Garza/Handl
+	# MUTPB = 1.0 # 1.0 in Garza/Handl i.e. always enter mutation, indiv link prob is calculated there
+	# NUM_INDIVS = 100 # 100 in Garza/Handl
 	
 	init_pop_start = time.time()
 	pop = toolbox.population()
@@ -134,7 +135,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 	### Start actual EA ###
 	ea_start = time.time()
-	for gen in range(1, NUM_GEN):
+	for gen in range(1, num_gens):
 		# Shuffle population
 		random.shuffle(pop)
 
@@ -162,11 +163,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		for ind, fit in zip(invalid_ind, fitnesses):
 			ind.fitness.values = fit
 
-		pop = toolbox.select(pop + offspring, NUM_INDIVS)
-
-		# print([indiv for indiv in pop])
-		# print("\n")
-		print(np.sum([ind.fitness.values for ind in pop]))
+		pop = toolbox.select(pop + offspring, num_indivs)
 
 		# print("Gen:",gen)
 		curr_HV = hypervolume(pop, HV_ref)
@@ -194,12 +191,15 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	classes.PartialClust.id_value = count()
 
 	final_pop_metrics = evaluation.finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len)
-	# print(final_pop_metrics)
+	# print(list(final_pop_metrics["Num Clusters"]))
+	# print(list(evaluation.numClusters(pop, mst_genotype, int_links_indices, relev_links_len)))
 
 	# Now add the VAR and CNN values for each individual
 	# We can probably actually do this in one step, as we're doing a for loop over each indiv anyway
 	# Or just comprehension it for the fitness values?
 
 	# print(logbook)
+
+	# plotHV_adaptdelta(HV, [0])
 
 	return pop, logbook, VAR_init, CNN_init, HV, ea_time, final_pop_metrics, HV_ref

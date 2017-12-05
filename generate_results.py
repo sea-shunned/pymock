@@ -35,19 +35,19 @@ results_folder = basepath+"/results/"
 # data_files = synth_data_files[:3] + real_data_files[:1]
 data_files = synth_data_files
 
-num_runs = 2
+# Specify the number of runs
+num_runs = 3
+
+# Generate/fix the random seed numbers
 # seeds = [random.randint(0,10000)*i for i in range(num_runs)]
-seeds = [12, 1000]
-assert len(seeds) == num_runs
-# Pickle (save) the seeds here
+seeds = [11, 1000, 10000]
+
+# Ensure that we have the right number of seeds for the number of runs
+assert len(seeds) >= num_runs
 
 # Set range of delta values to test for each file
 delta_vals = [i for i in range(95,97,15)]
 
-print("Delta values to test:", delta_vals)
-print("Number of runs per delta value:", num_runs)
-print("Number of datasets:", len(data_files))
-print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs,"\n")
 
 ## Below will be kept in the actual main function
 ## But just put here for a checklist
@@ -55,16 +55,26 @@ print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs,"\n
 ############ Should try to add num_indivs and num_gens here
 L = 10
 num_indivs = 100
+num_gens = 100
+delta_reduce = 5
 # Check crossover probability
 # Or do I want to put this stuff here? Eh.
 
-df_cols = ["VAR", "CNN", "Run"]
+fitness_cols = ["VAR", "CNN", "Run"]
 
 funcs = [main_base.main, main_carryon.main]
 
+# Print some outputs about the experiment configuration
+print("Delta values to test:", delta_vals)
+print("Number of runs per delta value:", num_runs)
+print("Number of datasets:", len(data_files))
+print("Number of strategies:", len(funcs))
+print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs*len(funcs),"\n")
+
 for file_path in data_files:
+	file_time = time.time()
 	import classes # May need to put this here to ensure counts etc. are reset - TEST THIS
-	classes.Dataset.data_name = file_path.split("/")[-1].split(".")[0]
+	classes.Dataset.data_name = file_path.split("/")[-1].split(".")[0][:-15]
 	print("Testing:",classes.Dataset.data_name)
 
 	# USE A TRY EXCEPT HERE TO CREATE A DATA FOLDER
@@ -93,6 +103,15 @@ for file_path in data_files:
 	# Remove labels if present and create data_dict
 	data, data_dict = classes.createDatasetGarza(data)
 
+	dataset_categ = "_".join(classes.Dataset.data_name.split("_")[:3])
+	results_folder_data = results_folder+dataset_categ+"/"
+
+	###	Try to create a folder for results, group by the k & d
+	if not os.path.isdir(results_folder_data):
+		print("Created a results folder for dataset category "+dataset_categ)
+		os.makedirs(results_folder_data)
+
+
 	# Precomputation for this dataset
 	print("Starting precomputation...")
 
@@ -118,59 +137,102 @@ for file_path in data_files:
 
 	HV_ref = None
 
+
 	for index_d, delta in enumerate(delta_vals):
 		print("Testing delta =",delta)
 		# Create tuple of arguments
-		args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs
+		args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
 
 		###### Arguments to add? ######
-		# Amount we reduce delta by
-		# Number of generations
 
 		# Initialise df
 		# df = pd.DataFrame(columns=df_cols)
 
-		final_obj_values = np.zeros((num_indivs*num_runs,len(df_cols)))
+		if HV_ref == None:
+			first_run = True
+
+		else:
+			first_run = False
 
 		##### What numbers do I want and where???? #####
 
-		for run in range(num_runs):
-			random.seed(seeds[run])
+		for func in funcs:
+			# Create arrays to save results for the given function
+			fitness_array = np.empty((num_indivs*num_runs,len(fitness_cols)))
+			hv_array = np.empty((num_runs,num_gens))
+			ari_array = np.empty((num_indivs,num_runs))
+			numclusts_array = np.empty((num_indivs,num_runs))
+			time_array = np.empty(num_runs)
+			# delta_triggers = []
 
-			print("HV ref:", HV_ref)
+			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
 
-			if HV_ref == None:
-				first_run = True
+			for run in range(num_runs):
+				random.seed(seeds[run])
 
-			else:
-				first_run = False
+				print("HV ref:", HV_ref)
 
-			for func in funcs:
-				print("Run",run,"with ",func.__globals__["__file__"].split("/")[-1])
+				print("\nRun",run,"with", strat_name)
 				start_time = time.time()
 				pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = func(*args)
 				end_time = time.time()
-				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)\n")
+				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
+
 				if first_run:
 					HV_ref = HV_ref_temp
 
-			###### Put the above into a loop over strategies (functions)
+				# Add fitness values
+				ind = num_indivs*run
+				fitness_array[ind:ind+num_indivs,0:3] = [indiv.fitness.values+(run+1,) for indiv in pop]
+
+				numclusts, aris = evaluation.finalPopMetrics(pop, mst_genotype, int_links_indices_spec, relev_links_len)
+
+				numclusts_array[:,run] = numclusts
+				ari_array[:,run] = aris
+
+				hv_array[:,run] = HV
+
+				time_array[run] = end_time - start_time
 
 			###### Create a folder for graphs, and save the graphs we make into that
 			###### Best to do that here and just have the graph func return a graph
 				# Easier to aggregate here
 				# Easier to save graphs for individual runs from within the main func, or aggregate over a single run with multiple funcs here
 
-			# print(final_pop_metrics,"\n")
+				# print(func.__globals__["__file__"].split("/")[-1].split(".")[0])
 
-			# Check logbook to see how the form looks, and if we can manipulate it into a dataframe
-			# May want to just loop through the pop and get the fitness values
-			# And add the run number to the 3rd column
+			# Save the arrays here
+			# np.savetxt(fname,array,delimiter=',')
 
-			# This is overwriting
-			ind = num_indivs*run
+			filename = "-".join([results_folder_data+classes.Dataset.data_name,strat_name])
 
-			final_obj_values[ind:ind+num_indivs,0:3] = [indiv.fitness.values+(run+1,) for indiv in pop]
+			# print(filename)
+
+			# np.savetxt(results_folder_data+classes.Dataset.data_name+strat_name+str(delta)+".csv",fitness_array)
+
+			#### Add the name of data and delta value
+
+			np.savetxt(filename+"-fitness-"+str(delta)+".csv", fitness_array, delimiter=",")
+			np.savetxt(filename+"-hv-"+str(delta)+".csv", hv_array, delimiter=",")
+			np.savetxt(filename+"-ari-"+str(delta)+".csv", ari_array, delimiter=",")
+			np.savetxt(filename+"-numclusts-"+str(delta)+".csv", numclusts_array, delimiter=",")
+			np.savetxt(filename+"-time-"+str(delta)+".csv", time_array, delimiter=",")
+
+			# Pickle delta triggers
+
+
+			# # This is overwriting
+			# ind = num_indivs*run
+
+			# final_obj_values[ind:ind+num_indivs,0:3] = [indiv.fitness.values+(run+1,) for indiv in pop]
 
 		# Modify the below for specific dataset folder
 		# np.savetxt(results_path+classes.Dataset.data_name[:-15]+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")
+
+	print(classes.Dataset.data_name + " complete! Took",time.time()-file_time,"seconds \n")
+
+
+### Graph/Analysis after all the data is done
+# Useful as we still have the experiment info available in memory
+# e.g. num runs etc.
+
