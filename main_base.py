@@ -3,7 +3,7 @@ import initialisation
 import objectives
 import operators
 import classes
-import evaluation
+
 import numpy as np
 from itertools import count
 import random
@@ -116,17 +116,17 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 	# Create stats object
 	# Set the key to be the fitness values of the individual
-	stats = tools.Statistics(lambda ind: ind.fitness.values)
-	stats.register("avg", np.mean, axis=0)
-	stats.register("std", np.std, axis=0)
-	stats.register("min", np.min, axis=0)
-	stats.register("max", np.max, axis=0)
+	# stats = tools.Statistics(lambda ind: ind.fitness.values)
+	# stats.register("avg", np.mean, axis=0)
+	# stats.register("std", np.std, axis=0)
+	# stats.register("min", np.min, axis=0)
+	# stats.register("max", np.max, axis=0)
 
-	logbook = tools.Logbook()
-	logbook.header = "gen", "evals", "avg", "std", "min", "max"
+	# logbook = tools.Logbook()
+	# logbook.header = "gen", "evals", "avg", "std", "min", "max"
 
-	record = stats.compile(pop)
-	logbook.record(gen=0, evals=len(pop), **record)
+	# record = stats.compile(pop)
+	# logbook.record(gen=0, evals=len(pop), **record)
 
 	HV = []
 
@@ -165,12 +165,10 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 		pop = toolbox.select(pop + offspring, num_indivs)
 
-		# print("Gen:",gen)
-		curr_HV = hypervolume(pop, HV_ref)
-		HV.append(curr_HV)
+		HV.append(hypervolume(pop, HV_ref))
 
-		record = stats.compile(pop)
-		logbook.record(gen=gen, evals=len(invalid_ind), **record)
+		# record = stats.compile(pop)
+		# logbook.record(gen=gen, evals=len(invalid_ind), **record)
 
 	ea_end = time.time()
 	ea_time = ea_end - ea_start
@@ -181,7 +179,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# print(len(tools.sortNondominated(pop, len(pop))))
 	# print(tools.sortNondominated(pop, len(pop))[0])
 	# print(len(tools.sortNondominated(pop, len(pop))[0])) # if ==len(pop) then only one front
-
+	
 	# Close pools just in case (shouldn't be needed)
 	# pool.close()
 	# pool.join()
@@ -190,16 +188,4 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# Alternate solution is to reload the module
 	classes.PartialClust.id_value = count()
 
-	final_pop_metrics = evaluation.finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len)
-	# print(list(final_pop_metrics["Num Clusters"]))
-	# print(list(evaluation.numClusters(pop, mst_genotype, int_links_indices, relev_links_len)))
-
-	# Now add the VAR and CNN values for each individual
-	# We can probably actually do this in one step, as we're doing a for loop over each indiv anyway
-	# Or just comprehension it for the fitness values?
-
-	# print(logbook)
-
-	# plotHV_adaptdelta(HV, [0])
-
-	return pop, logbook, VAR_init, CNN_init, HV, ea_time, final_pop_metrics, HV_ref
+	return pop, HV, HV_ref, int_links_indices, relev_links_len

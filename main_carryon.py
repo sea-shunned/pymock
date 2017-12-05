@@ -116,17 +116,17 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 	# Create stats object
 	# Set the key to be the fitness values of the individual
-	stats = tools.Statistics(lambda ind: ind.fitness.values)
-	stats.register("avg", np.mean, axis=0)
-	stats.register("std", np.std, axis=0)
-	stats.register("min", np.min, axis=0)
-	stats.register("max", np.max, axis=0)
+	# stats = tools.Statistics(lambda ind: ind.fitness.values)
+	# stats.register("avg", np.mean, axis=0)
+	# stats.register("std", np.std, axis=0)
+	# stats.register("min", np.min, axis=0)
+	# stats.register("max", np.max, axis=0)
 
-	logbook = tools.Logbook()
-	logbook.header = "gen", "evals", "avg", "std", "min", "max"
+	# logbook = tools.Logbook()
+	# logbook.header = "gen", "evals", "avg", "std", "min", "max"
 
-	record = stats.compile(pop)
-	logbook.record(gen=0, evals=len(pop), **record)
+	# record = stats.compile(pop)
+	# logbook.record(gen=0, evals=len(pop), **record)
 
 	# Calculate HV of initialised population
 	HV = []
@@ -192,7 +192,6 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 				# print(curr_grad, ref_grad)
 
 				if curr_grad <= 0.5 * ref_grad:
-					print("Here inside the trigger at gen",gen)
 					adapt_gens.append(gen)
 
 					# Reset our block (to ensure it isn't the initial default if we want it to change)
@@ -228,15 +227,15 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					for indiv in pop:
 						indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
 
-		record = stats.compile(pop)
-		logbook.record(gen=gen, evals=len(invalid_ind), **record)
+		# record = stats.compile(pop)
+		# logbook.record(gen=gen, evals=len(invalid_ind), **record)
 
 	ea_end = time.time()
 	ea_time = ea_end - ea_start
 	print("EA time:", ea_time)
 	print("Final population hypervolume is %f" % hypervolume(pop, HV_ref))
 
-	print(HV)
+	# print(HV)
 	print("Triggered gens:",adapt_gens)
 
 	# print(logbook)
@@ -252,22 +251,4 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# Alternate solution is to reload the module
 	classes.PartialClust.id_value = count()
 
-	final_pop_metrics = evaluation.finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len)
-
-	# print(list(final_pop_metrics["Num Clusters"]))
-	# print(list(evaluation.numClusters(pop, mst_genotype, int_links_indices, relev_links_len)))
-
-	# Now add the VAR and CNN values for each individual
-	# We can probably actually do this in one step, as we're doing a for loop over each indiv anyway
-	# Or just comprehension it for the fitness values?
-
-	# print(logbook)
-
-	# Print a graph here to show the hypervolume and when we get triggers
-	# search folders for the old code for this
-
-	# ax = plotHV_adaptdelta(HV, adapt_gens)
-	# plt.show()
-	# plotHV_adaptdelta(HV, adapt_gens[1:])
-
-	return pop, logbook, VAR_init, CNN_init, HV, ea_time, final_pop_metrics, HV_ref
+	return pop, HV, HV_ref, int_links_indices, relev_links_len

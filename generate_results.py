@@ -11,6 +11,7 @@ import random
 # MOCK files needed for precomputation
 import classes
 import precompute
+import evaluation
 
 # Import strategies here
 import main_base
@@ -46,7 +47,7 @@ seeds = [11, 1000, 10000]
 assert len(seeds) >= num_runs
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(95,97,15)]
+delta_vals = [i for i in range(90,97,5)]
 
 
 ## Below will be kept in the actual main function
@@ -158,10 +159,10 @@ for file_path in data_files:
 
 		for func in funcs:
 			# Create arrays to save results for the given function
-			fitness_array = np.empty((num_indivs*num_runs,len(fitness_cols)))
-			hv_array = np.empty((num_runs,num_gens))
-			ari_array = np.empty((num_indivs,num_runs))
-			numclusts_array = np.empty((num_indivs,num_runs))
+			fitness_array = np.empty((num_indivs*num_runs, len(fitness_cols)))
+			hv_array = np.empty((num_gens, num_runs))
+			ari_array = np.empty((num_indivs, num_runs))
+			numclusts_array = np.empty((num_indivs, num_runs))
 			time_array = np.empty(num_runs)
 			# delta_triggers = []
 
@@ -169,12 +170,12 @@ for file_path in data_files:
 
 			for run in range(num_runs):
 				random.seed(seeds[run])
-
+				print("\nSeed number:",seeds[run])
 				print("HV ref:", HV_ref)
 
-				print("\nRun",run,"with", strat_name)
+				print("Run",run,"with", strat_name)
 				start_time = time.time()
-				pop, logbook, _, _, HV, ea_time, final_pop_metrics, HV_ref_temp = func(*args)
+				pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len = func(*args)
 				end_time = time.time()
 				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
 
@@ -185,13 +186,17 @@ for file_path in data_files:
 				ind = num_indivs*run
 				fitness_array[ind:ind+num_indivs,0:3] = [indiv.fitness.values+(run+1,) for indiv in pop]
 
+				# Calculate number of clusters and the ARI for each individual in the final pop
 				numclusts, aris = evaluation.finalPopMetrics(pop, mst_genotype, int_links_indices_spec, relev_links_len)
 
+				# Assign these values
 				numclusts_array[:,run] = numclusts
 				ari_array[:,run] = aris
 
+				# Assign the HV
 				hv_array[:,run] = HV
 
+				# Assign the time taken
 				time_array[run] = end_time - start_time
 
 			###### Create a folder for graphs, and save the graphs we make into that
