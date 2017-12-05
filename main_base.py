@@ -83,13 +83,9 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# That is how https://github.com/DEAP/deap/blob/master/examples/ga/nsga2.py does it
 
 	# Evaluate the initial population
-	VAR_init = []
-	CNN_init = []
 	fitnesses = toolbox.map(toolbox.evaluate, pop)
 	for ind, fit in zip(pop, fitnesses):
 		ind.fitness.values = fit
-		VAR_init.append(fit[0])
-		CNN_init.append(fit[1])
 
 	if HV_ref == None:
 		# max_conn varies a lot with delta, so start with lowest delta
@@ -97,10 +93,6 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		# MST should have highes VAR value possible, regardless of delta
 		# Check this so that we don't give too much unnecessary room
 		HV_ref = [np.ceil(np.max(VAR_init)*1.5), np.ceil(max_conn+1)]
-
-	print("HV ref:", HV_ref)
-	# print(VAR_init)
-	# print(CNN_init)
 
 	# Check that our current HV_ref is always valid
 	# If we just start with delta=0 (or the lowest delta value) then this won't be a problem...
@@ -179,7 +171,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# print(len(tools.sortNondominated(pop, len(pop))))
 	# print(tools.sortNondominated(pop, len(pop))[0])
 	# print(len(tools.sortNondominated(pop, len(pop))[0])) # if ==len(pop) then only one front
-	
+
 	# Close pools just in case (shouldn't be needed)
 	# pool.close()
 	# pool.join()

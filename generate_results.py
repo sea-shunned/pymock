@@ -41,7 +41,14 @@ num_runs = 3
 
 # Generate/fix the random seed numbers
 # seeds = [random.randint(0,10000)*i for i in range(num_runs)]
-seeds = [11, 1000, 10000]
+# seeds = [11, 1000, 10000]
+
+# Randomly generated numbers to use as the fixed seeds
+# 50 unique seeds, should be enough as unlikely to run more than 50 times
+seeds = [11, 472, 6560, 15159, 25560, 4062, 24052, 56256, 66978, 64800, 6413, 119628, 2808, 115892, 118905, 140784, 47889, 26838, 142234, 139740, 163359, 127666, 10764, 62256, 191875, 30472, 66150, 169008, 285012, 4890, 187488, 223680, 18480, 42738, 210280, 173916, 111851, 289940, 159510, 250760, 31160, 143976, 70907, 142076, 311715, 68034, 49491, 144768, 376663, 354300]
+
+# Ensure we have unique seed numbers
+assert len(seeds) == len(set(seeds))
 
 # Ensure that we have the right number of seeds for the number of runs
 assert len(seeds) >= num_runs
@@ -49,17 +56,11 @@ assert len(seeds) >= num_runs
 # Set range of delta values to test for each file
 delta_vals = [i for i in range(90,97,5)]
 
-
-## Below will be kept in the actual main function
-## But just put here for a checklist
-# Check that 100 indivs and 100 generations is OK
-############ Should try to add num_indivs and num_gens here
+# Parameters across all strategies
 L = 10
 num_indivs = 100
 num_gens = 100
 delta_reduce = 5
-# Check crossover probability
-# Or do I want to put this stuff here? Eh.
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
@@ -137,7 +138,6 @@ for file_path in data_files:
 	print("Precomputation done!\n")
 
 	HV_ref = None
-
 
 	for index_d, delta in enumerate(delta_vals):
 		print("Testing delta =",delta)
