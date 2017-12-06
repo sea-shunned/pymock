@@ -16,6 +16,9 @@ import evaluation
 # Import strategies here
 import main_base
 import main_carryon
+import main_hypermutspec
+import main_hypermutall
+import main_reinit
 
 
 # Get our current wd as the base path
@@ -54,17 +57,17 @@ assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
 assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(0,98,90)]
+delta_vals = [i for i in range(90,98,2)]
 
 # Parameters across all strategies
 L = 10
 num_indivs = 100
 num_gens = 100
-delta_reduce = 5
+delta_reduce = 2
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
-funcs = [main_base.main, main_carryon.main]
+funcs = [main_base.main, main_carryon.main, main_hypermutspec.main]
 
 save_results = False
 

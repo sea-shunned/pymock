@@ -130,7 +130,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	block_trigger_gens = 10		# Number of generations to wait until measuring
 	adapt_gens = [0]			# Initialise list for tracking which gens we trigger adaptive delta
 
-	print(np.sum([ind.fitness.values for ind in pop]))
+	# print(np.sum([ind.fitness.values for ind in pop]))
 
 	### Start actual EA ### 
 	ea_start = time.time()
@@ -169,9 +169,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		pop = toolbox.select(pop + offspring, num_indivs)
 
 		# print("Gen:",gen)
-		HV.append(hypervolume(pop, HV_ref)) # put into one, TEST THIS
-
-		print(np.sum([ind.fitness.values for ind in pop]))
+		HV.append(hypervolume(pop, HV_ref))
 
 		### Adaptive Delta Trigger ###
 		if delta_val != 0:
@@ -214,14 +212,15 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
 					reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
 				
-					# Re-register the relevant functions with changed arguments
-					toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
-					toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
-
 					newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
 					# print(newly_unfixed_indices)
 					for indiv in pop:
 						indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
+					
+					# Re-register the relevant functions with changed arguments
+					toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
+					toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
+
 
 		# record = stats.compile(pop)
 		# logbook.record(gen=gen, evals=len(invalid_ind), **record)
