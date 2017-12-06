@@ -68,10 +68,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# CXPB = 1.0 # 1.0 in Garza/Handl i.e. always crossover
 	# MUTPB = 1.0 # 1.0 in Garza/Handl i.e. always enter mutation, indiv link prob is calculated there
 	
-	init_pop_start = time.time()
 	pop = toolbox.population()
-	init_pop_end = time.time()
-	# print("Initial population:",init_pop_end - init_pop_start)
 
 	# Convert each individual of class list to class deap.creator.Individual
 	# Easier than modifying population function
@@ -83,9 +80,13 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# That is how https://github.com/DEAP/deap/blob/master/examples/ga/nsga2.py does it
 
 	# Evaluate the initial population
+	VAR_init = []
+	CNN_init = []
 	fitnesses = toolbox.map(toolbox.evaluate, pop)
 	for ind, fit in zip(pop, fitnesses):
-		ind.fitness.values = fit
+		ind.fitness.values = fit	
+		VAR_init.append(fit[0])
+		CNN_init.append(fit[1])
 
 	if HV_ref == None:
 		# max_conn varies a lot with delta, so start with lowest delta
@@ -243,4 +244,4 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# Alternate solution is to reload the module
 	classes.PartialClust.id_value = count()
 
-	return pop, HV, HV_ref, int_links_indices, relev_links_len
+	return pop, HV, HV_ref, int_links_indices, relev_links_len, adapt_gens

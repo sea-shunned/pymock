@@ -48,10 +48,10 @@ num_runs = 3
 seeds = [11, 472, 6560, 15159, 25560, 4062, 24052, 56256, 66978, 64800, 6413, 119628, 2808, 115892, 118905, 140784, 47889, 26838, 142234, 139740, 163359, 127666, 10764, 62256, 191875, 30472, 66150, 169008, 285012, 4890, 187488, 223680, 18480, 42738, 210280, 173916, 111851, 289940, 159510, 250760, 31160, 143976, 70907, 142076, 311715, 68034, 49491, 144768, 376663, 354300]
 
 # Ensure we have unique seed numbers
-assert len(seeds) == len(set(seeds))
+assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
 
 # Ensure that we have the right number of seeds for the number of runs
-assert len(seeds) >= num_runs
+assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
 delta_vals = [i for i in range(90,97,5)]
@@ -164,7 +164,7 @@ for file_path in data_files:
 			ari_array = np.empty((num_indivs, num_runs))
 			numclusts_array = np.empty((num_indivs, num_runs))
 			time_array = np.empty(num_runs)
-			# delta_triggers = []
+			delta_triggers = []
 
 			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
 
@@ -175,7 +175,7 @@ for file_path in data_files:
 
 				print("Run",run,"with", strat_name)
 				start_time = time.time()
-				pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len = func(*args)
+				pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
 				end_time = time.time()
 				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
 
@@ -198,6 +198,8 @@ for file_path in data_files:
 
 				# Assign the time taken
 				time_array[run] = end_time - start_time
+
+				delta_triggers.append(adapt_gens)
 
 			###### Create a folder for graphs, and save the graphs we make into that
 			###### Best to do that here and just have the graph func return a graph
@@ -224,7 +226,8 @@ for file_path in data_files:
 			np.savetxt(filename+"-time-"+str(delta)+".csv", time_array, delimiter=",")
 
 			# Pickle delta triggers
-
+			print(delta_triggers)
+			print(np.asarray(delta_triggers))
 
 			# # This is overwriting
 			# ind = num_indivs*run
