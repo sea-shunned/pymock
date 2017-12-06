@@ -130,6 +130,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	block_trigger_gens = 10		# Number of generations to wait until measuring
 	adapt_gens = [0]			# Initialise list for tracking which gens we trigger adaptive delta
 
+	print(np.sum([ind.fitness.values for ind in pop]))
+
 	### Start actual EA ### 
 	ea_start = time.time()
 	for gen in range(1, num_gens):

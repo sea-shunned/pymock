@@ -54,7 +54,7 @@ assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
 assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(95,98,2)]
+delta_vals = [i for i in range(0,98,90)]
 
 # Parameters across all strategies
 L = 10
