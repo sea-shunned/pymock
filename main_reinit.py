@@ -138,7 +138,9 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		# Shuffle population
 		random.shuffle(pop)
 
-		if adapt_gens[-1] == gen-1:
+		# Pretty sure we need the and statement here to avoid triggered at gen 1!
+		if adapt_gens[-1] == gen-1 and gen != 1:
+			print("Reinitialisation at gen:",gen)
 			offspring = toolbox.population()
 
 		else:

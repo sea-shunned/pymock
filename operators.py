@@ -102,12 +102,9 @@ def neighbourHyperMutation_spec(parent, MUTPB, gen_length, argsortdists, L, int_
 	# Using a comprehension for this bit is faster
 	mutprobs = [first_term + ((nn_rankings[int_links_indices[index]][value] / gen_length) ** 2) for index,value in enumerate(parent)]
 
-	print(new_genes)
-	print(mutprobs)
+	# Now multiply the probabilities for the newly introduced variables
 	new_probs = [mut_value * hyper_mut for mut_value in mutprobs[-len(new_genes):]]
-	print(new_probs)
 	mutprobs[-len(new_genes):] = new_probs
-	print(mutprobs,"\n")
 
 	# Now just loop over the probabilities
 	# As we're using assignment, can't really do this part in a comprehension!

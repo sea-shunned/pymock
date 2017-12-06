@@ -152,6 +152,11 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 			toolbox.mutate(ind1)
 			toolbox.mutate(ind2)
 
+		# Go back to normal mutation operator
+		if adapt_gens[-1] == gen-1 and gen != 1:
+			toolbox.unregister("mutate")
+			toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
+
 		### The below takes longer! Odd, surely it should be faster if we do it right # was this due to profiling?
 		# mapped_off = pool.starmap(toolbox.mate,zip(offspring[::2], offspring[1::2]))
 		# offspring = [gen for i in mapped_off for gen in i]
