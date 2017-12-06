@@ -54,7 +54,7 @@ assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
 assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(90,97,5)]
+delta_vals = [i for i in range(95,98,2)]
 
 # Parameters across all strategies
 L = 10
@@ -67,7 +67,7 @@ fitness_cols = ["VAR", "CNN", "Run"]
 funcs = [main_base.main, main_carryon.main]
 
 # Print some outputs about the experiment configuration
-print("Delta values to test:", delta_vals)
+print("Delta values to test:", delta_vals, "("+str(len(delta_vals))+")")
 print("Number of runs per delta value:", num_runs)
 print("Number of datasets:", len(data_files))
 print("Number of strategies:", len(funcs))
@@ -140,7 +140,7 @@ for file_path in data_files:
 	HV_ref = None
 
 	for index_d, delta in enumerate(delta_vals):
-		print("Testing delta =",delta)
+		print("\nTesting delta =",delta)
 		# Create tuple of arguments
 		args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
 
@@ -226,8 +226,10 @@ for file_path in data_files:
 			np.savetxt(filename+"-time-"+str(delta)+".csv", time_array, delimiter=",")
 
 			# Pickle delta triggers
-			print(delta_triggers)
-			print(np.asarray(delta_triggers))
+			# No triggers for normal delta-MOCK
+			if strat_name != "main_base":
+				with open(filename+"-triggers-"+str(delta)+".pkl","wb") as f:
+					pickle.dump(delta_triggers, f)
 
 			# # This is overwriting
 			# ind = num_indivs*run
