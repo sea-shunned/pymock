@@ -37,7 +37,7 @@ results_folder = basepath+"/results/"
 data_files = synth_data_files
 
 # Specify the number of runs
-num_runs = 3
+num_runs = 2
 
 # Generate/fix the random seed numbers
 # seeds = [random.randint(0,10000)*i for i in range(num_runs)]
@@ -65,6 +65,8 @@ delta_reduce = 5
 fitness_cols = ["VAR", "CNN", "Run"]
 
 funcs = [main_base.main, main_carryon.main]
+
+save_results = False
 
 # Print some outputs about the experiment configuration
 print("Delta values to test:", delta_vals, "("+str(len(delta_vals))+")")
@@ -210,31 +212,21 @@ for file_path in data_files:
 
 			# Save the arrays here
 			# np.savetxt(fname,array,delimiter=',')
-
 			filename = "-".join([results_folder_data+classes.Dataset.data_name,strat_name])
 
-			# print(filename)
+			if save_results:
+				# Save array data
+				np.savetxt(filename+"-fitness-"+str(delta)+".csv", fitness_array, delimiter=",")
+				np.savetxt(filename+"-hv-"+str(delta)+".csv", hv_array, delimiter=",")
+				np.savetxt(filename+"-ari-"+str(delta)+".csv", ari_array, delimiter=",")
+				np.savetxt(filename+"-numclusts-"+str(delta)+".csv", numclusts_array, delimiter=",")
+				np.savetxt(filename+"-time-"+str(delta)+".csv", time_array, delimiter=",")
 
-			# np.savetxt(results_folder_data+classes.Dataset.data_name+strat_name+str(delta)+".csv",fitness_array)
-
-			#### Add the name of data and delta value
-
-			np.savetxt(filename+"-fitness-"+str(delta)+".csv", fitness_array, delimiter=",")
-			np.savetxt(filename+"-hv-"+str(delta)+".csv", hv_array, delimiter=",")
-			np.savetxt(filename+"-ari-"+str(delta)+".csv", ari_array, delimiter=",")
-			np.savetxt(filename+"-numclusts-"+str(delta)+".csv", numclusts_array, delimiter=",")
-			np.savetxt(filename+"-time-"+str(delta)+".csv", time_array, delimiter=",")
-
-			# Pickle delta triggers
-			# No triggers for normal delta-MOCK
-			if strat_name != "main_base":
-				with open(filename+"-triggers-"+str(delta)+".pkl","wb") as f:
-					pickle.dump(delta_triggers, f)
-
-			# # This is overwriting
-			# ind = num_indivs*run
-
-			# final_obj_values[ind:ind+num_indivs,0:3] = [indiv.fitness.values+(run+1,) for indiv in pop]
+				# Pickle delta triggers
+				# No triggers for normal delta-MOCK
+				if strat_name != "main_base":
+					with open(filename+"-triggers-"+str(delta)+".pkl","wb") as f:
+						pickle.dump(delta_triggers, f)
 
 		# Modify the below for specific dataset folder
 		# np.savetxt(results_path+classes.Dataset.data_name[:-15]+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")

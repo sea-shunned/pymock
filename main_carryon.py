@@ -169,10 +169,11 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		# print("Gen:",gen)
 		HV.append(hypervolume(pop, HV_ref)) # put into one, TEST THIS
 
+		print(np.sum([ind.fitness.values for ind in pop]))
+
 		### Adaptive Delta Trigger ###
 		if delta_val != 0:
 			if gen >= (adapt_gens[-1] + block_trigger_gens):
-
 				if gen == (adapt_gens[-1] + block_trigger_gens):
 					ref_grad = (HV[-1] - HV[adapt_gens[-1]]) / len(HV)
 					# print("Here at the equals bit",gen)
