@@ -42,22 +42,17 @@ data_files = synth_data_files
 # Specify the number of runs
 num_runs = 2
 
-# Generate/fix the random seed numbers
-# seeds = [random.randint(0,10000)*i for i in range(num_runs)]
-# seeds = [11, 1000, 10000]
-
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
 seeds = [11, 472, 6560, 15159, 25560, 4062, 24052, 56256, 66978, 64800, 6413, 119628, 2808, 115892, 118905, 140784, 47889, 26838, 142234, 139740, 163359, 127666, 10764, 62256, 191875, 30472, 66150, 169008, 285012, 4890, 187488, 223680, 18480, 42738, 210280, 173916, 111851, 289940, 159510, 250760, 31160, 143976, 70907, 142076, 311715, 68034, 49491, 144768, 376663, 354300]
 
 # Ensure we have unique seed numbers
 assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
-
 # Ensure that we have the right number of seeds for the number of runs
 assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(90,98,2)]
+delta_vals = [i for i in range(94,98,2)]
 
 # Parameters across all strategies
 L = 10
@@ -65,11 +60,11 @@ num_indivs = 100
 num_gens = 100
 delta_reduce = 2
 
-fitness_cols = ["VAR", "CNN", "Run"]
-
-funcs = [main_base.main, main_carryon.main, main_hypermutspec.main]
-
+funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main]
+# funcs = [main_reinit.main, main_base.main]
 save_results = False
+
+fitness_cols = ["VAR", "CNN", "Run"]
 
 # Print some outputs about the experiment configuration
 print("Delta values to test:", delta_vals, "("+str(len(delta_vals))+")")

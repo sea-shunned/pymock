@@ -134,8 +134,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		random.shuffle(pop)
 
 		offspring = tools.selTournamentDCD(pop, len(pop))
-		offspring = [toolbox.clone(ind) for ind in offspring]
-		# offspring = toolbox.map(toolbox.clone,offspring) # Map version of above, should be same
+		# offspring = [toolbox.clone(ind) for ind in offspring]
+		offspring = toolbox.map(toolbox.clone,offspring) # Map version of above, should be same
 
 		# If done properly, using comprehensions/map should speed this up
 		for ind1, ind2 in zip(offspring[::2], offspring[1::2]):

@@ -68,9 +68,7 @@ def initDeltaMOCK(k_user, num_indivs, mst_genotype, int_links_indices, relev_lin
 
 	### Add MST to population
 	indiv = mst_genotype[:]
-	pop.append([indiv[i] for i in int_links_indices[:relev_links_len]]) # We're adding the full length MST here!
-
-	# print(id(pop[0])==id(mst_genotype))
+	pop.append([indiv[i] for i in int_links_indices[:relev_links_len]]) # Add the MST solution
 
 	# int_links_indices should be the list of indices/nodes where we have unfixed links
 	k_max = k_user*2
@@ -98,6 +96,45 @@ def initDeltaMOCK(k_user, num_indivs, mst_genotype, int_links_indices, relev_lin
 		k_values = k_set[:num_indivs-1] # Minus one due to use of MST genotype
 
 	assert len(k_values) == num_indivs-1, "Different number of k values to P (pop size)"
+
+	for k in k_values:
+		# n = k-1
+		indiv = next(initCreateSol(k-1, mst_genotype, int_links_indices, relev_links_len, argsortdists, L))
+		red_genotype = [indiv[i] for i in int_links_indices[:relev_links_len]]
+		# print("Indiv length:",len(indiv))
+		# print("Reduced length:",len(red_genotype))
+		pop.append(red_genotype)
+	return pop
+
+def initDeltaMOCKadapt(k_user, num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L):
+	pop = []
+
+	# int_links_indices should be the list of indices/nodes where we have unfixed links
+	k_max = k_user*2
+
+	# Generate set of k values to use
+	k_all = list(range(2,k_max+1))
+	# Shuffle this set
+	k_set = k_all[:]
+	random.shuffle(k_set)
+	k_values = []
+
+	# If we don't have enough k values we need to resample
+	if len(k_all) < num_indivs:
+		while len(k_values) < num_indivs:
+			try:
+				k_values.append(k_set.pop())
+
+			# If k_max < 
+			except IndexError:
+				k_set = k_all[:]
+				random.shuffle(k_set)
+
+	# Otherwise just take the number of k values we need from the shuffled set
+	else:
+		k_values = k_set[:num_indivs]
+
+	assert len(k_values) == num_indivs, "Different number of k values to P (pop size)"
 
 	for k in k_values:
 		# n = k-1

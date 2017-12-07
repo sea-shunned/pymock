@@ -26,7 +26,7 @@ import time
 # creator.create("Individual", list, fitness=creator.Fitness)
 ## Only need to do the above once, which we do with main_base.py
 
-# @profile # for line_profiler
+@profile # for line_profiler
 def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce):
 
 	# Reduced genotype length
@@ -138,15 +138,21 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		# Shuffle population
 		random.shuffle(pop)
 
-		# Pretty sure we need the and statement here to avoid triggered at gen 1!
+		# We need the and statement here to avoid triggered at gen 1!
 		if adapt_gens[-1] == gen-1 and gen != 1:
 			print("Reinitialisation at gen:",gen)
+			
 			offspring = toolbox.population()
+			for index, indiv in enumerate(offspring):
+				indiv = creator.Individual(indiv)
+				offspring[index] = indiv
+
+			# offspring = [toolbox.clone(ind) for ind in offspring]
 
 		else:
 			offspring = tools.selTournamentDCD(pop, len(pop))
-			offspring = [toolbox.clone(ind) for ind in offspring]
-			# offspring = toolbox.map(toolbox.clone,offspring) # Map version of above, should be same
+			# offspring = [toolbox.clone(ind) for ind in offspring]
+			offspring = toolbox.map(toolbox.clone,offspring) # Map version of above, should be same
 
 			# If done properly, using comprehensions/map should speed this up
 			for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
@@ -230,7 +236,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					# Re-register the relevant functions with changed arguments
 					toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
 					toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
-					toolbox.register("initDelta", initialisation.initDeltaMOCK, classes.Dataset.k_user, num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L)
+					toolbox.register("initDelta", initialisation.initDeltaMOCKadapt, classes.Dataset.k_user, num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L)
 					toolbox.register("population", tools.initIterate, list, toolbox.initDelta)
 
 
