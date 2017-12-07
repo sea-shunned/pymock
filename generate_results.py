@@ -40,7 +40,7 @@ results_folder = basepath+"/results/"
 data_files = synth_data_files
 
 # Specify the number of runs
-num_runs = 2
+num_runs = 10
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -52,7 +52,7 @@ assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
 assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(94,98,2)]
+delta_vals = [i for i in range(80,99,3)]
 
 # Parameters across all strategies
 L = 10
@@ -61,8 +61,8 @@ num_gens = 100
 delta_reduce = 2
 
 funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main]
-# funcs = [main_reinit.main, main_base.main]
-save_results = False
+# funcs = [main_fairmut.main, main_base.main]
+save_results = True
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
@@ -235,4 +235,3 @@ for file_path in data_files:
 ### Graph/Analysis after all the data is done
 # Useful as we still have the experiment info available in memory
 # e.g. num runs etc.
-

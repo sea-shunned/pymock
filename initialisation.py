@@ -7,7 +7,7 @@ import precompute
 #### New initialisation ####
 
 def baseGenotype(mst_genotype, int_links_indices, relev_links_len):
-	base_genotype = mst_genotype.copy()
+	base_genotype = mst_genotype.copy() # hould use [:] for consistency
 	for index in int_links_indices[:relev_links_len]:
 		base_genotype[index] = index
 	base_clusters = precompute.decodingLAR(base_genotype)

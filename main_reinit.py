@@ -26,7 +26,7 @@ import time
 # creator.create("Individual", list, fitness=creator.Fitness)
 ## Only need to do the above once, which we do with main_base.py
 
-@profile # for line_profiler
+# @profile # for line_profiler
 def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce):
 
 	# Reduced genotype length
