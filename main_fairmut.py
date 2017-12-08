@@ -139,12 +139,12 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	for gen in range(1, num_gens):
 		# Shuffle population
 		random.shuffle(pop)
-		print(len([indiv.fairmut for indiv in pop if indiv.fairmut is not None]), "in pop")
+
 		offspring = tools.selTournamentDCD(pop, len(pop))
-		print(len([indiv.fairmut for indiv in offspring if indiv.fairmut is not None]), "after selection")
+
 		# offspring = [toolbox.clone(ind) for ind in offspring]
 		offspring = toolbox.map(toolbox.clone,offspring) # Map version of above, should be same
-		print(len([indiv.fairmut for indiv in offspring if indiv.fairmut is not None]), "after cloning")
+
 
 		# Check if we trigger fair mutation
 		if adapt_gens[-1] == gen-1 and gen != 1:
@@ -185,32 +185,24 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 						indiv[relev_links_len_old+index] = newly_unfixed_indices[index]
 						indiv.fairmut = relev_links_len_old+index
 
-
-			# print(len([indiv.fairmut for indiv in offspring if indiv.fairmut is not None]), "in fairmut trigger") # =num_indivs
-
 		# Otherwise we carry on as normal
 		else:
-			print("Else", gen)
-			print(len([indiv.fairmut for indiv in offspring if indiv.fairmut is not None]))
+
 			for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
 				toolbox.mate(ind1, ind2)
+
 				# Mutate individuals, using the right operator for the individual
 				if ind1.fairmut is not None:
-					print("Fair----------------------------------------------")
 					toolbox.mutateFair(ind1)
-					# print(ind1.fairmut)
 
 					# Repair fair mut individuals in case value has changed from crossover/mutation
 					ind1[ind1.fairmut] = ind1.fairmut
-					
-					# print(ind1.fairmut,"\n")
+
 				else:
 					toolbox.mutate(ind1)
 
 				if ind2.fairmut is not None:
-					print("Fair----------------------------------------------")
 					toolbox.mutateFair(ind2)
-					# print(ind2.fairmut,"\n")
 
 					ind2[ind2.fairmut] = ind2.fairmut
 
