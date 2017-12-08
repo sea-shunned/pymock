@@ -282,7 +282,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# print(tools.sortNondominated(pop, len(pop))[0])
 	# print(len(tools.sortNondominated(pop, len(pop))[0])) # if ==len(pop) then only one front
 
-	# Close pools just in case (shouldn't be needed)
+	# Close pools just in case
 	# pool.close()
 	# pool.join()
 

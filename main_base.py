@@ -175,8 +175,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# print(len(tools.sortNondominated(pop, len(pop))[0])) # if ==len(pop) then only one front
 
 	# Close pools just in case (shouldn't be needed)
-	# pool.close()
-	# pool.join()
+	pool.close()
+	pool.join()
 
 	# Reset the cluster ID value if we're running multiple values
 	# Alternate solution is to reload the module
