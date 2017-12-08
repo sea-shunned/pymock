@@ -52,7 +52,7 @@ assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
 assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(80,99,3)]
+delta_vals = [i for i in range(90,99,3)]
 
 # Parameters across all strategies
 L = 10
@@ -62,7 +62,7 @@ delta_reduce = 2
 
 funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main]
 # funcs = [main_fairmut.main, main_base.main]
-save_results = True
+save_results = False
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
@@ -112,7 +112,6 @@ for file_path in data_files:
 	if not os.path.isdir(results_folder_data):
 		print("Created a results folder for dataset category "+dataset_categ)
 		os.makedirs(results_folder_data)
-
 
 	# Precomputation for this dataset
 	print("Starting precomputation...")
