@@ -29,15 +29,18 @@ data_folder = basepath+"/data/"
 synth_data_folder = data_folder+"synthetic_datasets/"
 real_data_folder = data_folder+"UKC_datasets/"
 
-synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
 # synth_data_files = glob.glob(synth_data_folder+'tevc_50_40_7_*.data')
 # synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
-# real_data_files = glob.glob(real_data_folder+'*.txt')
+
+synth_data_files = glob.glob(synth_data_folder+'*.data')
+real_data_files = glob.glob(real_data_folder+'*.txt')
 
 results_folder = basepath+"/results/"
 
-# data_files = synth_data_files[:3] + real_data_files[:1]
-data_files = synth_data_files
+data_files = synth_data_files[:3] + real_data_files[:1]
+# data_files = synth_data_files
+# print(data_files)
 
 # Specify the number of runs
 num_runs = 10
