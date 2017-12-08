@@ -46,6 +46,8 @@ def neighbourMutation(parent, MUTPB, gen_length, argsortdists, L, int_links_indi
 	# Using a comprehension for this bit is faster
 	mutprobs = [first_term + ((nn_rankings[int_links_indices[index]][value] / gen_length) ** 2) for index,value in enumerate(parent)]
 
+	# print(mutprobs)
+
 	# Now just loop over the probabilities
 	# As we're using assignment, can't really do this part in a comprehension!
 	for index, mutprob in enumerate(mutprobs):
@@ -120,8 +122,6 @@ def neighbourFairMutation(parent, MUTPB, gen_length, argsortdists, L, int_links_
 
 	# Using a comprehension for this bit is faster
 	mutprobs = [(first_term + ((nn_rankings[int_links_indices[index]][value] / gen_length) ** 2))*raised_mut for index,value in enumerate(parent)]
-
-	# print(mutprobs,"\n")
 
 	# Now just loop over the probabilities
 	# As we're using assignment, can't really do this part in a comprehension!

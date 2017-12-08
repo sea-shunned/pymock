@@ -19,7 +19,7 @@ import main_carryon
 import main_hypermutspec
 import main_hypermutall
 import main_reinit
-
+import main_fairmut
 
 # Get our current wd as the base path
 basepath = os.getcwd()
@@ -40,7 +40,7 @@ results_folder = basepath+"/results/"
 data_files = synth_data_files
 
 # Specify the number of runs
-num_runs = 10
+num_runs = 2
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -58,10 +58,10 @@ delta_vals = [i for i in range(90,99,3)]
 L = 10
 num_indivs = 100
 num_gens = 100
-delta_reduce = 2
+delta_reduce = 5
 
-funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main]
-# funcs = [main_fairmut.main, main_base.main]
+# funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main]
+funcs = [main_fairmut.main, main_base.main]
 save_results = False
 
 fitness_cols = ["VAR", "CNN", "Run"]

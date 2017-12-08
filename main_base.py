@@ -23,7 +23,7 @@ import time
 
 # Run outside of multiprocessing scope
 creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
-creator.create("Individual", list, fitness=creator.Fitness)
+creator.create("Individual", list, fitness=creator.Fitness, fairmut=None)
 
 # @profile # for line_profiler
 def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce):
