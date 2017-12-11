@@ -57,6 +57,9 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 # Set range of delta values to test for each file
 delta_vals = [i for i in range(80,99,3)]
 
+# Square root values for delta
+sr_vals = [1,2,5]
+
 # Parameters across all strategies
 L = 10
 num_indivs = 100
@@ -140,6 +143,12 @@ for file_path in data_files:
 	print("Precomputation done!\n")
 
 	HV_ref = None
+
+
+	# Add square root delta values
+
+	for i in sr_vals:
+	delta_vals.extend(100-((100*i*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples))
 
 	for index_d, delta in enumerate(delta_vals):
 		print("\nTesting delta =",delta)
