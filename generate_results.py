@@ -83,6 +83,11 @@ for file_path in data_files:
 	file_time = time.time()
 	import classes # May need to put this here to ensure counts etc. are reset - TEST THIS
 	classes.Dataset.data_name = file_path.split("/")[-1].split(".")[0][:-15]
+	
+	# Correction for real dataset
+	if classes.Dataset.data_name == "":
+		classes.Dataset.data_name = file_path.split("/")[-1].split(".")[0]
+
 	print("Testing:",classes.Dataset.data_name)
 
 	# USE A TRY EXCEPT HERE TO CREATE A DATA FOLDER
@@ -114,6 +119,11 @@ for file_path in data_files:
 	dataset_categ = "_".join(classes.Dataset.data_name.split("_")[:3])
 	results_folder_data = results_folder+dataset_categ+"/"
 
+	# Add square root delta values
+	for i in sr_vals:
+		delta_vals.extend(100-((100*i*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples))
+		print(delta_vals)
+
 	###	Try to create a folder for results, group by the k & d
 	if not os.path.isdir(results_folder_data):
 		print("Created a results folder for dataset category "+dataset_categ)
@@ -143,12 +153,6 @@ for file_path in data_files:
 	print("Precomputation done!\n")
 
 	HV_ref = None
-
-
-	# Add square root delta values
-
-	for i in sr_vals:
-	delta_vals.extend(100-((100*i*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples))
 
 	for index_d, delta in enumerate(delta_vals):
 		print("\nTesting delta =",delta)
