@@ -38,8 +38,8 @@ real_data_files = glob.glob(real_data_folder+'*.txt')
 
 results_folder = basepath+"/results/"
 
-data_files = synth_data_files[:3] + real_data_files[:1]
-# data_files = synth_data_files
+# data_files = synth_data_files[:3] + real_data_files[:1]
+data_files = real_data_files[:1]
 # print(data_files)
 
 # Specify the number of runs
@@ -55,7 +55,7 @@ assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
 assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(80,99,3)]
+delta_vals = [i for i in range(90,99,3)]
 
 # Square root values for delta
 sr_vals = [1,2,5]
