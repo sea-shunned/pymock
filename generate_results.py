@@ -73,12 +73,6 @@ save_results = True
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
-# Print some outputs about the experiment configuration
-print("Delta values to test:", delta_vals, "("+str(len(delta_vals))+")")
-print("Number of runs per delta value:", num_runs)
-print("Number of datasets:", len(data_files))
-print("Number of strategies:", len(funcs))
-print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs*len(funcs),"\n")
 
 for file_path in data_files:
 	file_time = time.time()
@@ -112,18 +106,24 @@ for file_path in data_files:
 		classes.Dataset.labels = True
 	else:
 		classes.Dataset.labels = False
-	# If labels=True, then we can calc ARI, otherwise we can't, correct this!
 
 	# Remove labels if present and create data_dict
 	data, data_dict = classes.createDatasetGarza(data)
 
 	dataset_categ = "_".join(classes.Dataset.data_name.split("_")[:3])
-	results_folder_data = results_folder+dataset_categ+"/"
+	# results_folder_data = results_folder+dataset_categ+"/"
+	results_folder_data = results_folder+classes.Dataset.data_name+"/"
 
 	# Add square root delta values
-	print(delta_vals)
 	delta_vals.extend([100-((100*i*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples) for i in sr_vals])
-	print(delta_vals)
+
+	# Print some outputs about the experiment configuration
+	print("Delta values to test:", delta_vals, "("+str(len(delta_vals))+")")
+	print("Number of runs per delta value:", num_runs)
+	print("Number of datasets:", len(data_files))
+	print("Number of strategies:", len(funcs))
+	print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs*len(funcs),"\n")
+
 
 	###	Try to create a folder for results, group by the k & d
 	if not os.path.isdir(results_folder_data):
@@ -160,10 +160,6 @@ for file_path in data_files:
 		# Create tuple of arguments
 		args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
 
-		###### Arguments to add? ######
-
-		# Initialise df
-		# df = pd.DataFrame(columns=df_cols)
 
 		if HV_ref == None:
 			first_run = True
