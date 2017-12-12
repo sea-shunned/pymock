@@ -58,7 +58,8 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 delta_vals = [i for i in range(90,99,3)]
 
 # Square root values for delta
-sr_vals = [1,2,5]
+# Reverse to ensure lowest delta is first (in case of issues with HV ref point)
+sr_vals = [5,2,1]
 
 # Parameters across all strategies
 L = 10
@@ -120,9 +121,9 @@ for file_path in data_files:
 	results_folder_data = results_folder+dataset_categ+"/"
 
 	# Add square root delta values
-	for i in sr_vals:
-		delta_vals.extend(100-((100*i*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples))
-		print(delta_vals)
+	print(delta_vals)
+	delta_vals.extend([100-((100*i*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples) for i in sr_vals])
+	print(delta_vals)
 
 	###	Try to create a folder for results, group by the k & d
 	if not os.path.isdir(results_folder_data):
