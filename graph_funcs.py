@@ -2,6 +2,11 @@ import pandas as pd
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+from itertools import cycle
+
+
+plt.style.use('seaborn-paper')
 
 def normEAF(folder_path):
 	files = glob.glob(folder_path+'*.csv*')
@@ -120,19 +125,65 @@ def plotHV_adaptdelta(HV, adapt_gens):
 
 	# return ax
 
+def plotHVgens(folder_path, delta, styles_cycler, results_path):
+	files = glob.glob(folder_path+"*"+"HVgens"+"*")
+
+	# dashlist = [(None,None),(5,2),(10,2,20,2),(2,5),(10,5,2,5,2,5),()]
+
+	for file in files:
+
+		# Read the csv in, and filter just the columns with the delta value we're plotting
+		df = pd.read_csv(file)
+		df = df.filter(regex="d"+str(delta))
+
+		num_gens = df.shape[0]
+		# print(file)
+
+		fig = plt.figure(figsize=(18,12))
+		ax = fig.add_subplot(111)
+
+		for i in range(0,len(df.columns),3):
+			# print(df[df.columns[i]])
+
+			strat_name = df.columns[i].split("_")[2]
+
+			ax.errorbar(list(range(0,num_gens)),df[df.columns[i]],
+				yerr=df[df.columns[i+2]],
+				label=strat_name,
+				**next(styles_cycler)
+				)
+
+			# ax.set_title("")
+			ax.set_xlabel("Generation")
+			ax.set_ylabel("Hypervolume")
+			ax.legend()
+
+		# print(fig.dpi)
+		plt.show()
+		# print(fig.dpi)
+
+		savename = results_path+file.split('/')[-1].split('-')[0]+'-d'+str(delta)+'-HVplot.svg'
+		# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+
+def plotARI():
+
+	
+	
+	pass
+
 if __name__ == '__main__':
-	results_path = "/home/cshand/Documents/PhD_MOCK/adaptive_delta/results/"
-	# /home/cshand/Dropbox/Computer Science PhD/PhD_Y2/MOEA_Clustering/mock/adaptive_delta/results/eafs
+	basepath = os.getcwd()
+	aggregate_folder = basepath+"/results/aggregates/"
+	results_path = basepath+"/results/graphs/"
 
-	folders = glob.glob(results_path+'*/')
-	folders = folders[:1]
-	# print(folders)
+	styles = [
+	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
+	{'color':'r', 'dashes':(5,2), 'marker':"None",},			# carryon
+	{'color':'g', 'dashes':(2,5), 'marker':"None",},			# hypermutspec
+	{'color':'c', 'dashes':(None,None), 'marker':"o",'ms':7},	# hypermutall
+	{'color':'m', 'dashes':(None,None), 'marker':"^",'ms':7},	# reinit
+	{'color':'y', 'dashes':(None,None), 'marker':"D",'ms':7}]	# fairmut
 
-	# for folder in folders:
-	# 	normEAF(folder)
+	styles_cycler = cycle(styles)
 
-	# csv_path = "/home/cshand/Documents/PhD_MOCK/adaptive_delta/results/tevc_50_100_2/tevc_50_100_2_labels_headers_eaf_30.csv"
-	# plotObjectives(csv_path)
-
-	csv_path = "/home/cshand/Documents/PhD_MOCK/adaptive_delta/results/tevc_20_10_6_labels_headers_hv.csv"
-	plotHV(csv_path)
+	plotHVgens(aggregate_folder, 95, styles_cycler, results_path)
