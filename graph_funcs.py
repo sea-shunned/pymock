@@ -193,9 +193,6 @@ def plotARI(folder_path, delta, graph_path):
 	ax.set_xlabel("Strategy")
 	ax.set_ylabel("Adjusted Rand Index (ARI)")
 
-	# Set title and labels
-	# Ensure y-axis always shows 0.0-1.0
-
 	savename = graph_path+data_name+'-d'+str(delta)+'-ARIboxplot.svg'
 	# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
 

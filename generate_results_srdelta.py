@@ -45,7 +45,7 @@ print(data_files)
 # data_files = synth_data_files
 
 # Specify the number of runs
-num_runs = 2
+num_runs = 30
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
