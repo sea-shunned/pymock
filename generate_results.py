@@ -38,12 +38,12 @@ real_data_files = glob.glob(real_data_folder+'*.txt')
 
 results_folder = basepath+"/results/"
 
-# data_files = synth_data_files[:3] + real_data_files[:1]
-data_files = real_data_files[:1]
-# print(data_files)
+data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + real_data_files[:1]
+# data_files = real_data_files[:1]
+print(data_files)
 
 # Specify the number of runs
-num_runs = 10
+num_runs = 30
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -55,7 +55,8 @@ assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
 assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(90,99,3)]
+# delta_vals = [i for i in range(90,99,3)]
+delta_vals = [50,80]
 
 # Square root values for delta
 # Reverse to ensure lowest delta is first (in case of issues with HV ref point)

@@ -125,7 +125,7 @@ def plotHV_adaptdelta(HV, adapt_gens):
 
 	# return ax
 
-def plotHVgens(folder_path, delta, styles_cycler, results_path):
+def plotHVgens(folder_path, delta, styles_cycler, graph_path):
 	files = glob.glob(folder_path+"*"+"HVgens"+"*")
 
 	# dashlist = [(None,None),(5,2),(10,2,20,2),(2,5),(10,5,2,5,2,5),()]
@@ -162,19 +162,94 @@ def plotHVgens(folder_path, delta, styles_cycler, results_path):
 		plt.show()
 		# print(fig.dpi)
 
-		savename = results_path+file.split('/')[-1].split('-')[0]+'-d'+str(delta)+'-HVplot.svg'
+		savename = graph_path+file.split('/')[-1].split('-')[0]+'-d'+str(delta)+'-HVplot.svg'
 		# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
 
-def plotARI():
-	# Should I use a boxplot here?
-	
+def plotARI(folder_path, delta, graph_path):
+	# This uses raw data
 
-	pass
+	files = glob.glob(folder_path+"*"+"ari-"+str(delta)+"*")
+	files.sort()
+
+	fig = plt.figure(figsize=(18,12))
+	ax = fig.add_subplot(111)
+
+	data_list = []
+	strat_names = []
+
+	data_name = folder_path.split("/")[-1]
+
+	for file in files:
+
+		data = np.loadtxt(file, delimiter=',')
+
+		data_list.append(data)
+
+		strat_names.append(file.split("/")[-1].split("-")[1].split("_")[-1])
+
+	ax.boxplot(data_list, labels=strat_names)
+	ax.set_ylim(-0.05,1.05)
+
+	ax.set_xlabel("Strategy")
+	ax.set_ylabel("Adjusted Rand Index (ARI)")
+
+	# Set title and labels
+	# Ensure y-axis always shows 0.0-1.0
+
+	savename = graph_path+data_name+'-d'+str(delta)+'-ARIboxplot.svg'
+	# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+
+	plt.show()
+
+def plotNumClusts(folder_path, delta, graph_path):
+	# This uses raw data
+
+	files = glob.glob(folder_path+"*"+"numclusts-"+str(delta)+"*")
+	files.sort()
+
+	fig = plt.figure(figsize=(18,12))
+	ax = fig.add_subplot(111)
+
+	data_list = []
+	strat_names = []
+
+	data_name = folder_path.split("/")[-2]
+
+	for file in files:
+
+		data = np.loadtxt(file, delimiter=',')
+		data_list.append(data)
+
+		strat_names.append(file.split("/")[-1].split("-")[1].split("_")[-1])
+
+	ax.boxplot(data_list, labels=strat_names)
+	# ax.set_ylim(-0.05,1.05)
+
+	ax.set_xlabel("Strategy")
+	ax.set_ylabel("Number of Clusters")
+
+	true_clusts = data_name.split("_")[-1]
+	if true_clusts != "":
+		ax.plot(list(range(0,len(strat_names)+2)), [int(true_clusts)]*(len(strat_names)+2), linestyle = "--", label="True no. clusters")
+
+	ax.legend()
+	ax.plot()
+
+
+	savename = graph_path+data_name+'-d'+str(delta)+'-NumClustsboxplot.svg'
+	# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+
+	plt.show()
+
+	# pass
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
 	aggregate_folder = basepath+"/results/aggregates/"
-	results_path = basepath+"/results/graphs/"
+	graph_path = basepath+"/results/graphs/"
+	results_path = basepath+"/results/"
+
+	delta = 80
 
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
@@ -186,4 +261,12 @@ if __name__ == '__main__':
 
 	styles_cycler = cycle(styles)
 
-	plotHVgens(aggregate_folder, 95, styles_cycler, results_path)
+	# plotHVgens(aggregate_folder, delta, styles_cycler, graph_path)
+
+	dataset_folders = glob.glob(results_path+"*/")
+	dataset_folders.remove(aggregate_folder)
+	dataset_folders.remove(graph_path)
+
+	for dataset in dataset_folders:
+		plotARI(dataset, delta, graph_path)
+		# plotNumClusts(dataset, delta, graph_path)
