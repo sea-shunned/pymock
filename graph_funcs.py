@@ -193,6 +193,9 @@ def plotARI(folder_path, delta, graph_path):
 	ax.set_xlabel("Strategy")
 	ax.set_ylabel("Adjusted Rand Index (ARI)")
 
+	# Set title and labels
+	# Ensure y-axis always shows 0.0-1.0
+
 	savename = graph_path+data_name+'-d'+str(delta)+'-ARIboxplot.svg'
 	# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
 
@@ -232,6 +235,8 @@ def plotNumClusts(folder_path, delta, graph_path):
 	ax.legend()
 	ax.plot()
 
+	# Set title and labels
+	# Ensure y-axis always shows 0.0-1.0
 
 	savename = graph_path+data_name+'-d'+str(delta)+'-NumClustsboxplot.svg'
 	# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
@@ -246,7 +251,7 @@ if __name__ == '__main__':
 	graph_path = basepath+"/results/graphs/"
 	results_path = basepath+"/results/"
 
-	delta = 80
+	delta = 92
 
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
@@ -265,5 +270,5 @@ if __name__ == '__main__':
 	dataset_folders.remove(graph_path)
 
 	for dataset in dataset_folders:
-		plotARI(dataset, delta, graph_path)
-		# plotNumClusts(dataset, delta, graph_path)
+		# plotARI(dataset, delta, graph_path)
+		plotNumClusts(dataset, delta, graph_path)
