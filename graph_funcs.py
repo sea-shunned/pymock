@@ -166,9 +166,9 @@ def plotHVgens(folder_path, delta, styles_cycler, results_path):
 		# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
 
 def plotARI():
+	# Should I use a boxplot here?
+	
 
-	
-	
 	pass
 
 if __name__ == '__main__':
