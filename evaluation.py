@@ -64,6 +64,7 @@ def finalPopMetrics2(pop, mst_genotype, int_links_indices, relev_links_len):
 	
 	return final_pop_metrics
 
+# @profile
 def finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len):
 
 	num_examples = classes.Dataset.num_examples
@@ -101,8 +102,7 @@ def finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len):
 		for i, component in enumerate(conn_components):
 			pred_labels[component] = i
 
-		if np.any(np.isnan(pred_labels)) == True:
-			print("Label missing when trying to calculate ARI")
+		assert np.any(np.isnan(pred_labels)) != True
 
 		# Add the ARI value
 		ari_values.append(adjusted_rand_score(labels_true=classes.Dataset.label_vals, labels_pred=pred_labels))

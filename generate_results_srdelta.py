@@ -161,7 +161,7 @@ for file_path in data_files:
 
 	for index_d, delta in enumerate(delta_vals):
 		print("\nTesting delta =",delta)
-		
+
 		# Create tuple of arguments
 		args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
 
@@ -239,10 +239,10 @@ for file_path in data_files:
 				# Pickle delta triggers
 				# No triggers for normal delta-MOCK
 				if strat_name != "main_base":
-					# with open(filename+"-triggers-sr"+str(sr_vals[index_d])+".pkl","wb") as f:
+					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+".csv","w") as f:
 					# 	pickle.dump(delta_triggers, f)
-
-					np.savetxt(filename+"-triggers-sr"+str(sr_vals[index_d])+".csv", np.asarray(delta_triggers))
+						writer=csv.writer(f)
+						writer.writerows(delta_triggers)
 
 		# Modify the below for specific dataset folder
 		# np.savetxt(results_path+classes.Dataset.data_name[:-15]+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")
