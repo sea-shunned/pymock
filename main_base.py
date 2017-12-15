@@ -55,7 +55,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	toolbox.register("select", tools.selNSGA2)
 	# For multiprocessing
 	# print("Number of CPUs:",cpu_count())
-	pool = multiprocessing.Pool(processes = cpu_count()-2)
+	pool = multiprocessing.Pool(processes = cpu_count())
 	toolbox.register("map", pool.map, chunksize=20)
 	# toolbox.register("starmap", pool.starmap)
 

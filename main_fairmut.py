@@ -56,7 +56,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# DEAP has a built-in selection tool for NSGA2
 	toolbox.register("select", tools.selNSGA2)
 	# For multiprocessing
-	pool = multiprocessing.Pool(processes = cpu_count()-2)
+	pool = multiprocessing.Pool(processes = cpu_count())
 	toolbox.register("map", pool.map, chunksize=20)
 	# toolbox.register("starmap", pool.starmap)
 
@@ -261,9 +261,14 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					# Reset the partial clust counter to ceate new base clusters
 					classes.PartialClust.id_value = count()
 
-					# Reduce delta value
+					# Save old genotype length
 					relev_links_len_old = relev_links_len
-					delta_val -= delta_reduce
+					
+					# Reduce delta by flat value or multiple of the square root if using that
+					if isinstance(delta_val, int):
+						delta_val -= delta_reduce
+					else:
+						delta_val -= (100*delta_reduce*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples
 
 					print("Adaptive Delta engaged at gen %d! Going down to delta = %d" % (gen, delta_val))
 
@@ -287,7 +292,6 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 					toolbox.register("mutateFair", operators.neighbourFairMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings=nn_rankings, raised_mut=50)
 
-		print("\n")
 		# record = stats.compile(pop)
 		# logbook.record(gen=gen, evals=len(invalid_ind), **record)
 
