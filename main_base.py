@@ -3,11 +3,11 @@ import initialisation
 import objectives
 import operators
 import classes
+from evaluation import finalPopMetrics
 
 import numpy as np
 from itertools import count
 import random
-from graph_funcs import plotHV_adaptdelta
 
 # For multiprocessing
 from os import cpu_count
@@ -127,6 +127,10 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# Calculate HV of initialised population
 	HV.append(hypervolume(pop, HV_ref))
 
+	# ari_vals = np.empty((num_indivs, num_gens))
+	# numclusts_vals = np.empty((num_indivs, num_gens))
+	# numclusts_vals[:,0], ari_vals[:,0] = finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len)
+
 	### Start actual EA ###
 	ea_start = time.time()
 	for gen in range(1, num_gens):
@@ -163,6 +167,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 		# record = stats.compile(pop)
 		# logbook.record(gen=gen, evals=len(invalid_ind), **record)
+
+		# numclusts_vals[:,gen], ari_vals[:,gen] = finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len)
 
 	ea_end = time.time()
 	ea_time = ea_end - ea_start
