@@ -111,8 +111,6 @@ for file_path in data_files:
 	# Remove labels if present and create data_dict
 	data, data_dict = classes.createDatasetGarza(data)
 
-	dataset_categ = "_".join(classes.Dataset.data_name.split("_")[:3])
-	# results_folder_data = results_folder+dataset_categ+"/"
 	results_folder_data = results_folder+classes.Dataset.data_name+"/"
 
 	# Print some outputs about the experiment configuration
@@ -125,7 +123,7 @@ for file_path in data_files:
 
 	###	Try to create a folder for results, group by the k & d
 	if not os.path.isdir(results_folder_data):
-		print("Created a results folder for dataset category "+dataset_categ)
+		print("Created a results folder for dataset "+classes.Dataset.data_name)
 		os.makedirs(results_folder_data)
 
 	# Precomputation for this dataset

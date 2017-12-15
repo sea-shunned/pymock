@@ -207,7 +207,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					else:
 						delta_val -= (100*delta_reduce*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples
 
-					print("Adaptive Delta engaged at gen %d! Going down to delta = %d" % (gen, delta_val))
+					print("Adaptive Delta engaged at gen {}! Going down to delta = {}".format(gen, delta_val))
 
 					# Re-do the relevant precomputation
 					relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
@@ -233,7 +233,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	ea_end = time.time()
 	ea_time = ea_end - ea_start
 	print("EA time:", ea_time)
-	print("Final population hypervolume is %f" % hypervolume(pop, HV_ref))
+	print("Final population hypervolume is",HV[-1])
 
 	# print(HV)
 	print("Triggered gens:",adapt_gens)

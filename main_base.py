@@ -167,7 +167,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	ea_end = time.time()
 	ea_time = ea_end - ea_start
 	# print("EA time:", ea_time)
-	print("Final population hypervolume is %f" % hypervolume(pop, HV_ref))
+	print("Final population hypervolume is",HV[-1])
 
 	# print(logbook)
 	# print(len(tools.sortNondominated(pop, len(pop))))

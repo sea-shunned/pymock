@@ -39,13 +39,14 @@ real_data_files = glob.glob(real_data_folder+'*.txt')
 results_folder = basepath+"/results/"
 
 data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]]# + real_data_files[:1]
+
+synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+data_files = synth_data_files
+
 print(data_files)
 
-# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-# data_files = synth_data_files
-
 # Specify the number of runs
-num_runs = 30
+num_runs = 2
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -115,8 +116,6 @@ for file_path in data_files:
 	# Remove labels if present and create data_dict
 	data, data_dict = classes.createDatasetGarza(data)
 
-	dataset_categ = "_".join(classes.Dataset.data_name.split("_")[:3])
-	# results_folder_data = results_folder+dataset_categ+"/"
 	results_folder_data = results_folder+classes.Dataset.data_name+"/"
 
 	# Add square root delta values
@@ -132,7 +131,7 @@ for file_path in data_files:
 
 	###	Try to create a folder for results, group by the k & d
 	if not os.path.isdir(results_folder_data):
-		print("Created a results folder for dataset category "+dataset_categ)
+		print("Created a results folder for dataset "+classes.Dataset.data_name)
 		os.makedirs(results_folder_data)
 
 	# Precomputation for this dataset
@@ -165,7 +164,6 @@ for file_path in data_files:
 		# Create tuple of arguments
 		args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
 
-
 		if HV_ref == None:
 			first_run = True
 
@@ -194,7 +192,7 @@ for file_path in data_files:
 				start_time = time.time()
 				pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
 				end_time = time.time()
-				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
+				print("Run "+str(run)+" for d="+str(delta)+" (sr"+str(sr_vals[index_d])+") complete (Took",end_time-start_time,"seconds)")
 
 				if first_run:
 					HV_ref = HV_ref_temp
@@ -231,17 +229,19 @@ for file_path in data_files:
 
 			if save_results:
 				# Save array data
-				np.savetxt(filename+"-fitness-sr"+str(delta_vals[index_d])+".csv", fitness_array, delimiter=",")
-				np.savetxt(filename+"-hv-sr"+str(delta_vals[index_d])+".csv", hv_array, delimiter=",")
-				np.savetxt(filename+"-ari-sr"+str(delta_vals[index_d])+".csv", ari_array, delimiter=",")
-				np.savetxt(filename+"-numclusts-sr"+str(delta_vals[index_d])+".csv", numclusts_array, delimiter=",")
-				np.savetxt(filename+"-time-sr"+str(delta_vals[index_d])+".csv", time_array, delimiter=",")
+				np.savetxt(filename+"-fitness-sr"+str(sr_vals[index_d])+".csv", fitness_array, delimiter=",")
+				np.savetxt(filename+"-hv-sr"+str(sr_vals[index_d])+".csv", hv_array, delimiter=",")
+				np.savetxt(filename+"-ari-sr"+str(sr_vals[index_d])+".csv", ari_array, delimiter=",")
+				np.savetxt(filename+"-numclusts-sr"+str(sr_vals[index_d])+".csv", numclusts_array, delimiter=",")
+				np.savetxt(filename+"-time-sr"+str(sr_vals[index_d])+".csv", time_array, delimiter=",")
 
 				# Pickle delta triggers
 				# No triggers for normal delta-MOCK
 				if strat_name != "main_base":
-					with open(filename+"-triggers-sr"+str(delta_vals[index_d])+".pkl","wb") as f:
-						pickle.dump(delta_triggers, f)
+					# with open(filename+"-triggers-sr"+str(sr_vals[index_d])+".pkl","wb") as f:
+					# 	pickle.dump(delta_triggers, f)
+
+					np.savetxt(filename+"-triggers-sr"+str(sr_vals[index_d])+".csv", np.asarray(delta_triggers))
 
 		# Modify the below for specific dataset folder
 		# np.savetxt(results_path+classes.Dataset.data_name[:-15]+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")
