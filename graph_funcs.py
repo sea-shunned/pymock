@@ -128,8 +128,6 @@ def plotHV_adaptdelta(HV, adapt_gens):
 def plotHVgens(folder_path, delta, styles_cycler, graph_path):
 	files = glob.glob(folder_path+"*"+"HVgens"+"*")
 
-	# dashlist = [(None,None),(5,2),(10,2,20,2),(2,5),(10,5,2,5,2,5),()]
-
 	for file in files:
 
 		# Read the csv in, and filter just the columns with the delta value we're plotting
@@ -153,7 +151,7 @@ def plotHVgens(folder_path, delta, styles_cycler, graph_path):
 				**next(styles_cycler)
 				)
 
-			# ax.set_title("")
+			ax.set_title("HV during Evolution for "+folder_path.split("/")[-2])
 			ax.set_xlabel("Generation")
 			ax.set_ylabel("Hypervolume")
 			ax.legend()
@@ -193,8 +191,7 @@ def plotARI(folder_path, delta, graph_path):
 	ax.set_xlabel("Strategy")
 	ax.set_ylabel("Adjusted Rand Index (ARI)")
 
-	# Set title and labels
-	# Ensure y-axis always shows 0.0-1.0
+	ax.title("ARI for "+data_name)
 
 	savename = graph_path+data_name+'-d'+str(delta)+'-ARIboxplot.svg'
 	# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
@@ -227,6 +224,8 @@ def plotNumClusts(folder_path, delta, graph_path):
 
 	ax.set_xlabel("Strategy")
 	ax.set_ylabel("Number of Clusters")
+
+	ax.title("Number of Clusters for "+data_name)
 
 	true_clusts = data_name.split("_")[-1]
 	if true_clusts != "":
