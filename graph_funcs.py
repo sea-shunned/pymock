@@ -169,6 +169,9 @@ def plotARI(folder_path, delta, graph_path):
 	files = glob.glob(folder_path+"*"+"ari-"+str(delta)+"*")
 	files.sort()
 
+	if len(files) == 0:
+		return
+
 	fig = plt.figure(figsize=(18,12))
 	ax = fig.add_subplot(111)
 
@@ -191,7 +194,7 @@ def plotARI(folder_path, delta, graph_path):
 	ax.set_xlabel("Strategy")
 	ax.set_ylabel("Adjusted Rand Index (ARI)")
 
-	ax.title("ARI for "+data_name)
+	ax.set_title("ARI for "+data_name)
 
 	savename = graph_path+data_name+'-d'+str(delta)+'-ARIboxplot.svg'
 	# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
@@ -204,6 +207,9 @@ def plotNumClusts(folder_path, delta, graph_path):
 	files = glob.glob(folder_path+"*"+"numclusts-"+str(delta)+"*")
 	files.sort()
 
+	if len(files) == 0:
+		return
+
 	fig = plt.figure(figsize=(18,12))
 	ax = fig.add_subplot(111)
 
@@ -213,7 +219,6 @@ def plotNumClusts(folder_path, delta, graph_path):
 	data_name = folder_path.split("/")[-2]
 
 	for file in files:
-
 		data = np.loadtxt(file, delimiter=',')
 		data_list.append(data)
 
@@ -225,11 +230,14 @@ def plotNumClusts(folder_path, delta, graph_path):
 	ax.set_xlabel("Strategy")
 	ax.set_ylabel("Number of Clusters")
 
-	ax.title("Number of Clusters for "+data_name)
+	ax.set_title("Number of Clusters for {}".format(data_name))
 
 	true_clusts = data_name.split("_")[-1]
-	if true_clusts != "":
+
+	try:
 		ax.plot(list(range(0,len(strat_names)+2)), [int(true_clusts)]*(len(strat_names)+2), linestyle = "--", label="True no. clusters")
+	except ValueError:
+		print("No true cluster number available")
 
 	ax.legend()
 	ax.plot()
@@ -250,7 +258,7 @@ if __name__ == '__main__':
 	graph_path = basepath+"/results/graphs/"
 	results_path = basepath+"/results/"
 
-	delta = 92
+	delta = 96
 
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
@@ -269,5 +277,5 @@ if __name__ == '__main__':
 	dataset_folders.remove(graph_path)
 
 	for dataset in dataset_folders:
-		# plotARI(dataset, delta, graph_path)
-		plotNumClusts(dataset, delta, graph_path)
+		plotARI(dataset, delta, graph_path)
+		# plotNumClusts(dataset, delta, graph_path)
