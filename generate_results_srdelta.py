@@ -29,8 +29,8 @@ data_folder = basepath+"/data/"
 synth_data_folder = data_folder+"synthetic_datasets/"
 real_data_folder = data_folder+"UKC_datasets/"
 
-# synth_data_files = glob.glob(synth_data_folder+'tevc_50_40_7_*.data')
 # synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+# synth_data_files = glob.glob(synth_data_folder+'tevc_50_40_7_*.data')
 # synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
 
 synth_data_files = glob.glob(synth_data_folder+'*.data')
@@ -40,13 +40,13 @@ results_folder = basepath+"/results/"
 
 data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]]# + real_data_files[:1]
 
-synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-data_files = synth_data_files
+# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+# data_files = synth_data_files
 
 print(data_files)
 
 # Specify the number of runs
-num_runs = 2
+num_runs = 30
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -59,7 +59,6 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
 # delta_vals = [i for i in range(90,99,3)]
-# delta_vals = [50,80]
 delta_vals = []
 
 # Square root values for delta
