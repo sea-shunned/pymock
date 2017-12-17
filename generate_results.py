@@ -39,11 +39,11 @@ real_data_files = glob.glob(real_data_folder+'*.txt')
 results_folder = basepath+"/results/"
 
 data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + real_data_files[:1]
-# data_files = real_data_files[:1]
-print(data_files)
 
-synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-data_files = synth_data_files
+# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+# data_files = synth_data_files
+
+print(data_files)
 
 # Specify the number of runs
 num_runs = 30
@@ -65,11 +65,11 @@ delta_vals = [50,80]
 L = 10
 num_indivs = 100
 num_gens = 100
-delta_reduce = 2
+delta_reduce = 1
 
 funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
 # funcs = [main_fairmut.main, main_base.main]
-funcs = [main_carryon.main]
+# funcs = [main_carryon.main]
 save_results = True
 
 fitness_cols = ["VAR", "CNN", "Run"]
