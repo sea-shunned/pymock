@@ -60,7 +60,7 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 # Set range of delta values to test for each file
 # delta_vals = [i for i in range(90,99,3)]
 # delta_vals = [50,80]
-delta_vals = []
+# delta_vals = []
 
 # Square root values for delta
 # Reverse to ensure lowest delta is first (in case of issues with HV ref point)
@@ -119,7 +119,7 @@ for file_path in data_files:
 	results_folder_data = results_folder+classes.Dataset.data_name+"/"
 
 	# Add square root delta values
-	delta_vals.extend([100-((100*i*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples) for i in sr_vals])
+	delta_vals = [100-((100*i*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples) for i in sr_vals]
 
 	# Print some outputs about the experiment configuration
 	print("Delta values to test:", delta_vals, "("+str(len(delta_vals))+")")
