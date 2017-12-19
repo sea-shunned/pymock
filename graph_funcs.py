@@ -166,8 +166,10 @@ def plotHVgens(folder_path, delta, styles_cycler, graph_path):
 def plotARI(folder_path, delta, graph_path):
 	# This uses raw data
 
-	files = glob.glob(folder_path+"*"+"ari-"+str(delta)+"*")
+	files = glob.glob(folder_path+os.sep+"*"+"ari-"+str(delta)+"*")
 	files.sort()
+	print(folder_path)
+	print(files)
 
 	if len(files) == 0:
 		return
@@ -178,16 +180,18 @@ def plotARI(folder_path, delta, graph_path):
 	data_list = []
 	strat_names = []
 
-	data_name = folder_path.split("/")[-1]
-
+	data_name = folder_path.split(os.sep)[-1]
+	print(data_name)
 	for file in files:
 
 		data = np.loadtxt(file, delimiter=',')
 
 		data_list.append(data)
 
-		strat_names.append(file.split("/")[-1].split("-")[1].split("_")[-1])
+		strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 
+	print(len(data_list), len(strat_names))
+	print([x.shape for x in data_list])
 	ax.boxplot(data_list, labels=strat_names)
 	ax.set_ylim(-0.05,1.05)
 
@@ -254,11 +258,11 @@ def plotNumClusts(folder_path, delta, graph_path):
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
-	aggregate_folder = basepath+"/results/aggregates/"
-	graph_path = basepath+"/results/graphs/"
-	results_path = basepath+"/results/"
+	results_path = os.path.join(basepath, "results")
+	aggregate_folder = os.path.join(results_path, "aggregates")
+	graph_path = os.path.join(results_path, "graphs")
 
-	delta = 96
+	delta = "sr5"
 
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
@@ -272,7 +276,7 @@ if __name__ == '__main__':
 
 	# plotHVgens(aggregate_folder, delta, styles_cycler, graph_path)
 
-	dataset_folders = glob.glob(results_path+"*/")
+	dataset_folders = glob.glob(results_path+os.sep+"*")
 	dataset_folders.remove(aggregate_folder)
 	dataset_folders.remove(graph_path)
 
