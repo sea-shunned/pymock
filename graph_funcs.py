@@ -126,23 +126,25 @@ def plotHV_adaptdelta(HV, adapt_gens):
 	# return ax
 
 def plotHVgens(folder_path, delta, styles_cycler, graph_path):
-	files = glob.glob(folder_path+"*"+"HVgens"+"*")
+	files = glob.glob(folder_path+os.sep+"*"+"HVgens"+"*")
 
 	for file in files:
 
 		# Read the csv in, and filter just the columns with the delta value we're plotting
 		df = pd.read_csv(file)
-		df = df.filter(regex="d"+str(delta))
+
+		# Account for differences with numerical and sr5 etc.
+		if isinstance(delta,int):
+			df = df.filter(regex="d"+str(delta))
+		else:
+			df = df.filter(regex=delta)
 
 		num_gens = df.shape[0]
-		# print(file)
 
 		fig = plt.figure(figsize=(18,12))
 		ax = fig.add_subplot(111)
 
 		for i in range(0,len(df.columns),3):
-			# print(df[df.columns[i]])
-
 			strat_name = df.columns[i].split("_")[2]
 
 			ax.errorbar(list(range(0,num_gens)),df[df.columns[i]],
@@ -151,7 +153,7 @@ def plotHVgens(folder_path, delta, styles_cycler, graph_path):
 				**next(styles_cycler)
 				)
 
-			ax.set_title("HV during Evolution for "+folder_path.split("/")[-2])
+			ax.set_title("HV during Evolution for "+folder_path.split(os.sep)[-2])
 			ax.set_xlabel("Generation")
 			ax.set_ylabel("Hypervolume")
 			ax.legend()
@@ -168,8 +170,47 @@ def plotARI(folder_path, delta, graph_path):
 
 	files = glob.glob(folder_path+os.sep+"*"+"ari-"+str(delta)+"*")
 	files.sort()
-	print(folder_path)
-	print(files)
+
+	if len(files) == 0:
+		return
+
+	fig = plt.figure(figsize=(18,12))
+	ax = fig.add_subplot(111)
+
+	data_list = []
+	strat_names = []
+
+	data_name = folder_path.split(os.sep)[-1]
+
+	for file in files:
+
+		data = np.loadtxt(file, delimiter=',')
+		data_list.append(data)
+
+		strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+	ax.boxplot(data_list, labels=strat_names)
+	ax.set_ylim(-0.05,1.05)
+
+	ax.set_xlabel("Strategy")
+	ax.set_ylabel("Adjusted Rand Index (ARI)")
+
+	ax.set_title("ARI for "+data_name)
+
+	if isinstance(delta,int):
+		savename = graph_path+os.sep+data_name+'-d'+str(delta)+'-ARIboxplot.svg'
+	else:
+		savename = graph_path+os.sep+data_name+'-'+delta+'-ARIboxplot.svg'
+	
+	fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+
+	# plt.show()
+
+def plotNumClusts(folder_path, delta, graph_path):
+	# This uses raw data
+
+	files = glob.glob(folder_path+os.sep+"*"+"numclusts-"+str(delta)+"*")
+	files.sort()
 
 	if len(files) == 0:
 		return
@@ -182,51 +223,12 @@ def plotARI(folder_path, delta, graph_path):
 
 	data_name = folder_path.split(os.sep)[-1]
 	print(data_name)
+
 	for file in files:
-
 		data = np.loadtxt(file, delimiter=',')
-
 		data_list.append(data)
 
 		strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
-
-	print(len(data_list), len(strat_names))
-	print([x.shape for x in data_list])
-	ax.boxplot(data_list, labels=strat_names)
-	ax.set_ylim(-0.05,1.05)
-
-	ax.set_xlabel("Strategy")
-	ax.set_ylabel("Adjusted Rand Index (ARI)")
-
-	ax.set_title("ARI for "+data_name)
-
-	savename = graph_path+data_name+'-d'+str(delta)+'-ARIboxplot.svg'
-	# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
-
-	plt.show()
-
-def plotNumClusts(folder_path, delta, graph_path):
-	# This uses raw data
-
-	files = glob.glob(folder_path+"*"+"numclusts-"+str(delta)+"*")
-	files.sort()
-
-	if len(files) == 0:
-		return
-
-	fig = plt.figure(figsize=(18,12))
-	ax = fig.add_subplot(111)
-
-	data_list = []
-	strat_names = []
-
-	data_name = folder_path.split("/")[-2]
-
-	for file in files:
-		data = np.loadtxt(file, delimiter=',')
-		data_list.append(data)
-
-		strat_names.append(file.split("/")[-1].split("-")[1].split("_")[-1])
 
 	ax.boxplot(data_list, labels=strat_names)
 	# ax.set_ylim(-0.05,1.05)
@@ -236,7 +238,7 @@ def plotNumClusts(folder_path, delta, graph_path):
 
 	ax.set_title("Number of Clusters for {}".format(data_name))
 
-	true_clusts = data_name.split("_")[-1]
+	true_clusts = data_name.split("_")[-2]
 
 	try:
 		ax.plot(list(range(0,len(strat_names)+2)), [int(true_clusts)]*(len(strat_names)+2), linestyle = "--", label="True no. clusters")
@@ -249,12 +251,13 @@ def plotNumClusts(folder_path, delta, graph_path):
 	# Set title and labels
 	# Ensure y-axis always shows 0.0-1.0
 
-	savename = graph_path+data_name+'-d'+str(delta)+'-NumClustsboxplot.svg'
-	# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+	if isinstance(delta,int):
+		savename = graph_path+data_name+'-d'+str(delta)+'-NumClustsboxplot.svg'
+	else:
+		savename = graph_path+os.sep+data_name+'-'+delta+'-NumClustsboxplot.svg'
+	fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
 
-	plt.show()
-
-	# pass
+	# plt.show()
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
@@ -262,7 +265,7 @@ if __name__ == '__main__':
 	aggregate_folder = os.path.join(results_path, "aggregates")
 	graph_path = os.path.join(results_path, "graphs")
 
-	delta = "sr5"
+	delta = "sr1"
 
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
@@ -282,4 +285,7 @@ if __name__ == '__main__':
 
 	for dataset in dataset_folders:
 		plotARI(dataset, delta, graph_path)
-		# plotNumClusts(dataset, delta, graph_path)
+		plotNumClusts(dataset, delta, graph_path)
+
+	# Next, plot the time taken for the different sr1s
+	# A bar graph with error bars is fine!
