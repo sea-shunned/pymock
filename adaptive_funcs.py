@@ -18,7 +18,12 @@ def triggerGens(num_gens):
 	return trigger_gens
 
 
-
 if __name__ == '__main__':
 	for i in range(5):
-		print(triggerGens(100))
+		gens = triggerGens(100)
+		print(gens)
+
+		if 70 in gens:
+			print("OK")
+		else:
+			print("No")

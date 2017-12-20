@@ -62,7 +62,7 @@ def calcAggregates():
 
 						max_val = np.max(data)
 						min_val = np.min(data)
-
+						
 					n = data.shape[1]
 					std_err = std_dev / n
 
