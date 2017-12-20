@@ -73,8 +73,8 @@ delta_reduce = 1
 
 funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
 # funcs = [main_fairmut.main, main_base.main]
-# funcs = [main_carryon.main]
-save_results = True
+funcs = [main_carryon.main]
+save_results = False
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
@@ -229,16 +229,16 @@ for file_path in data_files:
 
 			if save_results:
 				# Save array data
-				np.savetxt(filename+"-fitness-sr"+str(sr_vals[index_d])+".csv", fitness_array, delimiter=",")
-				np.savetxt(filename+"-hv-sr"+str(sr_vals[index_d])+".csv", hv_array, delimiter=",")
-				np.savetxt(filename+"-ari-sr"+str(sr_vals[index_d])+".csv", ari_array, delimiter=",")
-				np.savetxt(filename+"-numclusts-sr"+str(sr_vals[index_d])+".csv", numclusts_array, delimiter=",")
-				np.savetxt(filename+"-time-sr"+str(sr_vals[index_d])+".csv", time_array, delimiter=",")
+				np.savetxt(filename+"-fitness-sr"+str(sr_vals[index_d])+"artif.csv", fitness_array, delimiter=",")
+				np.savetxt(filename+"-hv-sr"+str(sr_vals[index_d])+"artif.csv", hv_array, delimiter=",")
+				np.savetxt(filename+"-ari-sr"+str(sr_vals[index_d])+"artif.csv", ari_array, delimiter=",")
+				np.savetxt(filename+"-numclusts-sr"+str(sr_vals[index_d])+"artif.csv", numclusts_array, delimiter=",")
+				np.savetxt(filename+"-time-sr"+str(sr_vals[index_d])+"artif.csv", time_array, delimiter=",")
 
 				# Pickle delta triggers
 				# No triggers for normal delta-MOCK
 				if strat_name != "main_base":
-					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+".csv","w") as f:
+					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+"artif.csv","w") as f:
 					# 	pickle.dump(delta_triggers, f)
 						writer=csv.writer(f)
 						writer.writerows(delta_triggers)
