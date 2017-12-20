@@ -87,83 +87,135 @@ def plotObjectives(csv_path):
 	plt.show()
 
 # https://matplotlib.org/examples/color/color_cycle_demo.html
-def plotHV(csv_path):
-	df_hv = pd.read_csv(csv_path)
+# def plotHV(csv_path):
+# 	df_hv = pd.read_csv(csv_path)
 
-	fig = plt.figure()
+# 	fig = plt.figure()
+# 	ax = fig.add_subplot(111)
+
+# 	# is below a list or a generator?
+# 	colors = plt.cm.rainbow(np.linspace(0, 5, len(df_hv)))
+# 	# colors = iter(cm.rainbow(np.linspace(0, 1, len(df_hv))))
+
+# 	for index, column in enumerate(df_hv):
+# 		# print(len(df_hv[column]))
+# 		plt.plot(range(0,100), df_hv[column], color=colors[index], label=list(df_hv)[index]) #next(colors)
+# 	plt.legend()
+# 	plt.show()
+
+# def plotHV_adaptdelta(HV, adapt_gens):
+# 	fig = plt.figure()
+# 	ax = fig.add_subplot(111)
+
+# 	# print(HV)
+# 	# print(adapt_gens)
+
+# 	# This is to create some nicer max/min limits for the y-xis (HV)
+# 	max_HV = round(np.ceil(np.max(HV)), -1)
+# 	min_HV = round(np.floor(np.min(HV)), -1)
+
+# 	ax.plot(range(0, len(HV)), HV, 'g-')
+# 	for gen in adapt_gens:
+# 		ax.plot([gen,gen], [0,max_HV+10], 'r--' )
+
+# 	# -10 and +10 to avoid issues with rounding, to give some distance for our max and min
+# 	ax.set_ylim([min_HV-10,max_HV+10])
+
+# 	plt.show()
+
+# 	# return ax
+
+# def plotHVgens(folder_path, delta, styles_cycler, graph_path):
+# 	files = glob.glob(folder_path+os.sep+"*"+"HVgens"+"*")
+# 	print(folder_path)
+
+
+# 	for file in files:
+
+# 		# Read the csv in, and filter just the columns with the delta value we're plotting
+# 		df = pd.read_csv(file)
+
+# 		# Account for differences with numerical and sr5 etc.
+# 		if isinstance(delta,int):
+# 			df = df.filter(regex="d"+str(delta))
+# 		else:
+# 			df = df.filter(regex=delta)
+
+# 		num_gens = df.shape[0]
+
+# 		fig = plt.figure(figsize=(18,12))
+# 		ax = fig.add_subplot(111)
+
+# 		for i in range(0,len(df.columns),3):
+# 			strat_name = df.columns[i].split("_")[2]
+
+# 			ax.errorbar(list(range(0,num_gens)),df[df.columns[i]],
+# 				yerr=df[df.columns[i+2]],
+# 				label=strat_name,
+# 				**next(styles_cycler)
+# 				)
+
+# 			ax.set_title("HV during Evolution for "+folder_path.split(os.sep)[-2])
+# 			ax.set_xlabel("Generation")
+# 			ax.set_ylabel("Hypervolume")
+# 			ax.legend()
+
+# 		# print(fig.dpi)
+# 		plt.show()
+# 		# print(fig.dpi)
+
+# 		savename = graph_path+file.split('/')[-1].split('-')[0]+'-d'+str(delta)+'-HVplot.svg'
+# 		# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+
+def plotHVgens(folder_path, delta, graph_path, styles, styles_cycler):
+
+	files = glob.glob(folder_path+os.sep+"*"+"HV-"+str(delta)+"*")
+	files.sort()
+
+	if len(files) == 0:
+		return
+
+	data_name = folder_path.split(os.sep)[-1]
+	print(data_name)
+
+	# strat_names = []
+	# means = []
+	# std_errs = []
+
+	styles_cycler = cycle(styles)
+
+	fig = plt.figure(figsize=(18,12))
 	ax = fig.add_subplot(111)
 
-	# is below a list or a generator?
-	colors = plt.cm.rainbow(np.linspace(0, 5, len(df_hv)))
-	# colors = iter(cm.rainbow(np.linspace(0, 1, len(df_hv))))
+	print(files)
 
-	for index, column in enumerate(df_hv):
-		# print(len(df_hv[column]))
-		plt.plot(range(0,100), df_hv[column], color=colors[index], label=list(df_hv)[index]) #next(colors)
-	plt.legend()
+	for ind, file in enumerate(files):
+		data = np.loadtxt(file, delimiter=',')
+		# print(data.shape[0])
+		strat_name = file.split(os.sep)[-1].split("-")[1].split("_")[-1]
+		print(np.mean(data,axis=1).shape)
+		# means.append()
+
+		# Use shape[0] as we just have a vector of length num_runs		
+
+		ax.errorbar(list(range(0,data.shape[0])), np.mean(data,axis=1),
+			yerr=np.std(data, ddof=0, axis=1)/data.shape[1],
+			label=strat_name,
+			**next(styles_cycler))
+
+		# ax.bar(ind, np.mean(data), width, color=style['color'],
+			# yerr=np.std(data, ddof=0)/data.shape[0])
+
+	# ax.set_xticks(np.arange(len(strat_names)))
+	# ax.set_xticklabels((strat_names))
+
+	ax.set_xlabel("Generations")
+	ax.set_ylabel("Hypervolume")
+	ax.legend()
+
+	ax.set_title("HV for {}".format(data_name))
 	plt.show()
 
-def plotHV_adaptdelta(HV, adapt_gens):
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-
-	# print(HV)
-	# print(adapt_gens)
-
-	# This is to create some nicer max/min limits for the y-xis (HV)
-	max_HV = round(np.ceil(np.max(HV)), -1)
-	min_HV = round(np.floor(np.min(HV)), -1)
-
-	ax.plot(range(0, len(HV)), HV, 'g-')
-	for gen in adapt_gens:
-		ax.plot([gen,gen], [0,max_HV+10], 'r--' )
-
-	# -10 and +10 to avoid issues with rounding, to give some distance for our max and min
-	ax.set_ylim([min_HV-10,max_HV+10])
-
-	plt.show()
-
-	# return ax
-
-def plotHVgens(folder_path, delta, styles_cycler, graph_path):
-	files = glob.glob(folder_path+os.sep+"*"+"HVgens"+"*")
-
-	for file in files:
-
-		# Read the csv in, and filter just the columns with the delta value we're plotting
-		df = pd.read_csv(file)
-
-		# Account for differences with numerical and sr5 etc.
-		if isinstance(delta,int):
-			df = df.filter(regex="d"+str(delta))
-		else:
-			df = df.filter(regex=delta)
-
-		num_gens = df.shape[0]
-
-		fig = plt.figure(figsize=(18,12))
-		ax = fig.add_subplot(111)
-
-		for i in range(0,len(df.columns),3):
-			strat_name = df.columns[i].split("_")[2]
-
-			ax.errorbar(list(range(0,num_gens)),df[df.columns[i]],
-				yerr=df[df.columns[i+2]],
-				label=strat_name,
-				**next(styles_cycler)
-				)
-
-			ax.set_title("HV during Evolution for "+folder_path.split(os.sep)[-2])
-			ax.set_xlabel("Generation")
-			ax.set_ylabel("Hypervolume")
-			ax.legend()
-
-		# print(fig.dpi)
-		plt.show()
-		# print(fig.dpi)
-
-		savename = graph_path+file.split('/')[-1].split('-')[0]+'-d'+str(delta)+'-HVplot.svg'
-		# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
 
 def plotARI(folder_path, delta, graph_path):
 	# This uses raw data
@@ -259,13 +311,59 @@ def plotNumClusts(folder_path, delta, graph_path):
 
 	# plt.show()
 
+def plotTimes(folder_path, delta, graph_path, styles_cycler):
+	files = glob.glob(folder_path+os.sep+"*"+"time-"+str(delta)+"*")
+	files.sort()
+
+	print(folder_path)
+
+	if len(files) == 0:
+		return
+
+	fig = plt.figure(figsize=(18,12))
+	ax = fig.add_subplot(111)
+
+	data_name = folder_path.split(os.sep)[-1]
+	print(data_name)
+
+	strat_names = []
+	means = []
+	std_errs = []
+
+	# ind = range(0,6)
+	width = 0.35
+
+	for ind, file in enumerate(files):
+		data = np.loadtxt(file, delimiter=',')
+	
+		strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+		# means.append()
+
+		# Use shape[0] as we just have a vector of length num_runs
+
+		style = next(styles_cycler)
+		
+		ax.bar(ind, np.mean(data), width, color=style['color'],
+			yerr=np.std(data, ddof=0)/data.shape[0])
+
+	ax.set_xticks(np.arange(len(strat_names)))
+	ax.set_xticklabels((strat_names))
+
+	ax.set_xlabel("Strategy")
+	ax.set_ylabel("Time Taken")
+
+	ax.set_title("Time taken for {}".format(data_name))
+	# print(styles['color'])
+	plt.show()
+
 if __name__ == '__main__':
 	basepath = os.getcwd()
 	results_path = os.path.join(basepath, "results")
 	aggregate_folder = os.path.join(results_path, "aggregates")
 	graph_path = os.path.join(results_path, "graphs")
 
-	delta = "sr1"
+	delta = "sr5"
 
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
@@ -284,8 +382,7 @@ if __name__ == '__main__':
 	dataset_folders.remove(graph_path)
 
 	for dataset in dataset_folders:
+		plotHVgens(dataset, delta, graph_path, styles, styles_cycler)
 		plotARI(dataset, delta, graph_path)
 		plotNumClusts(dataset, delta, graph_path)
-
-	# Next, plot the time taken for the different sr1s
-	# A bar graph with error bars is fine!
+		plotTimes(dataset, delta, graph_path, styles_cycler)
