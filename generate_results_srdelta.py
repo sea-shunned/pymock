@@ -40,8 +40,8 @@ results_folder = basepath+"/results/"
 
 data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]]# + real_data_files[:1]
 
-# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-# data_files = synth_data_files
+synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+data_files = synth_data_files
 
 print(data_files)
 
@@ -63,7 +63,7 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Square root values for delta
 # Reverse to ensure lowest delta is first (in case of issues with HV ref point)
-sr_vals = [5,2,1]
+sr_vals = [5,1]
 
 # Parameters across all strategies
 L = 10
@@ -182,6 +182,11 @@ for file_path in data_files:
 			delta_triggers = []
 
 			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
+
+			if strat_name != "main_base" and sr_vals[index_d]==5:
+				continue
+
+			print(strat_name, sr_vals[index_d])
 
 			for run in range(num_runs):
 				random.seed(seeds[run])
