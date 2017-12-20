@@ -127,8 +127,6 @@ def plotHV_adaptdelta(HV, adapt_gens):
 
 def plotHVgens(folder_path, delta, styles_cycler, graph_path):
 	files = glob.glob(folder_path+os.sep+"*"+"HVgens"+"*")
-	print(folder_path)
-
 
 	for file in files:
 
@@ -166,56 +164,6 @@ def plotHVgens(folder_path, delta, styles_cycler, graph_path):
 
 		savename = graph_path+file.split('/')[-1].split('-')[0]+'-d'+str(delta)+'-HVplot.svg'
 		# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
-
-def plotHVgens2(folder_path, delta, graph_path, styles, styles_cycler):
-
-	files = glob.glob(folder_path+os.sep+"*"+"HV-"+str(delta)+"*")
-	files.sort()
-
-	if len(files) == 0:
-		return
-
-	data_name = folder_path.split(os.sep)[-1]
-	print(data_name)
-
-	# strat_names = []
-	# means = []
-	# std_errs = []
-
-	styles_cycler = cycle(styles)
-
-	fig = plt.figure(figsize=(18,12))
-	ax = fig.add_subplot(111)
-
-	print(files)
-
-	for ind, file in enumerate(files):
-		data = np.loadtxt(file, delimiter=',')
-		# print(data.shape[0])
-		strat_name = file.split(os.sep)[-1].split("-")[1].split("_")[-1]
-		print(np.mean(data,axis=1).shape)
-		# means.append()
-
-		# Use shape[0] as we just have a vector of length num_runs		
-
-		ax.errorbar(list(range(0,data.shape[0])), np.mean(data,axis=1),
-			yerr=np.std(data, ddof=0, axis=1)/data.shape[1],
-			label=strat_name,
-			**next(styles_cycler))
-
-		# ax.bar(ind, np.mean(data), width, color=style['color'],
-			# yerr=np.std(data, ddof=0)/data.shape[0])
-
-	# ax.set_xticks(np.arange(len(strat_names)))
-	# ax.set_xticklabels((strat_names))
-
-	ax.set_xlabel("Generations")
-	ax.set_ylabel("Hypervolume")
-	ax.legend()
-
-	ax.set_title("HV for {}".format(data_name))
-	plt.show()
-
 
 def plotARI(folder_path, delta, graph_path):
 	# This uses raw data
@@ -311,59 +259,13 @@ def plotNumClusts(folder_path, delta, graph_path):
 
 	# plt.show()
 
-def plotTimes(folder_path, delta, graph_path, styles_cycler):
-	files = glob.glob(folder_path+os.sep+"*"+"time-"+str(delta)+"*")
-	files.sort()
-
-	print(folder_path)
-
-	if len(files) == 0:
-		return
-
-	fig = plt.figure(figsize=(18,12))
-	ax = fig.add_subplot(111)
-
-	data_name = folder_path.split(os.sep)[-1]
-	print(data_name)
-
-	strat_names = []
-	means = []
-	std_errs = []
-
-	# ind = range(0,6)
-	width = 0.35
-
-	for ind, file in enumerate(files):
-		data = np.loadtxt(file, delimiter=',')
-	
-		strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
-
-		# means.append()
-
-		# Use shape[0] as we just have a vector of length num_runs
-
-		style = next(styles_cycler)
-		
-		ax.bar(ind, np.mean(data), width, color=style['color'],
-			yerr=np.std(data, ddof=0)/data.shape[0])
-
-	ax.set_xticks(np.arange(len(strat_names)))
-	ax.set_xticklabels((strat_names))
-
-	ax.set_xlabel("Strategy")
-	ax.set_ylabel("Time Taken")
-
-	ax.set_title("Time taken for {}".format(data_name))
-	# print(styles['color'])
-	plt.show()
-
 if __name__ == '__main__':
 	basepath = os.getcwd()
 	results_path = os.path.join(basepath, "results")
 	aggregate_folder = os.path.join(results_path, "aggregates")
 	graph_path = os.path.join(results_path, "graphs")
 
-	delta = "sr5"
+	delta = "sr1"
 
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
@@ -382,11 +284,8 @@ if __name__ == '__main__':
 	dataset_folders.remove(graph_path)
 
 	for dataset in dataset_folders:
-		plotHVgens2(dataset, delta, graph_path, styles, styles_cycler)
 		plotARI(dataset, delta, graph_path)
 		plotNumClusts(dataset, delta, graph_path)
-		plotTimes(dataset, delta, graph_path, styles_cycler)
-		# plotHVgens(dataset, delta, styles_cycler, graph_path)
 
 	# Next, plot the time taken for the different sr1s
 	# A bar graph with error bars is fine!
