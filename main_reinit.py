@@ -7,7 +7,6 @@ import evaluation
 import numpy as np
 from itertools import count
 import random
-from graph_funcs import plotHV_adaptdelta
 
 # For multiprocessing
 from os import cpu_count
