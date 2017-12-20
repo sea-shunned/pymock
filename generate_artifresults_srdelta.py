@@ -40,13 +40,13 @@ results_folder = basepath+"/results/"
 
 data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]]# + real_data_files[:1]
 
-# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-# data_files = synth_data_files
+synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
+data_files = synth_data_files
 
 print(data_files)
 
 # Specify the number of runs
-num_runs = 30
+num_runs = 2
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -63,7 +63,7 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Square root values for delta
 # Reverse to ensure lowest delta is first (in case of issues with HV ref point)
-sr_vals = [5,2,1]
+sr_vals = [5,1]
 
 # Parameters across all strategies
 L = 10
@@ -74,7 +74,7 @@ delta_reduce = 1
 funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
 # funcs = [main_fairmut.main, main_base.main]
 # funcs = [main_carryon.main]
-save_results = True
+save_results = False
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
@@ -183,6 +183,11 @@ for file_path in data_files:
 
 			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
 
+			if strat_name != "main_base" and sr_vals[index_d]==5:
+				continue
+
+			print(strat_name, sr_vals[index_d])
+
 			for run in range(num_runs):
 				random.seed(seeds[run])
 				print("\nSeed number:",seeds[run])
@@ -229,11 +234,11 @@ for file_path in data_files:
 
 			if save_results:
 				# Save array data
-				np.savetxt(filename+"-fitness-sr"+str(sr_vals[index_d])+".csv", fitness_array, delimiter=",")
-				np.savetxt(filename+"-hv-sr"+str(sr_vals[index_d])+".csv", hv_array, delimiter=",")
-				np.savetxt(filename+"-ari-sr"+str(sr_vals[index_d])+".csv", ari_array, delimiter=",")
-				np.savetxt(filename+"-numclusts-sr"+str(sr_vals[index_d])+".csv", numclusts_array, delimiter=",")
-				np.savetxt(filename+"-time-sr"+str(sr_vals[index_d])+".csv", time_array, delimiter=",")
+				np.savetxt(filename+"-fitness-sr"+str(sr_vals[index_d])+"artif.csv", fitness_array, delimiter=",")
+				np.savetxt(filename+"-hv-sr"+str(sr_vals[index_d])+"artif.csv", hv_array, delimiter=",")
+				np.savetxt(filename+"-ari-sr"+str(sr_vals[index_d])+"artif.csv", ari_array, delimiter=",")
+				np.savetxt(filename+"-numclusts-sr"+str(sr_vals[index_d])+"artif.csv", numclusts_array, delimiter=",")
+				np.savetxt(filename+"-time-sr"+str(sr_vals[index_d])+"artif.csv", time_array, delimiter=",")
 
 				# Pickle delta triggers
 				# No triggers for normal delta-MOCK

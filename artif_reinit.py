@@ -7,6 +7,7 @@ import evaluation
 import numpy as np
 from itertools import count
 import random
+from graph_funcs import plotHV_adaptdelta
 
 # For multiprocessing
 from os import cpu_count
@@ -137,19 +138,31 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		# Shuffle population
 		random.shuffle(pop)
 
-		offspring = tools.selTournamentDCD(pop, len(pop))
-		# offspring = [toolbox.clone(ind) for ind in offspring]
-		offspring = toolbox.map(toolbox.clone,offspring) # Map version of above, should be same
+		# We need the and statement here to avoid triggered at gen 1!
+		if adapt_gens[-1] == gen-1 and gen != 1:
+			print("Reinitialisation at gen:",gen)
+			
+			offspring = toolbox.population()
+			for index, indiv in enumerate(offspring):
+				indiv = creator.Individual(indiv)
+				offspring[index] = indiv
 
-		# If done properly, using comprehensions/map should speed this up
-		for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
-			# print(id(ind1),id(ind2))
-			# CXPB will pretty much always be one so no need for an if, just send straight to crossover
-			toolbox.mate(ind1, ind2)
+			# offspring = [toolbox.clone(ind) for ind in offspring]
 
-			# Mutate individuals
-			toolbox.mutate(ind1)
-			toolbox.mutate(ind2)
+		else:
+			offspring = tools.selTournamentDCD(pop, len(pop))
+			# offspring = [toolbox.clone(ind) for ind in offspring]
+			offspring = toolbox.map(toolbox.clone,offspring) # Map version of above, should be same
+
+			# If done properly, using comprehensions/map should speed this up
+			for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
+				# print(id(ind1),id(ind2))
+				# CXPB will pretty much always be one so no need for an if, just send straight to crossover
+				toolbox.mate(ind1, ind2)
+
+				# Mutate individuals
+				toolbox.mutate(ind1)
+				toolbox.mutate(ind2)
 
 		### The below takes longer! Odd, surely it should be faster if we do it right # was this due to profiling?
 		# mapped_off = pool.starmap(toolbox.mate,zip(offspring[::2], offspring[1::2]))
@@ -168,7 +181,9 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		pop = toolbox.select(pop + offspring, num_indivs)
 
 		# print("Gen:",gen)
-		HV.append(hypervolume(pop, HV_ref))
+		HV.append(hypervolume(pop, HV_ref)) # put into one, TEST THIS
+
+		# print(np.sum([ind.fitness.values for ind in pop]))
 
 		### Adaptive Delta Trigger ###
 		if delta_val != 0:
@@ -193,6 +208,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					# Re-do the relevant precomputation
 					toolbox.unregister("evaluate")
 					toolbox.unregister("mutate")
+					toolbox.unregister("initDelta")
+					toolbox.unregister("population")
 
 					# Reset the partial clust counter to ceate new base clusters
 					classes.PartialClust.id_value = count()
@@ -224,6 +241,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					# Re-register the relevant functions with changed arguments
 					toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
 					toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
+					toolbox.register("initDelta", initialisation.initDeltaMOCKadapt, classes.Dataset.k_user, num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L)
+					toolbox.register("population", tools.initIterate, list, toolbox.initDelta)
 
 
 		# record = stats.compile(pop)

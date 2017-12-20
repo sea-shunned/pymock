@@ -7,6 +7,7 @@ import evaluation
 import numpy as np
 from itertools import count
 import random
+from graph_funcs import plotHV_adaptdelta
 
 # For multiprocessing
 from os import cpu_count
@@ -151,6 +152,11 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 			toolbox.mutate(ind1)
 			toolbox.mutate(ind2)
 
+		# Go back to normal mutation operator
+		if adapt_gens[-1] == gen-1 and gen != 1:
+			toolbox.unregister("mutate")
+			toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
+
 		### The below takes longer! Odd, surely it should be faster if we do it right # was this due to profiling?
 		# mapped_off = pool.starmap(toolbox.mate,zip(offspring[::2], offspring[1::2]))
 		# offspring = [gen for i in mapped_off for gen in i]
@@ -223,7 +229,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					
 					# Re-register the relevant functions with changed arguments
 					toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
-					toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
+					toolbox.register("mutate", operators.neighbourHyperMutation_all, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings, hyper_mut=500)
 
 
 		# record = stats.compile(pop)

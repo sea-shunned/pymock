@@ -7,6 +7,7 @@ import evaluation
 import numpy as np
 from itertools import count
 import random
+from graph_funcs import plotHV_adaptdelta
 
 # For multiprocessing
 from os import cpu_count
@@ -22,7 +23,7 @@ import time
 
 # Run outside of multiprocessing scope
 # creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
-# creator.create("Individual", list, fitness=creator.Fitness)
+# creator.create("Individual", list, fitness=creator.Fitness, test=False)
 ## Only need to do the above once, which we do with main_base.py
 
 # @profile # for line_profiler
@@ -83,7 +84,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	CNN_init = []
 	fitnesses = toolbox.map(toolbox.evaluate, pop)
 	for ind, fit in zip(pop, fitnesses):
-		ind.fitness.values = fit	
+		ind.fitness.values = fit
 		VAR_init.append(fit[0])
 		CNN_init.append(fit[1])
 
@@ -129,6 +130,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	block_trigger_gens = 10		# Number of generations to wait until measuring
 	adapt_gens = [0]			# Initialise list for tracking which gens we trigger adaptive delta
 
+	delta_h = 1
+
 	# print(np.sum([ind.fitness.values for ind in pop]))
 
 	### Start actual EA ### 
@@ -138,18 +141,73 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		random.shuffle(pop)
 
 		offspring = tools.selTournamentDCD(pop, len(pop))
+
 		# offspring = [toolbox.clone(ind) for ind in offspring]
 		offspring = toolbox.map(toolbox.clone,offspring) # Map version of above, should be same
 
-		# If done properly, using comprehensions/map should speed this up
-		for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
-			# print(id(ind1),id(ind2))
-			# CXPB will pretty much always be one so no need for an if, just send straight to crossover
-			toolbox.mate(ind1, ind2)
 
-			# Mutate individuals
-			toolbox.mutate(ind1)
-			toolbox.mutate(ind2)
+		# Check if we trigger fair mutation
+		if adapt_gens[-1] == gen-1 and gen != 1:
+			# Perform crossover and mutate with a raised mutation rate 
+			for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
+				toolbox.mate(ind1, ind2)
+
+				# Use the raised mutation rate
+				toolbox.mutateFair(ind1)
+				toolbox.mutateFair(ind2)
+
+			# Calculate how many individuals we have to explore each new gene
+			rem = num_indivs % len(newly_unfixed_indices)
+			indivs_per_gene = num_indivs // len(newly_unfixed_indices)
+
+			# If we have too many new genes, just create 1 solution for the first num_indivs new genes
+			if rem == num_indivs:
+				print("Too many ("+str(len(newly_unfixed_indices))+") new genes, just creating one for the first (top in terms of DI) "+str(num_indivs)+" (num_indivs) new genes")
+				for index, indiv in enumerate(offspring):
+					indiv[relev_links_len_old+index] = newly_unfixed_indices[index]
+					indiv.fairmut = relev_links_len_old+index
+
+			# Otherwise generate the appropriate number of solutions for each of our new genes
+			else:
+				counter = 0
+				for index, gene in enumerate(newly_unfixed_indices):
+					for indiv in offspring[counter*indivs_per_gene:(counter+1)*indivs_per_gene]:
+						indiv[relev_links_len_old+index] = gene
+						indiv.fairmut = relev_links_len_old+index
+					counter += 1
+
+				# Randomly choose which gene to set to self-connecting for our remaining solutions
+				if rem > 0:
+					for indiv in offspring[-rem:]:
+						# Use Numpy to avoid consuming from our fixed Python seed, diminishing similarity
+						# This isn't used in any other strategy so randomness doens't need to be accounted for
+						index = int(np.random.choice(len(newly_unfixed_indices),1))
+						indiv[relev_links_len_old+index] = newly_unfixed_indices[index]
+						indiv.fairmut = relev_links_len_old+index
+
+		# Otherwise we carry on as normal
+		else:
+
+			for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
+				toolbox.mate(ind1, ind2)
+
+				# Mutate individuals, using the right operator for the individual
+				if ind1.fairmut is not None:
+					toolbox.mutateFair(ind1)
+
+					# Repair fair mut individuals in case value has changed from crossover/mutation
+					ind1[ind1.fairmut] = ind1.fairmut
+
+				else:
+					toolbox.mutate(ind1)
+
+				if ind2.fairmut is not None:
+					toolbox.mutateFair(ind2)
+
+					ind2[ind2.fairmut] = ind2.fairmut
+
+				else:
+					toolbox.mutate(ind2)
 
 		### The below takes longer! Odd, surely it should be faster if we do it right # was this due to profiling?
 		# mapped_off = pool.starmap(toolbox.mate,zip(offspring[::2], offspring[1::2]))
@@ -169,6 +227,12 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
 		# print("Gen:",gen)
 		HV.append(hypervolume(pop, HV_ref))
+
+		if adapt_gens[-1] + delta_h + 1 == gen:
+			print("Unprotecting fair mut indivs")
+			for indiv in pop:
+				indiv.fairmut = None
+			# print([indiv.fairmut for indiv in pop])
 
 		### Adaptive Delta Trigger ###
 		if delta_val != 0:
@@ -223,8 +287,10 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 					
 					# Re-register the relevant functions with changed arguments
 					toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
-					toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings = nn_rankings)
 
+					toolbox.register("mutate", operators.neighbourMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings=nn_rankings)
+
+					toolbox.register("mutateFair", operators.neighbourFairMutation, MUTPB = 1.0, gen_length = relev_links_len, argsortdists=argsortdists, L = L, int_links_indices=int_links_indices, nn_rankings=nn_rankings, raised_mut=50)
 
 		# record = stats.compile(pop)
 		# logbook.record(gen=gen, evals=len(invalid_ind), **record)
