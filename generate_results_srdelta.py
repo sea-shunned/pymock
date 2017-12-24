@@ -38,7 +38,7 @@ real_data_files = glob.glob(real_data_folder+'*.txt')
 
 results_folder = basepath+"/results/"
 
-data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]]# + real_data_files[:1]
+data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + real_data_files[:1]
 
 # synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
 # data_files = synth_data_files
@@ -229,16 +229,16 @@ for file_path in data_files:
 
 			if save_results:
 				# Save array data
-				np.savetxt(filename+"-fitness-sr"+str(sr_vals[index_d])+"dh5.csv", fitness_array, delimiter=",")
-				np.savetxt(filename+"-hv-sr"+str(sr_vals[index_d])+"dh5.csv", hv_array, delimiter=",")
-				np.savetxt(filename+"-ari-sr"+str(sr_vals[index_d])+"dh5.csv", ari_array, delimiter=",")
-				np.savetxt(filename+"-numclusts-sr"+str(sr_vals[index_d])+"dh5.csv", numclusts_array, delimiter=",")
-				np.savetxt(filename+"-time-sr"+str(sr_vals[index_d])+"dh5.csv", time_array, delimiter=",")
+				np.savetxt(filename+"-fitness-sr"+str(sr_vals[index_d])+"dh3.csv", fitness_array, delimiter=",")
+				np.savetxt(filename+"-hv-sr"+str(sr_vals[index_d])+"dh3.csv", hv_array, delimiter=",")
+				np.savetxt(filename+"-ari-sr"+str(sr_vals[index_d])+"dh3.csv", ari_array, delimiter=",")
+				np.savetxt(filename+"-numclusts-sr"+str(sr_vals[index_d])+"dh3.csv", numclusts_array, delimiter=",")
+				np.savetxt(filename+"-time-sr"+str(sr_vals[index_d])+"dh3.csv", time_array, delimiter=",")
 
 				# Pickle delta triggers
 				# No triggers for normal delta-MOCK
 				if strat_name != "main_base":
-					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+"dh5.csv","w") as f:
+					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+"dh3.csv","w") as f:
 					# 	pickle.dump(delta_triggers, f)
 						writer=csv.writer(f)
 						writer.writerows(delta_triggers)

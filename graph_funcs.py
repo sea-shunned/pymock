@@ -167,8 +167,7 @@ def plotObjectives(csv_path):
 # 		savename = graph_path+file.split('/')[-1].split('-')[0]+'-d'+str(delta)+'-HVplot.svg'
 # 		# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
 
-def plotHVgens(folder_path, delta, graph_path, styles, styles_cycler):
-
+def plotHVgens(folder_path, delta, graph_path, styles, save=False):
 	files = glob.glob(folder_path+os.sep+"*"+"HV-"+str(delta)+"*")
 	files.sort()
 
@@ -176,70 +175,83 @@ def plotHVgens(folder_path, delta, graph_path, styles, styles_cycler):
 		return
 
 	data_name = folder_path.split(os.sep)[-1]
-	print(data_name)
-
-	# strat_names = []
-	# means = []
-	# std_errs = []
 
 	styles_cycler = cycle(styles)
 
+	ax, fig = graphHVgens(files, data_name, styles_cycler)
+	
+	if save:
+		if isinstance(delta,int):
+			savename = graph_path+os.sep+data_name+'-d'+str(delta)+'-ARIboxplot.svg'
+		else:
+			savename = graph_path+os.sep+data_name+'-'+delta+'-ARIboxplot.svg'
+		
+		fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')		
+
+	else:
+		plt.show()
+
+def graphHVgens(files, data_name, styles_cycler):
 	fig = plt.figure(figsize=(18,12))
 	ax = fig.add_subplot(111)
 
-	print(files)
-
-	for ind, file in enumerate(files):
+	for file in files:
 		data = np.loadtxt(file, delimiter=',')
-		# print(data.shape[0])
-		strat_name = file.split(os.sep)[-1].split("-")[1].split("_")[-1]
-		print(np.mean(data,axis=1).shape)
-		# means.append()
 
-		# Use shape[0] as we just have a vector of length num_runs		
+		# strat_name = file.split(os.sep)[-1].split("-")[1].split("_")[-1]
+		strat_delta = "-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+			file.split(os.sep)[-1].split("-")[-1].split(".")[0]])
 
 		ax.errorbar(list(range(0,data.shape[0])), np.mean(data,axis=1),
 			yerr=np.std(data, ddof=0, axis=1)/data.shape[1],
-			label=strat_name,
+			label=strat_delta,
 			**next(styles_cycler))
-
-		# ax.bar(ind, np.mean(data), width, color=style['color'],
-			# yerr=np.std(data, ddof=0)/data.shape[0])
-
-	# ax.set_xticks(np.arange(len(strat_names)))
-	# ax.set_xticklabels((strat_names))
 
 	ax.set_xlabel("Generations")
 	ax.set_ylabel("Hypervolume")
 	ax.legend()
 
 	ax.set_title("HV for {}".format(data_name))
-	plt.show()
 
+	return ax, fig
 
-def plotARI(folder_path, delta, graph_path):
-	# This uses raw data
-
+def plotARI(folder_path, delta, graph_path, save=False):
 	files = glob.glob(folder_path+os.sep+"*"+"ari-"+str(delta)+"*")
 	files.sort()
 
 	if len(files) == 0:
 		return
 
+	data_name = folder_path.split(os.sep)[-1]
+
+	ax, fig = graphARI(files, data_name)
+
+	if save:
+		if isinstance(delta,int):
+			savename = graph_path+os.sep+data_name+'-d'+str(delta)+'-ARIBoxplot.svg'
+		else:
+			savename = graph_path+os.sep+data_name+'-'+delta+'-ARIBoxplot.svg'
+
+		fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+
+	else:
+		plt.show()
+
+def graphARI(files, data_name):
 	fig = plt.figure(figsize=(18,12))
 	ax = fig.add_subplot(111)
 
 	data_list = []
 	strat_names = []
 
-	data_name = folder_path.split(os.sep)[-1]
-
 	for file in files:
-
 		data = np.loadtxt(file, delimiter=',')
 		data_list.append(data)
 
-		strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+		strat_delta = "-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+			file.split(os.sep)[-1].split("-")[-1].split(".")[0]])
+
+		strat_names.append(strat_delta)
 
 	ax.boxplot(data_list, labels=strat_names)
 	ax.set_ylim(-0.05,1.05)
@@ -249,38 +261,45 @@ def plotARI(folder_path, delta, graph_path):
 
 	ax.set_title("ARI for "+data_name)
 
-	if isinstance(delta,int):
-		savename = graph_path+os.sep+data_name+'-d'+str(delta)+'-ARIboxplot.svg'
-	else:
-		savename = graph_path+os.sep+data_name+'-'+delta+'-ARIboxplot.svg'
-	
-	fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+	return ax, fig
 
-	# plt.show()
-
-def plotNumClusts(folder_path, delta, graph_path):
-	# This uses raw data
-
+def plotNumClusts(folder_path, delta, graph_path, save=False):
 	files = glob.glob(folder_path+os.sep+"*"+"numclusts-"+str(delta)+"*")
 	files.sort()
 
 	if len(files) == 0:
 		return
 
+	data_name = folder_path.split(os.sep)[-1]
+
+	ax, fig = graphNumClusts(files, data_name)
+
+	if save:
+		if isinstance(delta,int):
+			savename = graph_path+data_name+'-d'+str(delta)+'-NumClustsBoxplot.svg'
+		else:
+			savename = graph_path+os.sep+data_name+'-'+delta+'-NumClustsBoxplot.svg'
+
+		fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+
+	else:
+		plt.show()
+
+def graphNumClusts(files, data_name):
 	fig = plt.figure(figsize=(18,12))
 	ax = fig.add_subplot(111)
 
 	data_list = []
 	strat_names = []
 
-	data_name = folder_path.split(os.sep)[-1]
-	print(data_name)
-
 	for file in files:
 		data = np.loadtxt(file, delimiter=',')
 		data_list.append(data)
 
-		strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+		strat_delta = "-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+			file.split(os.sep)[-1].split("-")[-1].split(".")[0]])
+
+		strat_names.append(strat_delta)
 
 	ax.boxplot(data_list, labels=strat_names)
 	# ax.set_ylim(-0.05,1.05)
@@ -298,24 +317,12 @@ def plotNumClusts(folder_path, delta, graph_path):
 		print("No true cluster number available")
 
 	ax.legend()
-	ax.plot()
 
-	# Set title and labels
-	# Ensure y-axis always shows 0.0-1.0
+	return ax, fig
 
-	if isinstance(delta,int):
-		savename = graph_path+data_name+'-d'+str(delta)+'-NumClustsboxplot.svg'
-	else:
-		savename = graph_path+os.sep+data_name+'-'+delta+'-NumClustsboxplot.svg'
-	fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
-
-	# plt.show()
-
-def plotTimes(folder_path, delta, graph_path, styles_cycler):
+def plotTimes(folder_path, delta, graph_path, styles_cycler, save=False):
 	files = glob.glob(folder_path+os.sep+"*"+"time-"+str(delta)+"*")
 	files.sort()
-
-	print(folder_path)
 
 	if len(files) == 0:
 		return
@@ -324,26 +331,39 @@ def plotTimes(folder_path, delta, graph_path, styles_cycler):
 	ax = fig.add_subplot(111)
 
 	data_name = folder_path.split(os.sep)[-1]
-	print(data_name)
+
+	width = 0.35
+
+	ax, fig = graphTime(files, styles_cycler, data_name)
+
+	if save:
+		if isinstance(delta,int):
+			savename = graph_path+data_name+'-d'+str(delta)+'-TimesPlot.svg'
+		else:
+			savename = graph_path+os.sep+data_name+'-'+delta+'-TimesPlot.svg'
+		fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+
+	else:
+		plt.show()
+
+def graphTime(files, styles_cycler, data_name):
+	fig = plt.figure(figsize=(18,12))
+	ax = fig.add_subplot(111)
 
 	strat_names = []
-	means = []
-	std_errs = []
-
-	# ind = range(0,6)
 	width = 0.35
 
 	for ind, file in enumerate(files):
 		data = np.loadtxt(file, delimiter=',')
 	
-		strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+		strat_delta = "-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+			file.split(os.sep)[-1].split("-")[-1].split(".")[0]])
 
-		# means.append()
-
-		# Use shape[0] as we just have a vector of length num_runs
+		strat_names.append(strat_delta)
 
 		style = next(styles_cycler)
 		
+		# Use shape[0] as we just have a vector of length num_runs
 		ax.bar(ind, np.mean(data), width, color=style['color'],
 			yerr=np.std(data, ddof=0)/data.shape[0])
 
@@ -354,16 +374,45 @@ def plotTimes(folder_path, delta, graph_path, styles_cycler):
 	ax.set_ylabel("Time Taken")
 
 	ax.set_title("Time taken for {}".format(data_name))
-	# print(styles['color'])
-	plt.show()
+
+	return ax, fig
+
+def fairmutComp(folder_path, delta, styles, save=False):
+	files = glob.glob(folder_path+os.sep+"*"+"fairmut*"+str(delta)+"d*")
+
+	# Skips folders where we haven't changed the delta_h value
+	if len(files) == 0:
+		return
+
+	data_name = folder_path.split(os.sep)[-1]
+	metrics = ["hv", "ari", "numclusts"]
+
+	styles_cycler = cycle(styles)
+
+	for metric in metrics:
+		files = glob.glob(folder_path+os.sep+"*"+"fairmut*"+metric+"*"+str(delta)+"*")
+
+		## Fix what files we send through etc.
+
+		print(files)
+
+		if metric == "hv":
+			ax, fig = graphHVgens(files, data_name, styles_cycler)
+
+		elif metric == "ari":
+			ax, fig = graphARI(files, data_name)
+
+		elif metric == "numclusts":
+			ax, fig = graphNumClusts(files, data_name)
+
+		plt.show()
+
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
 	results_path = os.path.join(basepath, "results")
 	aggregate_folder = os.path.join(results_path, "aggregates")
 	graph_path = os.path.join(results_path, "graphs")
-
-	delta = "sr5"
 
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
@@ -375,14 +424,18 @@ if __name__ == '__main__':
 
 	styles_cycler = cycle(styles)
 
-	# plotHVgens(aggregate_folder, delta, styles_cycler, graph_path)
-
 	dataset_folders = glob.glob(results_path+os.sep+"*")
 	dataset_folders.remove(aggregate_folder)
 	dataset_folders.remove(graph_path)
 
+	delta = "sr5"
+
+	save = False
+
 	for dataset in dataset_folders:
-		plotHVgens(dataset, delta, graph_path, styles, styles_cycler)
-		plotARI(dataset, delta, graph_path)
-		plotNumClusts(dataset, delta, graph_path)
-		plotTimes(dataset, delta, graph_path, styles_cycler)
+		# plotHVgens(dataset, delta, graph_path, styles, styles_cycler, save)
+		# plotARI(dataset, delta, graph_path, save)
+		# plotNumClusts(dataset, delta, graph_path, save)
+		# plotTimes(dataset, delta, graph_path, styles_cycler, save)
+
+		fairmutComp(dataset, delta, styles, save)
