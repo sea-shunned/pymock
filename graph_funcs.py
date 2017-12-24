@@ -203,7 +203,7 @@ def graphHVgens(files, data_name, styles_cycler):
 			file.split(os.sep)[-1].split("-")[-1].split(".")[0]])
 
 		ax.errorbar(list(range(0,data.shape[0])), np.mean(data,axis=1),
-			yerr=np.std(data, ddof=0, axis=1)/data.shape[1],
+			yerr=np.std(data, ddof=0, axis=1)/np.sqrt(data.shape[1]),
 			label=strat_delta,
 			**next(styles_cycler))
 
@@ -365,7 +365,7 @@ def graphTime(files, styles_cycler, data_name):
 		
 		# Use shape[0] as we just have a vector of length num_runs
 		ax.bar(ind, np.mean(data), width, color=style['color'],
-			yerr=np.std(data, ddof=0)/data.shape[0])
+			yerr=np.std(data, ddof=0)/np.sqrt(data.shape[0]))
 
 	ax.set_xticks(np.arange(len(strat_names)))
 	ax.set_xticklabels((strat_names))
@@ -433,9 +433,9 @@ if __name__ == '__main__':
 	save = False
 
 	for dataset in dataset_folders:
-		# plotHVgens(dataset, delta, graph_path, styles, styles_cycler, save)
+		plotHVgens(dataset, delta, graph_path, styles, save)
 		# plotARI(dataset, delta, graph_path, save)
 		# plotNumClusts(dataset, delta, graph_path, save)
 		# plotTimes(dataset, delta, graph_path, styles_cycler, save)
 
-		fairmutComp(dataset, delta, styles, save)
+		# fairmutComp(dataset, delta, styles, save)
