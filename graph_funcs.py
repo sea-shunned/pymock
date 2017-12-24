@@ -407,12 +407,14 @@ def fairmutComp(folder_path, delta, styles, save=False):
 
 		plt.show()
 
+def plotDeltaAssump()
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
 	results_path = os.path.join(basepath, "results")
 	aggregate_folder = os.path.join(results_path, "aggregates")
 	graph_path = os.path.join(results_path, "graphs")
+	assumption_folder = os.path.join(results_path, "delta_assump")
 
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
@@ -439,3 +441,9 @@ if __name__ == '__main__':
 		# plotTimes(dataset, delta, graph_path, styles_cycler, save)
 
 		# fairmutComp(dataset, delta, styles, save)
+
+
+
+	files = glob.glob(assumption_folder+os.sep+"*")
+
+	

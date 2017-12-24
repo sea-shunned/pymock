@@ -164,7 +164,7 @@ for file_path in data_files:
 				start_time = time.time()
 				pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
 				end_time = time.time()
-				print("Run "+str(run)+" for d="+str(delta)+" (sr"+str(sr_vals[index_d])+") complete (Took",end_time-start_time,"seconds)")
+				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
 
 				if first_run:
 					HV_ref = HV_ref_temp
