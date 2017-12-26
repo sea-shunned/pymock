@@ -407,7 +407,14 @@ def fairmutComp(folder_path, delta, styles, save=False):
 
 		plt.show()
 
-def plotDeltaAssump()
+def plotDeltaAssump(assumption_folder):
+
+	metric = "hv"
+
+	files = glob.glob(assumption_folder+os.sep+"*"+metric+"*")
+
+	for file in files:
+		file.split("-")[0]
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
