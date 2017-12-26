@@ -20,14 +20,14 @@ import main_base
 basepath = os.getcwd()
 
 # Set paths for datasets
-data_folder = basepath+"/data/"
-synth_data_folder = data_folder+"synthetic_datasets/"
-real_data_folder = data_folder+"UKC_datasets/"
+data_folder = os.path.join(basepath, "data")+os.sep
+synth_data_folder = os.path.join(data_folder, "synthetic_datasets")+os.sep
+real_data_folder = os.path.join(data_folder, "UKC_datasets")+os.sep
 
 synth_data_files = glob.glob(synth_data_folder+'*.data')
 real_data_files = glob.glob(real_data_folder+'*.txt')
 
-results_folder = basepath+"/results/delta_assump"
+results_folder = os.path.join(basepath,"results","delta_assump")+os.sep
 
 data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]]# + real_data_files[:1]
 

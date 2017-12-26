@@ -407,14 +407,45 @@ def fairmutComp(folder_path, delta, styles, save=False):
 
 		plt.show()
 
-def plotDeltaAssump(assumption_folder):
-
-	metric = "hv"
-
+def plotDeltaAssump(assumption_folder, metric="ari"):
 	files = glob.glob(assumption_folder+os.sep+"*"+metric+"*")
 
+	data_names = set()
+
 	for file in files:
-		file.split("-")[0]
+		data_names.add(file.split(os.sep)[-1].split("-")[0])
+
+	print(data_names)
+
+	fig = plt.figure(figsize=(18,12))
+	ax = fig.add_subplot(111)
+
+	for data_name in data_names:
+		files = glob.glob(assumption_folder+os.sep+data_name+"*"+metric+"*")		
+		# print(files,"\n")
+
+		means = []
+		stderrs = []
+		delta_vals = []
+
+		for file in files:
+			data = np.loadtxt(file, delimiter=',')
+
+			means.append(np.mean(data))
+			stderrs.append(np.std(data, ddof=0)/np.sqrt(data.shape[1]))
+
+			delta_vals.append(float(".".join(file.split(os.sep)[-1].split("-")[-1].split(".")[:-1])))
+
+		
+		ax.errorbar(delta_vals, means, yerr=stderrs, label=data_name, capsize=5, capthick=1)
+
+	ax.set_xlabel("Delta Value")
+	ax.set_ylabel(metric)
+
+	ax.legend()
+
+	plt.show()			
+
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
@@ -441,8 +472,8 @@ if __name__ == '__main__':
 
 	save = False
 
-	for dataset in dataset_folders:
-		plotHVgens(dataset, delta, graph_path, styles, save)
+	# for dataset in dataset_folders:
+	# 	plotHVgens(dataset, delta, graph_path, styles, save)
 		# plotARI(dataset, delta, graph_path, save)
 		# plotNumClusts(dataset, delta, graph_path, save)
 		# plotTimes(dataset, delta, graph_path, styles_cycler, save)
@@ -451,6 +482,6 @@ if __name__ == '__main__':
 
 
 
-	files = glob.glob(assumption_folder+os.sep+"*")
+	# files = glob.glob(assumption_folder+os.sep+"*")
 
-	
+	plotDeltaAssump(assumption_folder)
