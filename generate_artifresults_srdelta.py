@@ -186,7 +186,7 @@ for file_path in data_files:
 			if strat_name != "main_base" and sr_vals[index_d]==5:
 				continue
 
-			print(strat_name, sr_vals[index_d])
+			print("Strategy:",strat_name, "Delta:",sr_vals[index_d])
 
 			for run in range(num_runs):
 				random.seed(seeds[run])
