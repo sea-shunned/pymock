@@ -49,7 +49,8 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 # delta_vals = [i for i in range(90,99,3)]
 # delta_vals = []
 
-delta_vals = [x/100.0 for x in range(9000,9999,66)]
+# delta_vals = [x/100.0 for x in range(9000,9999,66)]
+delta_vals = [0, 10, 20, 30, 40, 50, 60, 70, 80]
 
 # Parameters across all strategies
 L = 10
