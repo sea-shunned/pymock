@@ -31,6 +31,8 @@ results_folder = os.path.join(basepath,"results","delta_assump")+os.sep
 
 data_files = real_data_files[1:2]
 
+# Try to select the smallest and largest UKC datasets
+
 print(data_files)
 
 # Specify the number of runs
