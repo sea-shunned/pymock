@@ -21,6 +21,8 @@ import main_hypermutall
 import main_reinit
 import main_fairmut
 
+import adaptive_funcs
+
 # Get our current wd as the base path
 basepath = os.getcwd()
 
@@ -46,7 +48,7 @@ data_files = synth_data_files
 print(data_files)
 
 # Specify the number of runs
-num_runs = 2
+num_runs = 1
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -63,7 +65,7 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Square root values for delta
 # Reverse to ensure lowest delta is first (in case of issues with HV ref point)
-sr_vals = [5,1]
+sr_vals = [1]
 
 # Parameters across all strategies
 L = 10
@@ -71,13 +73,15 @@ num_indivs = 100
 num_gens = 100
 delta_reduce = 1
 
-funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
+funcs = [main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
 # funcs = [main_fairmut.main, main_base.main]
 # funcs = [main_carryon.main]
 save_results = False
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
+trigger_gen_list = [triggerGens_interval(num_gens) for i in range(num_runs)]
+print("Trigger gen list:", trigger_gen_list)
 
 for file_path in data_files:
 	file_time = time.time()
@@ -126,7 +130,6 @@ for file_path in data_files:
 	print("Number of datasets:", len(data_files))
 	print("Number of strategies:", len(funcs))
 	print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs*len(funcs),"\n")
-
 
 	###	Try to create a folder for results, group by the k & d
 	if not os.path.isdir(results_folder_data):
@@ -183,8 +186,8 @@ for file_path in data_files:
 
 			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
 
-			if strat_name != "main_base" and sr_vals[index_d]==5:
-				continue
+			# if strat_name != "main_base" and sr_vals[index_d]==5:
+			# 	continue
 
 			print("Strategy:",strat_name, "Delta:",sr_vals[index_d])
 
@@ -195,7 +198,7 @@ for file_path in data_files:
 
 				print("Run",run,"with", strat_name)
 				start_time = time.time()
-				pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
+				pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args, trigger_gens=trigger_gen_list[run])
 				end_time = time.time()
 				print("Run "+str(run)+" for d="+str(delta)+" (sr"+str(sr_vals[index_d])+") complete (Took",end_time-start_time,"seconds)")
 

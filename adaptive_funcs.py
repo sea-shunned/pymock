@@ -1,6 +1,6 @@
 import numpy as np
 
-def triggerGens(num_gens):
+def triggerGens_random(num_gens):
 	upper = int(num_gens-(num_gens/10))
 	lower = int(num_gens/10)
 
@@ -15,15 +15,34 @@ def triggerGens(num_gens):
 		except IndexError:
 			continue
 
+	if np.max(trigger_gens) >= 100:
+	# 	print(trigger_gens)
+		trigger_gens = [i-10 for i in trigger_gens]
+
+	# 	print(trigger_gens,"\n")
+
 	return trigger_gens
 
+def triggerGens_interval(num_gens):
+	upper = int(num_gens-(num_gens/10))
+	lower = int(num_gens/10)
+	interval = (upper-lower)/4
+
+	trigger_gens = [np.random.randint(lower+(interval*i), lower+(interval*(i+1))) for i in range(0,4)]
+
+	# print(trigger_gens)
+
+	return trigger_gens
 
 if __name__ == '__main__':
-	for i in range(5):
-		gens = triggerGens(100)
-		print(gens)
+	# for i in range(100):
+		# print(triggerGens_random(100))
+		# print(triggerGens_interval(100),"\n")
+		# print(gens)
 
-		if 70 in gens:
-			print("OK")
-		else:
-			print("No")
+	print([triggerGens_interval(100) for i in range(30)])
+
+		# if 70 in gens:
+		# 	print("OK")
+		# else:
+		# 	print("No")
