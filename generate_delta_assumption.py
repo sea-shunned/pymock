@@ -29,7 +29,7 @@ real_data_files = glob.glob(real_data_folder+'*.txt')
 
 results_folder = os.path.join(basepath,"results","delta_assump")+os.sep
 
-data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + synth_data_files[40:44]# + real_data_files[:1]
+data_files = real_data_files[1:2]
 
 print(data_files)
 
@@ -49,8 +49,8 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 # delta_vals = [i for i in range(90,99,3)]
 # delta_vals = []
 
-# delta_vals = [x/100.0 for x in range(9000,9999,66)]
-delta_vals = [0, 10, 20, 30, 40, 50, 60, 70, 80]
+delta_vals = [x/100.0 for x in range(9000,9999,66)]
+# delta_vals = [0, 10, 20, 30, 40, 50, 60, 70, 80]
 
 # Parameters across all strategies
 L = 10
