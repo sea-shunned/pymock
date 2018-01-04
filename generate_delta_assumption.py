@@ -29,7 +29,7 @@ real_data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 
 results_folder = os.path.join(basepath,"results","delta_assump")+os.sep
 
-data_files = real_data_files[0] + real_data_files[-1]
+data_files = real_data_files[1:2] + real_data_files[-1:]
 
 # Try to select the smallest and largest UKC datasets
 
