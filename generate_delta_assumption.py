@@ -25,11 +25,11 @@ synth_data_folder = os.path.join(data_folder, "synthetic_datasets")+os.sep
 real_data_folder = os.path.join(data_folder, "UKC_datasets")+os.sep
 
 synth_data_files = glob.glob(synth_data_folder+'*.data')
-real_data_files = glob.glob(real_data_folder+'*.txt')
+real_data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 
 results_folder = os.path.join(basepath,"results","delta_assump")+os.sep
 
-data_files = real_data_files[1:2]
+data_files = real_data_files[0] + real_data_files[-1]
 
 # Try to select the smallest and largest UKC datasets
 
