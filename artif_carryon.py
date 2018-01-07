@@ -7,7 +7,6 @@ import evaluation
 import numpy as np
 from itertools import count
 import random
-from adaptive_funcs import triggerGens
 
 # For multiprocessing
 from os import cpu_count
@@ -27,7 +26,7 @@ import time
 ## Only need to do the above once, which we do with main_base.py
 
 # @profile # for line_profiler
-def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce):
+def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce, trigger_gens):
 
 	# Reduced genotype length
 	relev_links_len = initialisation.relevantLinks(delta_val, classes.Dataset.num_examples)
@@ -131,8 +130,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	adapt_gens = [0]			# Initialise list for tracking which gens we trigger adaptive delta
 
 	# print(np.sum([ind.fitness.values for ind in pop]))
-
-	trigger_gens = triggerGens(num_gens)
+	print("Trigger Gens:", trigger_gens)
 
 	### Start actual EA ### 
 	ea_start = time.time()
