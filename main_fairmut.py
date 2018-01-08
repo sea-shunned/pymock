@@ -7,7 +7,6 @@ import evaluation
 import numpy as np
 from itertools import count
 import random
-from graph_funcs import plotHV_adaptdelta
 
 # For multiprocessing
 from os import cpu_count
@@ -130,7 +129,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	block_trigger_gens = 10		# Number of generations to wait until measuring
 	adapt_gens = [0]			# Initialise list for tracking which gens we trigger adaptive delta
 
-	delta_h = 1
+	delta_h = 3
 
 	# print(np.sum([ind.fitness.values for ind in pop]))
 
