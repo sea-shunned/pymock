@@ -407,7 +407,7 @@ def fairmutComp(folder_path, delta, styles, save=False):
 
 		plt.show()
 
-def plotDeltaAssump(assumption_folder, metric="ari"):
+def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=False):
 	files = glob.glob(assumption_folder+os.sep+"*"+metric+"*")
 
 	data_names = set()
@@ -444,13 +444,19 @@ def plotDeltaAssump(assumption_folder, metric="ari"):
 
 	ax.legend()
 
-	plt.show()			
+	if save:
+		savename = graph_path+'DeltaAssumption.svg'
+		print(savename)
+		# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+
+	else:
+		plt.show()		
 
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
 	results_path = os.path.join(basepath, "results")
-	aggregate_folder = os.path.join(results_path, "aggregates")
+	# aggregate_folder = os.path.join(results_path, "aggregates")
 	graph_path = os.path.join(results_path, "graphs")
 	assumption_folder = os.path.join(results_path, "delta_assump")
 
@@ -465,7 +471,7 @@ if __name__ == '__main__':
 	styles_cycler = cycle(styles)
 
 	dataset_folders = glob.glob(results_path+os.sep+"*")
-	dataset_folders.remove(aggregate_folder)
+	# dataset_folders.remove(aggregate_folder)
 	dataset_folders.remove(graph_path)
 
 	delta = "sr5"
@@ -484,4 +490,4 @@ if __name__ == '__main__':
 
 	# files = glob.glob(assumption_folder+os.sep+"*")
 
-	plotDeltaAssump(assumption_folder)
+	plotDeltaAssump(assumption_folder, graph_path)
