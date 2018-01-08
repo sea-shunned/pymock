@@ -407,7 +407,7 @@ def fairmutComp(folder_path, delta, styles, save=False):
 
 		plt.show()
 
-def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=False):
+def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=True):
 	files = glob.glob(assumption_folder+os.sep+"*"+metric+"*")
 
 	data_names = set()
@@ -422,19 +422,24 @@ def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=False):
 
 	for data_name in data_names:
 		files = glob.glob(assumption_folder+os.sep+data_name+"*"+metric+"*")		
-		# print(files,"\n")
+		files = sorted(files)
+
 
 		means = []
 		stderrs = []
 		delta_vals = []
 
 		for file in files:
+			delta = float(".".join(file.split(os.sep)[-1].split("-")[-1].split(".")[:-1]))
+			if delta < 90:
+				continue
+
 			data = np.loadtxt(file, delimiter=',')
 
 			means.append(np.mean(data))
 			stderrs.append(np.std(data, ddof=0)/np.sqrt(data.shape[1]))
 
-			delta_vals.append(float(".".join(file.split(os.sep)[-1].split("-")[-1].split(".")[:-1])))
+			delta_vals.append(delta)
 
 		
 		ax.errorbar(delta_vals, means, yerr=stderrs, label=data_name, capsize=5, capthick=1)
@@ -442,12 +447,12 @@ def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=False):
 	ax.set_xlabel("Delta Value")
 	ax.set_ylabel(metric)
 
-	ax.legend()
+	ax.legend(loc='lower left')
 
 	if save:
-		savename = graph_path+'DeltaAssumption.svg'
-		print(savename)
-		# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+		savename = graph_path+os.sep+'DeltaAssumption.svg'
+		# print(savename)
+		fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
 
 	else:
 		plt.show()		
