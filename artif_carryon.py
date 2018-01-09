@@ -175,6 +175,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 		if delta_val != 0:
 			if gen in trigger_gens:
 				print("Triggered at:",gen)
+				adapt_gens.append(gen)
+				
 				# Re-do the relevant precomputation
 				toolbox.unregister("evaluate")
 				toolbox.unregister("mutate")

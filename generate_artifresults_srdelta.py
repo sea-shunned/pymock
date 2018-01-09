@@ -14,12 +14,12 @@ import precompute
 import evaluation
 
 # Import strategies here
-import main_base
-import main_carryon
-import main_hypermutspec
-import main_hypermutall
-import main_reinit
-import main_fairmut
+import main_base # for DEAP indiv declaration
+import artif_carryon
+import artif_hypermutspec
+import artif_hypermutall
+import artif_reinit
+import artif_fairmut
 
 import adaptive_funcs
 
@@ -27,28 +27,24 @@ import adaptive_funcs
 basepath = os.getcwd()
 
 # Set paths for datasets
-data_folder = basepath+"/data/"
-synth_data_folder = data_folder+"synthetic_datasets/"
-real_data_folder = data_folder+"UKC_datasets/"
-
-# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-# synth_data_files = glob.glob(synth_data_folder+'tevc_50_40_7_*.data')
-# synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
+data_folder = os.path.join(basepath, "data")+os.sep
+synth_data_folder = os.path.join(data_folder, "synthetic_datasets")+os.sep
+real_data_folder = os.path.join(data_folder, "UKC_datasets")+os.sep
 
 synth_data_files = glob.glob(synth_data_folder+'*.data')
-real_data_files = glob.glob(real_data_folder+'*.txt')
+real_data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 
-results_folder = basepath+"/results/"
+results_folder = os.path.join(basepath,"results","artif")+os.sep
 
-data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]]# + real_data_files[:1]
+data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + [synth_data_files[52]] + real_data_files[1:2] + real_data_files[-1:]
 
-synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-data_files = synth_data_files
+# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_8_*.data')
+# data_files = synth_data_files
 
 print(data_files)
 
 # Specify the number of runs
-num_runs = 1
+num_runs = 30
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -65,7 +61,7 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Square root values for delta
 # Reverse to ensure lowest delta is first (in case of issues with HV ref point)
-sr_vals = [1]
+sr_vals = [5,1]
 
 # Parameters across all strategies
 L = 10
@@ -73,15 +69,30 @@ num_indivs = 100
 num_gens = 100
 delta_reduce = 1
 
-funcs = [main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
-# funcs = [main_fairmut.main, main_base.main]
-# funcs = [main_carryon.main]
-save_results = False
+funcs = [main_base.main, artif_carryon.main, artif_hypermutspec.main, artif_hypermutall.main, artif_reinit.main, artif_fairmut.main]
+
+save_results = True
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
-trigger_gen_list = [triggerGens_interval(num_gens) for i in range(num_runs)]
+# Dynamic interval trigger_gen list
+# trigger_gen_list = [adaptive_funcs.triggerGens_interval(num_gens) for i in range(num_runs)]
+
+# Static interval trigger_gen list
+trigger_gen_list = [[12, 40, 63, 87], [12, 40, 64, 80], [27, 41, 60, 80], [13, 38, 60, 75], [19, 31, 64, 75], [11, 41, 51, 71], [21, 39, 64, 74], [10, 32, 50, 75], [23, 31, 50, 73], [29, 39, 66, 70], [23, 31, 52, 78], [20, 44, 50, 82], [11, 34, 55, 78], [22, 42, 64, 72], [11, 39, 60, 72], [28, 49, 66, 74], [20, 31, 67, 89], [27, 36, 66, 73], [14, 30, 57, 78], [12, 42, 65, 79], [18, 33, 50, 88], [14, 36, 51, 83], [20, 42, 61, 74], [25, 48, 56, 70], [10, 43, 64, 83], [20, 36, 60, 74], [26, 44, 61, 81], [10, 44, 66, 88], [29, 45, 57, 76], [14, 31, 54, 87]]
+
+# # Static random trigger_gen list
+# trigger_gen_list = [[33, 43, 53, 84], [13, 45, 62, 72], [32, 54, 76, 88], [9, 71, 81, 91], [18, 28, 39, 49], [42, 52, 62, 72], [14, 24, 59, 77], [21, 40, 50, 60], [14, 27, 74, 89], [49, 60, 70, 80], [17, 27, 47, 73], [52, 62, 72, 82], [11, 21, 31, 87], [11, 21, 82, 92], [19, 29, 55, 66], [32, 42, 67, 81], [15, 78, 89, 99], [11, 36, 46, 56], [35, 60, 70, 80], [54, 74, 84, 94], [24, 34, 72, 82], [42, 52, 64, 74], [15, 30, 57, 67], [14, 34, 44, 84], [13, 27, 44, 73], [25, 35, 45, 55], [43, 53, 63, 73], [29, 39, 49, 59], [49, 59, 69, 79], [24, 51, 61, 81]]
+
+
+assert len(trigger_gen_list) >= num_runs, "Too many runs for number of available seeds"
 print("Trigger gen list:", trigger_gen_list)
+
+print('Number of delta values to test:', len(sr_vals))
+print("Number of runs per delta value:", num_runs)
+print("Number of datasets:", len(data_files))
+print("Number of strategies:", len(funcs))
+print("Number of total MOCK Runs:", len(data_files)*len(sr_vals)*num_runs*len(funcs),"\n")
 
 for file_path in data_files:
 	file_time = time.time()
@@ -119,17 +130,13 @@ for file_path in data_files:
 	# Remove labels if present and create data_dict
 	data, data_dict = classes.createDatasetGarza(data)
 
-	results_folder_data = results_folder+classes.Dataset.data_name+"/"
+	results_folder_data = results_folder+classes.Dataset.data_name+os.sep
 
 	# Add square root delta values
 	delta_vals = [100-((100*i*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples) for i in sr_vals]
 
 	# Print some outputs about the experiment configuration
 	print("Delta values to test:", delta_vals, "("+str(len(delta_vals))+")")
-	print("Number of runs per delta value:", num_runs)
-	print("Number of datasets:", len(data_files))
-	print("Number of strategies:", len(funcs))
-	print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs*len(funcs),"\n")
 
 	###	Try to create a folder for results, group by the k & d
 	if not os.path.isdir(results_folder_data):
@@ -161,8 +168,11 @@ for file_path in data_files:
 
 	HV_ref = None
 
+	# Generate SR5 HV ref point to avoid issues
+	# _,_, HV_ref ,_,_,_ = main_base.main(data, data_dict, 100-((100*5*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples), HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce)
+
 	for index_d, delta in enumerate(delta_vals):
-		print("\nTesting delta =",delta)
+		print("\nTesting delta =",delta, "(sr"+str(sr_vals[index_d])+")")
 
 		# Create tuple of arguments
 		args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
@@ -173,9 +183,18 @@ for file_path in data_files:
 		else:
 			first_run = False
 
-		##### What numbers do I want and where???? #####
-
 		for func in funcs:
+			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
+			
+			# Don't do sr5 for any of the artif scripts
+			if strat_name != "main_base" and sr_vals[index_d]==5:
+				# print("\n",strat_name, sr_vals[index_d], delta,"\n")
+				continue
+
+			# # Don't do sr1 for base MOCK
+			# if strat_name == "main_base" and sr_vals[index_d]==1:
+			# 	continue
+
 			# Create arrays to save results for the given function
 			fitness_array = np.empty((num_indivs*num_runs, len(fitness_cols)))
 			hv_array = np.empty((num_gens, num_runs))
@@ -184,12 +203,7 @@ for file_path in data_files:
 			time_array = np.empty(num_runs)
 			delta_triggers = []
 
-			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
-
-			# if strat_name != "main_base" and sr_vals[index_d]==5:
-			# 	continue
-
-			print("Strategy:",strat_name, "Delta:",sr_vals[index_d])
+			print("\nStrategy:",strat_name, "Delta: sr",sr_vals[index_d])
 
 			for run in range(num_runs):
 				random.seed(seeds[run])
@@ -197,9 +211,14 @@ for file_path in data_files:
 				print("HV ref:", HV_ref)
 
 				print("Run",run,"with", strat_name)
-				start_time = time.time()
-				pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args, trigger_gens=trigger_gen_list[run])
-				end_time = time.time()
+				if strat_name == "main_base":
+					start_time = time.time()
+					pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
+					end_time = time.time()
+				else:	
+					start_time = time.time()
+					pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args, trigger_gens=trigger_gen_list[run])
+					end_time = time.time()
 				print("Run "+str(run)+" for d="+str(delta)+" (sr"+str(sr_vals[index_d])+") complete (Took",end_time-start_time,"seconds)")
 
 				if first_run:

@@ -5,7 +5,6 @@ def triggerGens_random(num_gens):
 	lower = int(num_gens/10)
 
 	trigger_gens = sorted([np.random.randint(lower,upper) for i in range(0,4)])
-	# print(trigger_gens)
 
 	for i in range(len(trigger_gens)):
 		try:
@@ -16,11 +15,9 @@ def triggerGens_random(num_gens):
 			continue
 
 	if np.max(trigger_gens) >= 100:
-	# 	print(trigger_gens)
 		trigger_gens = [i-10 for i in trigger_gens]
 
-	# 	print(trigger_gens,"\n")
-
+	# return sorted([np.random.randint(lower,upper) for i in range(0,4)])
 	return trigger_gens
 
 def triggerGens_interval(num_gens):
@@ -29,8 +26,6 @@ def triggerGens_interval(num_gens):
 	interval = (upper-lower)/4
 
 	trigger_gens = [np.random.randint(lower+(interval*i), lower+(interval*(i+1))) for i in range(0,4)]
-
-	# print(trigger_gens)
 
 	return trigger_gens
 

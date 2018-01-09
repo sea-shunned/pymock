@@ -25,20 +25,18 @@ import main_fairmut
 basepath = os.getcwd()
 
 # Set paths for datasets
-data_folder = basepath+"/data/"
-synth_data_folder = data_folder+"synthetic_datasets/"
-real_data_folder = data_folder+"UKC_datasets/"
-
-# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-# synth_data_files = glob.glob(synth_data_folder+'tevc_50_40_7_*.data')
-# synth_data_files = glob.glob(synth_data_folder+'tevc_100_40_3_*.data')
+data_folder = os.path.join(basepath, "data")+os.sep
+synth_data_folder = os.path.join(data_folder, "synthetic_datasets")+os.sep
+real_data_folder = os.path.join(data_folder, "UKC_datasets")+os.sep
 
 synth_data_files = glob.glob(synth_data_folder+'*.data')
-real_data_files = glob.glob(real_data_folder+'*.txt')
+real_data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 
-results_folder = basepath+"/results/"
+results_folder = os.path.join(basepath,"results")+os.sep
 
-data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + real_data_files[:1]
+# data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + real_data_files[:1]
+
+data_files = real_data_files[1:2]
 
 # synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
 # data_files = synth_data_files
@@ -58,8 +56,8 @@ assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
 assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
-# delta_vals = [i for i in range(90,99,3)]
-delta_vals = [50,80]
+delta_vals = [i for i in range(0,81,10)]
+# delta_vals = [50,80]
 
 # Parameters across all strategies
 L = 10
@@ -67,9 +65,9 @@ num_indivs = 100
 num_gens = 100
 delta_reduce = 1
 
-funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
+# funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
 # funcs = [main_fairmut.main, main_base.main]
-# funcs = [main_carryon.main]
+funcs = [main_base.main]
 save_results = True
 
 fitness_cols = ["VAR", "CNN", "Run"]
