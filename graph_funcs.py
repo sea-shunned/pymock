@@ -1,12 +1,16 @@
 import pandas as pd
 import glob
 import numpy as np
+# import matplotlib
+# matplotlib.use('PS')
 import matplotlib.pyplot as plt
 import os
 from itertools import cycle
 
 
 plt.style.use('seaborn-paper')
+# plt.rc('text', usetex=True)
+# plt.rc('font', family='serif')
 
 def normEAF(folder_path):
 	files = glob.glob(folder_path+'*.csv*')
@@ -164,12 +168,14 @@ def plotObjectives(csv_path):
 # 		plt.show()
 # 		# print(fig.dpi)
 
-# 		savename = graph_path+file.split('/')[-1].split('-')[0]+'-d'+str(delta)+'-HVplot.svg'
-# 		# fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+# 		savename = graph_path+file.split('/')[-1].split('-')[0]+'-d'+str(delta)+'-HVplot.pdf'
+# 		# fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
 
 def plotHVgens(folder_path, delta, graph_path, styles, save=False):
-	files = glob.glob(folder_path+os.sep+"*"+"HV-"+str(delta)+"*")
+	files = glob.glob(folder_path+os.sep+"*"+"hv-"+str(delta)+"*")
 	files.sort()
+
+	print(files)
 
 	if len(files) == 0:
 		return
@@ -182,11 +188,11 @@ def plotHVgens(folder_path, delta, graph_path, styles, save=False):
 	
 	if save:
 		if isinstance(delta,int):
-			savename = graph_path+os.sep+data_name+'-d'+str(delta)+'-ARIboxplot.svg'
+			savename = graph_path+os.sep+data_name+'-d'+str(delta)+'-HVgenplot.pdf'
 		else:
-			savename = graph_path+os.sep+data_name+'-'+delta+'-ARIboxplot.svg'
+			savename = graph_path+os.sep+data_name+'-'+delta+'-HVgenplot.pdf'
 		
-		fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')		
+		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')		
 
 	else:
 		plt.show()
@@ -228,11 +234,11 @@ def plotARI(folder_path, delta, graph_path, save=False):
 
 	if save:
 		if isinstance(delta,int):
-			savename = graph_path+os.sep+data_name+'-d'+str(delta)+'-ARIBoxplot.svg'
+			savename = graph_path+os.sep+data_name+'-d'+str(delta)+'-ARIBoxplot.pdf'
 		else:
-			savename = graph_path+os.sep+data_name+'-'+delta+'-ARIBoxplot.svg'
+			savename = graph_path+os.sep+data_name+'-'+delta+'-ARIBoxplot.pdf'
 
-		fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
 
 	else:
 		plt.show()
@@ -276,11 +282,11 @@ def plotNumClusts(folder_path, delta, graph_path, save=False):
 
 	if save:
 		if isinstance(delta,int):
-			savename = graph_path+data_name+'-d'+str(delta)+'-NumClustsBoxplot.svg'
+			savename = graph_path+'-d'+str(delta)+'-NumClustsBoxplot.pdf'
 		else:
-			savename = graph_path+os.sep+data_name+'-'+delta+'-NumClustsBoxplot.svg'
+			savename = graph_path+os.sep+'-'+delta+'-NumClustsBoxplot.pdf'
 
-		fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
 
 	else:
 		plt.show()
@@ -338,10 +344,10 @@ def plotTimes(folder_path, delta, graph_path, styles_cycler, save=False):
 
 	if save:
 		if isinstance(delta,int):
-			savename = graph_path+data_name+'-d'+str(delta)+'-TimesPlot.svg'
+			savename = graph_path+data_name+'-d'+str(delta)+'-TimesPlot.pdf'
 		else:
-			savename = graph_path+os.sep+data_name+'-'+delta+'-TimesPlot.svg'
-		fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+			savename = graph_path+os.sep+data_name+'-'+delta+'-TimesPlot.pdf'
+		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
 
 	else:
 		plt.show()
@@ -377,7 +383,7 @@ def graphTime(files, styles_cycler, data_name):
 
 	return ax, fig
 
-def fairmutComp(folder_path, delta, styles, save=False):
+def fairmutComp(folder_path, graph_path, delta, styles, save=False):
 	files = glob.glob(folder_path+os.sep+"*"+"fairmut*"+str(delta)+"d*")
 
 	# Skips folders where we haven't changed the delta_h value
@@ -385,7 +391,7 @@ def fairmutComp(folder_path, delta, styles, save=False):
 		return
 
 	data_name = folder_path.split(os.sep)[-1]
-	metrics = ["hv", "ari", "numclusts"]
+	metrics = ["hv", "numclusts"]
 
 	styles_cycler = cycle(styles)
 
@@ -393,8 +399,6 @@ def fairmutComp(folder_path, delta, styles, save=False):
 		files = glob.glob(folder_path+os.sep+"*"+"fairmut*"+metric+"*"+str(delta)+"*")
 
 		## Fix what files we send through etc.
-
-		print(files)
 
 		if metric == "hv":
 			ax, fig = graphHVgens(files, data_name, styles_cycler)
@@ -405,7 +409,11 @@ def fairmutComp(folder_path, delta, styles, save=False):
 		elif metric == "numclusts":
 			ax, fig = graphNumClusts(files, data_name)
 
-		plt.show()
+		if save:
+			savename = graph_path+data_name+"-fairmut-"+metric+".pdf"
+			fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
+		else:
+			plt.show()
 
 def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=True):
 	files = glob.glob(assumption_folder+os.sep+"*"+metric+"*")
@@ -450,9 +458,9 @@ def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=True):
 	ax.legend(loc='lower left')
 
 	if save:
-		savename = graph_path+os.sep+'DeltaAssumption.svg'
+		savename = graph_path+'DeltaAssumption.pdf'
 		# print(savename)
-		fig.savefig(savename, format='svg', dpi=1200, bbox_inches='tight')
+		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
 
 	else:
 		plt.show()		
@@ -468,10 +476,11 @@ if __name__ == '__main__':
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
 	{'color':'r', 'dashes':(5,2), 'marker':"None",},			# carryon
-	{'color':'g', 'dashes':(2,5), 'marker':"None",},			# hypermutspec
-	{'color':'c', 'dashes':(None,None), 'marker':"o",'ms':7},	# hypermutall
-	{'color':'m', 'dashes':(None,None), 'marker':"^",'ms':7},	# reinit
-	{'color':'y', 'dashes':(None,None), 'marker':"D",'ms':7}]	# fairmut
+	{'color':'g', 'dashes':(2,5), 'marker':"None",},			# fairmut
+	{'color':'c', 'dashes':(None,None), 'marker':"o",'ms':7},	# fairmut extra
+	{'color':'m', 'dashes':(None,None), 'marker':"^",'ms':7},	# hypermutall
+	{'color':'y', 'dashes':(None,None), 'marker':"D",'ms':7},	# hypermutspec
+	{'color':'k', 'dashes':(None,None), 'marker':"v",'ms':7}]	# reinit
 
 	styles_cycler = cycle(styles)
 
@@ -479,20 +488,53 @@ if __name__ == '__main__':
 	# dataset_folders.remove(aggregate_folder)
 	dataset_folders.remove(graph_path)
 
+	graph_path = os.path.join(results_path, "graphs")+os.sep
+
 	delta = "sr5"
 
 	save = False
 
-	# for dataset in dataset_folders:
+	font = {'family' : 'normal',
+		'weight' : 'medium',
+		'size'   : 10}
+
+	plt.rc('font', **font)
+
+	# SMALL_SIZE = 8
+	# MEDIUM_SIZE = 10
+	# BIGGER_SIZE = 12
+	# plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+	# plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+	# plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+	# plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+	# plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+	# plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+	# plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+	for dataset in dataset_folders:
+
 	# 	plotHVgens(dataset, delta, graph_path, styles, save)
 		# plotARI(dataset, delta, graph_path, save)
 		# plotNumClusts(dataset, delta, graph_path, save)
 		# plotTimes(dataset, delta, graph_path, styles_cycler, save)
 
-		# fairmutComp(dataset, delta, styles, save)
+
+		if "200_20_2" in dataset:
+			print(dataset)
+			# fairmutComp(dataset, graph_path, delta, styles, True)
+			plotNumClusts(dataset, delta, graph_path, False)
+			# plt.rc('text', usetex=True)
+			plt.rc('font', family='serif')
+			plotNumClusts(dataset, delta, graph_path, False)
+			plotHVgens(dataset, delta, graph_path, styles, False)
+		elif "20_100_10" in dataset:
+			print(dataset)
+			# fairmutComp(dataset, graph_path, delta, styles, True)
+			plotNumClusts(dataset, delta, graph_path, False)
+			plotHVgens(dataset, delta, graph_path, styles, False)
 
 
 
 	# files = glob.glob(assumption_folder+os.sep+"*")
 
-	plotDeltaAssump(assumption_folder, graph_path)
+	# plotDeltaAssump(assumption_folder, graph_path)
