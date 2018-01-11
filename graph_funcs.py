@@ -540,11 +540,10 @@ def plotArtifExp_multiple(artif_folder, metric="ari"):
 
 	# plt.subplots(1, num_subplots, sharex='all', sharey='all')
 
-	width = 0.35
+	width = 0.4
 
 	colors=["w","w","g","c","m","y","k"]
 	hatches = ["/" , "\\" , "|" , "-" , "+" , "x", "."]
-
 
 	fig = plt.figure(figsize=(18,12))
 	# ax1 = fig.add_subplot(111)
@@ -553,6 +552,7 @@ def plotArtifExp_multiple(artif_folder, metric="ari"):
 		subplot_num += 1
 
 		ax1 = fig.add_subplot(num_subplots, 1, subplot_num)
+		# ax1 = fig.add_subplot(1, num_subplots, subplot_num)
 
 		metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
 		time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
@@ -604,6 +604,30 @@ def plotArtifExp_multiple(artif_folder, metric="ari"):
 		ax2.set_title("Comparison of time and performance for "+data_name)
 
 	plt.show()
+
+def plotArtifExp_multiple2(artif_folder, metric="ari"):
+	folders = glob.glob(artif_folder+os.sep+"*", recursive=True)
+	num_subplots = len(glob.glob(artif_folder+os.sep+"*"))
+
+	ind = np.arange(int(num_subplots/2)*-2, int(num_subplots/2))
+	ind = ind*0.36 # to adjust for bar size
+
+	width = 0.16
+
+	colors = ["w","w","g","c","m","y","k"]
+	hatches = ["/" , "\\" , "|" , "-" , "+" , "x", "."]
+
+	# for loop dataset
+		# for loop strategy
+
+			# Plot the bars here
+			# ax1.bar(2*i+ind[j], ens_prob_avg[i][j], width=w, alpha=0.6 , color=colours[0].rgb, label='geometric comb')
+
+		# Plot the line here for each dataset
+		# Similar method to above, basically mirroring the bars but with lines
+
+	# ax1.set_xticks(np.arange(num_subplots)*2+ind[num_subplots])
+
 
 
 if __name__ == '__main__':
