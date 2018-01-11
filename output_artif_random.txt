@@ -51554,3 +51554,45 @@ Genotype length: 66
 Max conn: 58.26269841269876
 No. base clusters: 67
 Length cnn pair list: 98
+Trigger Gens: [24, 51, 61, 81]
+Unprotecting fair mut indivs
+Triggered at: 24
+Adaptive Delta engaged at gen 24! Going down to delta = 96.94825380622845
+Genotype length: 132
+Max conn: 298.08333333333195
+No. base clusters: 133
+Length cnn pair list: 167
+Unprotecting fair mut indivs
+Triggered at: 51
+Adaptive Delta engaged at gen 51! Going down to delta = 95.42238070934268
+Genotype length: 197
+Max conn: 641.474603174605
+No. base clusters: 198
+Length cnn pair list: 234
+Unprotecting fair mut indivs
+Triggered at: 61
+Adaptive Delta engaged at gen 61! Going down to delta = 93.8965076124569
+Genotype length: 263
+Max conn: 1047.0067460317343
+No. base clusters: 264
+Length cnn pair list: 304
+Unprotecting fair mut indivs
+Triggered at: 81
+Adaptive Delta engaged at gen 81! Going down to delta = 92.37063451557113
+Genotype length: 328
+Max conn: 1348.4337301586952
+No. base clusters: 329
+Length cnn pair list: 386
+Unprotecting fair mut indivs
+EA time: 53.92501735687256
+Final population hypervolume is 3793.6760849505763
+Triggered gens: [0, 24, 51, 61, 81]
+Run 29 for d=98.4741269031 (sr1) complete (Took 55.370205879211426 seconds)
+tevc_200_60_5 complete! Took 12122.889511823654 seconds 
+
+Testing: UKC2
+Delta values to test: [96.942282043102963, 99.388456408620598] (2)
+Created a results folder for dataset UKC2
+Starting precomputation...
+Distance array done!
+NN rankings done!
