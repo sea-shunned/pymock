@@ -463,7 +463,147 @@ def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=True):
 		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
 
 	else:
-		plt.show()		
+		plt.show()
+
+
+def plotArtifExp_single(dataset_folder,metric="ari"):
+	metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
+	time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
+
+	assert len(metric_files) == len(time_files)
+
+	fig = plt.figure(figsize=(18,12))
+	ax1 = fig.add_subplot(111)
+
+	width = 0.35
+
+	means=[]
+	errs=[]
+
+	colors=["w","w","g","c","m","y","k"]
+	hatches = ["/" , "\\" , "|" , "-" , "+" , "x", "."]
+
+	data_name = dataset_folder.split(os.sep)[-1]
+
+	strat_names = []
+	for index, file in enumerate(metric_files):
+		
+		data_metric = np.loadtxt(file, delimiter=",")
+
+		if "main_base" in file:
+			strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+				file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
+
+		else:
+			strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+		err = np.std(data_metric, ddof=0)/np.sqrt(data_metric.shape[1])
+
+		ax1.bar(index, np.mean(data_metric), width, tick_label=strat_names[-1], label=strat_names[-1], alpha=0.7, lw=1.2, color="grey", edgecolor="black", hatch=hatches[index], yerr=err, error_kw=dict(capsize=3, capthick=1, ecolor="black", alpha=0.7))
+
+		data_time = np.loadtxt(time_files[index], delimiter=',')
+		
+		means.append(np.mean(data_time))
+		errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
+
+	ax1.set_ylabel("ARI")
+	ax1.set_xlabel("Strategy")
+	ax1.set_ylim(-0.05,1.05)
+
+	ax2 = ax1.twinx()
+
+	ax2.errorbar(list(range(len(strat_names))), means, color="black", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
+
+	ax2.set_ylabel("Time")
+
+	# print(strat_names)
+	ax2.set_xticks(np.arange(len(strat_names)))
+	ax2.set_xticklabels(strat_names)
+	ax2.set_title("Comparison of time and performance for "+data_name)
+
+	lines, labels = ax1.get_legend_handles_labels()
+	lines2, labels2 = ax2.get_legend_handles_labels()
+	ax2.legend(lines + lines2, labels + labels2, loc=0)
+
+	plt.show()
+
+def plotArtifExp_multiple(artif_folder, metric="ari"):
+	# Use glob to get all files (recursively)
+	folders = glob.glob(artif_folder+os.sep+"*", recursive=True)
+	print(folders)
+
+	# I'll need to plot the line graph (time) multiple times, one for each dataset in the right x positions
+	# Easier alternative might be to use subplots
+
+	# Equivalent to the number of datasets
+	num_subplots = len(glob.glob(artif_folder+os.sep+"*"))
+
+	# plt.subplots(1, num_subplots, sharex='all', sharey='all')
+
+	width = 0.35
+
+	colors=["w","w","g","c","m","y","k"]
+	hatches = ["/" , "\\" , "|" , "-" , "+" , "x", "."]
+
+
+	fig = plt.figure(figsize=(18,12))
+	# ax1 = fig.add_subplot(111)
+
+	for subplot_num, dataset_folder in enumerate(folders):
+		subplot_num += 1
+
+		ax1 = fig.add_subplot(num_subplots, 1, subplot_num)
+
+		metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
+		time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
+
+		means = []
+		errs = []
+		strat_names = []
+
+		data_name = dataset_folder.split(os.sep)[-1]
+
+		for index, file in enumerate(metric_files):
+			data_metric = np.loadtxt(file, delimiter=",")
+
+			if "main_base" in file:
+				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+					file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
+
+			else:
+				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+			err = np.std(data_metric, ddof=0)/np.sqrt(data_metric.shape[1])
+
+			ax1.bar(index, np.mean(data_metric), width, tick_label=strat_names[-1], label=strat_names[-1], alpha=0.7, lw=1.2, color="grey", edgecolor="black", hatch=hatches[index], yerr=err, error_kw=dict(capsize=3, capthick=1, ecolor="black", alpha=0.7))
+
+			data_time = np.loadtxt(time_files[index], delimiter=',')
+
+			# Need to normalise the times here
+		
+
+			means.append(np.mean(data_time))
+			errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
+
+		ax1.set_ylabel("ARI")
+		ax1.set_xlabel("Strategy")
+		ax1.set_ylim(-0.05,1.05)
+
+		ax2 = ax1.twinx()
+
+		ax2.errorbar(list(range(len(strat_names))), means, color="black", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
+
+		# https://stackoverflow.com/questions/12919230/how-to-share-secondary-y-axis-between-subplots-in-matplotlib
+		## Use the above to get_shared_y_axes()
+
+		ax2.set_ylabel("Time")
+
+		# print(strat_names)
+		ax2.set_xticks(np.arange(len(strat_names)))
+		ax2.set_xticklabels(strat_names)
+		ax2.set_title("Comparison of time and performance for "+data_name)
+
+	plt.show()
 
 
 if __name__ == '__main__':
@@ -472,6 +612,7 @@ if __name__ == '__main__':
 	# aggregate_folder = os.path.join(results_path, "aggregates")
 	graph_path = os.path.join(results_path, "graphs")
 	assumption_folder = os.path.join(results_path, "delta_assump")
+	artif_folder = os.path.join(results_path, "artif")
 
 	styles = [
 	{'color':'b', 'dashes':(None,None), 'marker':"None"}, 		# base
@@ -487,6 +628,7 @@ if __name__ == '__main__':
 	dataset_folders = glob.glob(results_path+os.sep+"*")
 	# dataset_folders.remove(aggregate_folder)
 	dataset_folders.remove(graph_path)
+	dataset_folders.remove(artif_folder)
 
 	graph_path = os.path.join(results_path, "graphs")+os.sep
 
@@ -494,11 +636,11 @@ if __name__ == '__main__':
 
 	save = False
 
-	font = {'family' : 'normal',
-		'weight' : 'medium',
-		'size'   : 10}
+	# font = {'family' : 'normal',
+	# 	'weight' : 'medium',
+	# 	'size'   : 10}
 
-	plt.rc('font', **font)
+	# plt.rc('font', **font)
 
 	# SMALL_SIZE = 8
 	# MEDIUM_SIZE = 10
@@ -511,30 +653,32 @@ if __name__ == '__main__':
 	# plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 	# plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
-	for dataset in dataset_folders:
+	# for dataset in dataset_folders:
 
-	# 	plotHVgens(dataset, delta, graph_path, styles, save)
-		# plotARI(dataset, delta, graph_path, save)
-		# plotNumClusts(dataset, delta, graph_path, save)
-		# plotTimes(dataset, delta, graph_path, styles_cycler, save)
-
-
-		if "200_20_2" in dataset:
-			print(dataset)
-			# fairmutComp(dataset, graph_path, delta, styles, True)
-			plotNumClusts(dataset, delta, graph_path, False)
-			# plt.rc('text', usetex=True)
-			plt.rc('font', family='serif')
-			plotNumClusts(dataset, delta, graph_path, False)
-			plotHVgens(dataset, delta, graph_path, styles, False)
-		elif "20_100_10" in dataset:
-			print(dataset)
-			# fairmutComp(dataset, graph_path, delta, styles, True)
-			plotNumClusts(dataset, delta, graph_path, False)
-			plotHVgens(dataset, delta, graph_path, styles, False)
+	# # 	plotHVgens(dataset, delta, graph_path, styles, save)
+	# 	# plotARI(dataset, delta, graph_path, save)
+	# 	# plotNumClusts(dataset, delta, graph_path, save)
+	# 	# plotTimes(dataset, delta, graph_path, styles_cycler, save)
 
 
+	# 	if "200_20_2" in dataset:
+	# 		print(dataset)
+	# 		# fairmutComp(dataset, graph_path, delta, styles, True)
+	# 		plotNumClusts(dataset, delta, graph_path, False)
+	# 		# plt.rc('text', usetex=True)
+	# 		plt.rc('font', family='serif')
+	# 		plotNumClusts(dataset, delta, graph_path, False)
+	# 		plotHVgens(dataset, delta, graph_path, styles, False)
+	# 	elif "20_100_10" in dataset:
+	# 		print(dataset)
+	# 		# fairmutComp(dataset, graph_path, delta, styles, True)
+	# 		plotNumClusts(dataset, delta, graph_path, False)
+	# 		plotHVgens(dataset, delta, graph_path, styles, False)
 
-	# files = glob.glob(assumption_folder+os.sep+"*")
+	# artif_folder = os.path.join(results_path, "artif")+os.sep
+	dataset_folders = glob.glob(artif_folder+os.sep+"*")
 
-	# plotDeltaAssump(assumption_folder, graph_path)
+	# for dataset_folder in dataset_folders:
+	# 	plotArtifExp_single(dataset_folder,metric="ari")
+
+	plotArtifExp_multiple(artif_folder)
