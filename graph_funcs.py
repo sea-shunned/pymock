@@ -610,23 +610,72 @@ def plotArtifExp_multiple2(artif_folder, metric="ari"):
 	num_subplots = len(glob.glob(artif_folder+os.sep+"*"))
 
 	ind = np.arange(int(num_subplots/2)*-2, int(num_subplots/2))
-	ind = ind*0.36 # to adjust for bar size
+	ind = ind*0.26 # space between bars in a group
 
-	width = 0.16
+	width = 0.2
 
 	colors = ["w","w","g","c","m","y","k"]
 	hatches = ["/" , "\\" , "|" , "-" , "+" , "x", "."]
 
-	# for loop dataset
+	fig = plt.figure(figsize=(18,12))
+	ax1 = fig.add_subplot(111)
+	ax2 = ax1.twinx()
+
+	for dataset_num, dataset_folder in enumerate(folders):
+		metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
+		time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
+
+		means = []
+		errs = []
+		strat_names = []
+
+		data_name = dataset_folder.split(os.sep)[-1]
+		
 		# for loop strategy
+		for index, file in enumerate(metric_files):
+			data_metric = np.loadtxt(file, delimiter=",")
+
+			if "main_base" in file:
+				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+					file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
+
+			else:
+				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+			err = np.std(data_metric, ddof=0)/np.sqrt(data_metric.shape[1])
 
 			# Plot the bars here
 			# ax1.bar(2*i+ind[j], ens_prob_avg[i][j], width=w, alpha=0.6 , color=colours[0].rgb, label='geometric comb')
+			# ax1.bar(index, np.mean(data_metric), width, tick_label=strat_names[-1], label=strat_names[-1], alpha=0.7, lw=1.2, color="grey", edgecolor="black", hatch=hatches[index], yerr=err, error_kw=dict(capsize=3, capthick=1, ecolor="black", alpha=0.7))
+			ax1.bar(2*dataset_num+ind[index], np.mean(data_metric), width, alpha=0.7, lw=1.2, color="grey", edgecolor="black", hatch=hatches[index], yerr=err, error_kw=dict(capsize=3, capthick=1, ecolor="black", alpha=0.6))
+
+			data_time = np.loadtxt(time_files[index], delimiter=',')
+
+			# Need to normalise the times here
+			max_val = np.max(data_time)
+			min_val = np.min(data_time)
+			denom = max_val - min_val
+
+			print(data_time)
+			data_time = (data_time - min_val)/denom
+			print(data_time)
+
+			means.append(np.mean(data_time))
+			errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
 
 		# Plot the line here for each dataset
 		# Similar method to above, basically mirroring the bars but with lines
+		# ax2 = ax1.twinx()
 
-	# ax1.set_xticks(np.arange(num_subplots)*2+ind[num_subplots])
+		# print(means, len(means))
+		# print([i+2*dataset_num for i in ind], len([i+2*dataset_num for i in ind[:len(means)]]))
+
+		ax2.errorbar([i+2*dataset_num for i in ind[:len(means)]], means, color="red", linestyle="--", yerr=errs, capsize=7, capthick=1)
+		# ax2.errorbar(list(range(len(strat_names))), means, color="black", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
+
+	ax2.set_xticks(np.arange(num_subplots)*2+ind[num_subplots])
+
+	plt.show()
 
 
 
@@ -705,4 +754,5 @@ if __name__ == '__main__':
 	# for dataset_folder in dataset_folders:
 	# 	plotArtifExp_single(dataset_folder,metric="ari")
 
-	plotArtifExp_multiple(artif_folder)
+	# plotArtifExp_multiple(artif_folder)
+	plotArtifExp_multiple2(artif_folder)
