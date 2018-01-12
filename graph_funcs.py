@@ -526,7 +526,7 @@ def plotArtifExp_single(dataset_folder,graph_path,metric="ari",save=False):
 	ax2.legend(lines + lines2, labels + labels2, loc=0)
 
 	if save:
-		savename = graph_path + "artif-interval-" + data_name + ".pdf"
+		savename = graph_path + "artif-interval-" + data_name + "-bar.pdf"
 		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
 	else:
 		plt.show()
@@ -704,6 +704,9 @@ def plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False):
 	strat_names = []
 	data_metric_list = []
 
+	min_val = np.inf
+	max_val = 0
+
 	for index, file in enumerate(metric_files):
 		
 		data_metric_list.append(np.max(np.loadtxt(file, delimiter=","),axis=0))
@@ -716,7 +719,20 @@ def plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False):
 			strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 
 		data_time = np.loadtxt(time_files[index], delimiter=',')
-		
+
+		if np.max(data_time) > max_val:
+			max_val = np.max(data_time)
+
+		if np.min(data_time) < min_val:
+			min_val = np.min(data_time)
+
+		denom = max_val - min_val
+
+	for index, file in enumerate(time_files):
+		data_time = np.loadtxt(file, delimiter=',')
+
+		data_time = (data_time - min_val)/denom
+
 		means.append(np.mean(data_time))
 		errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
 
@@ -734,13 +750,14 @@ def plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False):
 
 	ax2.set_xticklabels(strat_names)
 	ax2.set_title("Comparison of time and performance for "+data_name)
+	ax2.set_ylim(-0.05,1.05)
 
 	lines, labels = ax1.get_legend_handles_labels()
 	lines2, labels2 = ax2.get_legend_handles_labels()
-	ax2.legend(lines + lines2, labels + labels2, loc=0)
+	ax2.legend(lines + lines2, labels + labels2, loc=1)
 
 	if save:
-		savename = graph_path + "artif-interval-" + data_name + ".pdf"
+		savename = graph_path + "artif-interval-" + data_name + "-box.pdf"
 		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
 	else:
 		plt.show()
@@ -820,7 +837,7 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 			means.append(np.mean(data_time))
 			errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
 			
-			
+
 		ax1.boxplot(data_metric_list, labels=strat_names)
 		ax1.set_ylabel("ARI")
 		ax1.set_xlabel("Strategy")
@@ -882,20 +899,20 @@ if __name__ == '__main__':
 
 	# font = {'family' : 'normal',
 	# 	'weight' : 'medium',
-	# 	'size'   : 10}
+	# 	'size'   : 12}
 
 	# plt.rc('font', **font)
 
-	# SMALL_SIZE = 8
-	# MEDIUM_SIZE = 10
-	# BIGGER_SIZE = 12
-	# plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+	SMALL_SIZE = 12
+	MEDIUM_SIZE = 14
+	BIGGER_SIZE = 16
+	plt.rc('font', size=MEDIUM_SIZE)          # controls default text sizes
 	# plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
-	# plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-	# plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-	# plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-	# plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
-	# plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+	plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+	plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+	plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+	plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+	plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 	# for dataset in dataset_folders:
 
@@ -922,9 +939,9 @@ if __name__ == '__main__':
 	# artif_folder = os.path.join(results_path, "artif")+os.sep
 	dataset_folders = glob.glob(artif_folder+os.sep+"*")
 
-	# for dataset_folder in dataset_folders:
-	# 	plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False)
+	for dataset_folder in dataset_folders:
+		plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False)
 
 	# plotArtifExp_multiple(artif_folder)
 	# plotArtifExp_multiple2(artif_folder)
-	plotArtifExp_multiplebox(artif_folder)
+	# plotArtifExp_multiplebox(artif_folder)
