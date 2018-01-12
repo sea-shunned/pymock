@@ -466,7 +466,7 @@ def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=True):
 		plt.show()
 
 
-def plotArtifExp_single(dataset_folder,metric="ari"):
+def plotArtifExp_single(dataset_folder,graph_path,metric="ari",save=False):
 	metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
 	time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
 
@@ -525,7 +525,11 @@ def plotArtifExp_single(dataset_folder,metric="ari"):
 	lines2, labels2 = ax2.get_legend_handles_labels()
 	ax2.legend(lines + lines2, labels + labels2, loc=0)
 
-	plt.show()
+	if save:
+		savename = graph_path + "artif-interval-" + data_name + ".pdf"
+		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
+	else:
+		plt.show()
 
 def plotArtifExp_multiple(artif_folder, metric="ari"):
 	# Use glob to get all files (recursively)
@@ -751,8 +755,8 @@ if __name__ == '__main__':
 	# artif_folder = os.path.join(results_path, "artif")+os.sep
 	dataset_folders = glob.glob(artif_folder+os.sep+"*")
 
-	# for dataset_folder in dataset_folders:
-	# 	plotArtifExp_single(dataset_folder,metric="ari")
+	for dataset_folder in dataset_folders:
+		plotArtifExp_single(dataset_folder,graph_path,metric="ari",save=True)
 
 	# plotArtifExp_multiple(artif_folder)
-	plotArtifExp_multiple2(artif_folder)
+	# plotArtifExp_multiple2(artif_folder)
