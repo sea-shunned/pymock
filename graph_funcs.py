@@ -682,6 +682,173 @@ def plotArtifExp_multiple2(artif_folder, metric="ari"):
 	plt.show()
 
 
+def plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False):
+	metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
+	time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
+
+	assert len(metric_files) == len(time_files)
+
+	fig = plt.figure(figsize=(18,12))
+	ax1 = fig.add_subplot(111)
+
+	width = 0.35
+
+	means=[]
+	errs=[]
+
+	colors=["w","w","g","c","m","y","k"]
+	hatches = ["/" , "\\" , "|" , "-" , "+" , "x", "."]
+
+	data_name = dataset_folder.split(os.sep)[-1]
+
+	strat_names = []
+	data_metric_list = []
+
+	for index, file in enumerate(metric_files):
+		
+		data_metric_list.append(np.max(np.loadtxt(file, delimiter=","),axis=0))
+
+		if "main_base" in file:
+			strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+				file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
+
+		else:
+			strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+		data_time = np.loadtxt(time_files[index], delimiter=',')
+		
+		means.append(np.mean(data_time))
+		errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
+
+	ax1.boxplot(data_metric_list, labels=strat_names)
+
+	ax1.set_ylabel("ARI")
+	ax1.set_xlabel("Strategy")
+	ax1.set_ylim(-0.05,1.05)
+
+	ax2 = ax1.twinx()
+
+	ax2.errorbar(list(range(1,len(data_metric_list)+1)), means, color="black", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
+
+	ax2.set_ylabel("Time")
+
+	ax2.set_xticklabels(strat_names)
+	ax2.set_title("Comparison of time and performance for "+data_name)
+
+	lines, labels = ax1.get_legend_handles_labels()
+	lines2, labels2 = ax2.get_legend_handles_labels()
+	ax2.legend(lines + lines2, labels + labels2, loc=0)
+
+	if save:
+		savename = graph_path + "artif-interval-" + data_name + ".pdf"
+		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
+	else:
+		plt.show()
+
+def plotArtifExp_multiplebox(artif_folder, metric="ari"):
+	folders = glob.glob(artif_folder+os.sep+"*", recursive=True)
+	num_subplots = len(glob.glob(artif_folder+os.sep+"*"))
+
+	ind = np.arange(int(num_subplots/2)*-2, int(num_subplots/2))
+	ind = ind*0.26 # space between bars in a group
+
+	width = 0.2
+
+	colors = ["w","w","g","c","m","y","k"]
+	hatches = ["/" , "\\" , "|" , "-" , "+" , "x", "."]
+
+	fig = plt.figure(figsize=(18,12))
+	# ax1 = fig.add_subplot(111)
+	
+
+	for subplot_num, dataset_folder in enumerate(folders):
+		subplot_num += 1
+
+		ax1 = fig.add_subplot(num_subplots, 2, subplot_num)
+		# ax1 = fig.add_subplot(1, num_subplots, subplot_num)
+
+		metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
+		time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
+
+		means = []
+		errs = []
+		strat_names = []
+		data_metric_list = []
+
+		data_name = dataset_folder.split(os.sep)[-1]
+
+		min_val = np.inf
+		max_val = 0
+		
+		# for loop strategy
+		for index, file in enumerate(metric_files):
+
+			data_metric_list.append(np.max(np.loadtxt(file, delimiter=","),axis=0))
+
+			if "main_base" in file:
+				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+					file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
+
+			else:
+				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+
+			# ax1.bar(2*subplot_num+ind[index], np.mean(data_metric), width, alpha=0.7, lw=1.2, color="grey", edgecolor="black", hatch=hatches[index], yerr=err, error_kw=dict(capsize=3, capthick=1, ecolor="black", alpha=0.6))
+
+			data_time = np.loadtxt(time_files[index], delimiter=',')
+
+			# Need to normalise the times here
+			##### Not here, we need to loop through and find the max over all strategies first!
+			# max_val = np.max(data_time)
+			# min_val = np.min(data_time)
+			# denom = max_val - min_val
+
+			if np.max(data_time) > max_val:
+				max_val = np.max(data_time)
+
+			if np.min(data_time) < min_val:
+				min_val = np.min(data_time)
+
+
+		denom = max_val - min_val
+
+		for index, file in enumerate(time_files):
+			data_time = np.loadtxt(file, delimiter=',')
+
+			data_time = (data_time - min_val)/denom
+
+			means.append(np.mean(data_time))
+			errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
+			
+			
+		ax1.boxplot(data_metric_list, labels=strat_names)
+		ax1.set_ylabel("ARI")
+		ax1.set_xlabel("Strategy")
+		ax1.set_ylim(-0.05,1.05)
+
+		ax2 = ax1.twinx()
+
+		ax2.errorbar(list(range(1,len(data_metric_list)+1)), means, color="red", linestyle="--", yerr=errs, capsize=7, capthick=1)
+		# ax2.errorbar(list(range(len(strat_names))), means, color="black", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
+
+		ax2.set_ylabel("Time")
+		ax2.set_ylim(-0.05,1.05)
+		# ax2.set_xticks(np.arange(len(strat_names)))
+		ax2.set_xticklabels(strat_names)
+
+
+	print(len(fig.get_axes()))
+
+	axes = fig.get_axes()
+	print(axes, axes[0])
+
+	# for i in range(2, len(axes),2):
+	# 	print(axes[i])
+	# 	axes[0].get_shared_x_axes().join(axes[0],axes[i])
+	#	axes[0].get_shared_y_axes().join(axes[0],axes[i])
+
+	plt.show()
+
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
@@ -755,8 +922,9 @@ if __name__ == '__main__':
 	# artif_folder = os.path.join(results_path, "artif")+os.sep
 	dataset_folders = glob.glob(artif_folder+os.sep+"*")
 
-	for dataset_folder in dataset_folders:
-		plotArtifExp_single(dataset_folder,graph_path,metric="ari",save=True)
+	# for dataset_folder in dataset_folders:
+	# 	plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False)
 
 	# plotArtifExp_multiple(artif_folder)
 	# plotArtifExp_multiple2(artif_folder)
+	plotArtifExp_multiplebox(artif_folder)
