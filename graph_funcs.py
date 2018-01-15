@@ -787,8 +787,6 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 			ax1 = fig.add_subplot(num_subplots, 2, subplot_num)
 		# ax1 = fig.add_subplot(1, num_subplots, subplot_num)
 
-
-
 		metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
 		time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
 
@@ -954,8 +952,8 @@ if __name__ == '__main__':
 	# artif_folder = os.path.join(results_path, "artif")+os.sep
 	dataset_folders = glob.glob(artif_folder+os.sep+"*")
 
-	# for dataset_folder in dataset_folders:
-	# 	plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False)
+	for dataset_folder in dataset_folders:
+		plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False)
 
 	# plotArtifExp_multiple(artif_folder)
 	# plotArtifExp_multiple2(artif_folder)

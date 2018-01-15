@@ -267,7 +267,7 @@ for file_path in data_files:
 				# Pickle delta triggers
 				# No triggers for normal delta-MOCK
 				if strat_name != "main_base":
-					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+".csv","w") as f:
+					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+"artif.csv","w") as f:
 					# 	pickle.dump(delta_triggers, f)
 						writer=csv.writer(f)
 						writer.writerows(delta_triggers)
