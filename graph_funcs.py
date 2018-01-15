@@ -781,8 +781,13 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 	for subplot_num, dataset_folder in enumerate(folders):
 		subplot_num += 1
 
-		ax1 = fig.add_subplot(num_subplots, 2, subplot_num)
+		if subplot_num > 1:
+			ax1 = fig.add_subplot(num_subplots, 2, subplot_num, sharex=fig.get_axes()[0])
+		else:
+			ax1 = fig.add_subplot(num_subplots, 2, subplot_num)
 		# ax1 = fig.add_subplot(1, num_subplots, subplot_num)
+
+
 
 		metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
 		time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
@@ -839,8 +844,8 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 			
 
 		ax1.boxplot(data_metric_list, labels=strat_names)
-		ax1.set_ylabel("ARI")
-		ax1.set_xlabel("Strategy")
+		# ax1.set_ylabel("ARI")
+		# ax1.set_xlabel("Strategy")
 		ax1.set_ylim(-0.05,1.05)
 
 		ax2 = ax1.twinx()
@@ -848,23 +853,33 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 		ax2.errorbar(list(range(1,len(data_metric_list)+1)), means, color="red", linestyle="--", yerr=errs, capsize=7, capthick=1)
 		# ax2.errorbar(list(range(len(strat_names))), means, color="black", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
 
-		ax2.set_ylabel("Time")
+		# ax2.set_ylabel("Time")
 		ax2.set_ylim(-0.05,1.05)
 		# ax2.set_xticks(np.arange(len(strat_names)))
 		ax2.set_xticklabels(strat_names)
 
+	ax1.set_ylabel("ARI")
+	ax1.set_xlabel("Strategy")
+	ax2.set_ylabel("Time")
 
-	print(len(fig.get_axes()))
+	# print(len(fig.get_axes()))
 
 	axes = fig.get_axes()
-	print(axes, axes[0])
+	# print(axes, axes[0])
 
 	# for i in range(2, len(axes),2):
 	# 	print(axes[i])
-	# 	axes[0].get_shared_x_axes().join(axes[0],axes[i])
-	#	axes[0].get_shared_y_axes().join(axes[0],axes[i])
+		# axes[0].get_shared_x_axes().join(axes[0],axes[i])
+		# axes[0].get_shared_y_axes().join(axes[0],axes[i])
+
+	# -4 just means the bottom 2 with 7 dataset results
+	for i in range(len(axes)-4):
+		plt.setp(axes[i].get_xticklabels(), visible=False)
 
 	plt.show()
+
+
+	# Consider saving these axes into a dict or something, and then adding them to a fig afterwards with a gridspec subplot - may be able to control axes better/make it look better
 
 
 if __name__ == '__main__':
@@ -939,9 +954,9 @@ if __name__ == '__main__':
 	# artif_folder = os.path.join(results_path, "artif")+os.sep
 	dataset_folders = glob.glob(artif_folder+os.sep+"*")
 
-	for dataset_folder in dataset_folders:
-		plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False)
+	# for dataset_folder in dataset_folders:
+	# 	plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False)
 
 	# plotArtifExp_multiple(artif_folder)
 	# plotArtifExp_multiple2(artif_folder)
-	# plotArtifExp_multiplebox(artif_folder)
+	plotArtifExp_multiplebox(artif_folder)
