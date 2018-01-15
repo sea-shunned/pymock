@@ -36,10 +36,12 @@ real_data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 
 results_folder = os.path.join(basepath,"results","artif")+os.sep
 
-# data_files = [synth_data_files[1]] + [synth_data_files[93]] + [synth_data_files[167]] + [synth_data_files[214]] + [synth_data_files[228]] + [synth_data_files[315]] + [synth_data_files[306]] + real_data_files[1:2] + real_data_files[-1:]
+# data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + [synth_data_files[52]] + real_data_files[1:2] + real_data_files[-1:]
 
-data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
-# data_files = sorted(glob.glob(real_data_folder+'*.txt'))
+data_files = [synth_data_files[1]] + [synth_data_files[93]] + [synth_data_files[167]] + [synth_data_files[214]] + [synth_data_files[228]] + [synth_data_files[315]] + [synth_data_files[306]] + real_data_files[1:2] + real_data_files[-1:]
+
+# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_8_*.data')
+# data_files = synth_data_files
 
 print(data_files)
 
@@ -61,7 +63,7 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Square root values for delta
 # Reverse to ensure lowest delta is first (in case of issues with HV ref point)
-sr_vals = [5,1]
+sr_vals = [1]
 
 # Parameters across all strategies
 L = 10
@@ -69,7 +71,7 @@ num_indivs = 100
 num_gens = 100
 delta_reduce = 1
 
-funcs = [main_base.main, artif_carryon.main, artif_hypermutspec.main, artif_hypermutall.main, artif_reinit.main, artif_fairmut.main]
+funcs = [main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
 
 save_results = True
 
@@ -82,7 +84,7 @@ fitness_cols = ["VAR", "CNN", "Run"]
 # trigger_gen_list = [[12, 40, 63, 87], [12, 40, 64, 80], [27, 41, 60, 80], [13, 38, 60, 75], [19, 31, 64, 75], [11, 41, 51, 71], [21, 39, 64, 74], [10, 32, 50, 75], [23, 31, 50, 73], [29, 39, 66, 70], [23, 31, 52, 78], [20, 44, 50, 82], [11, 34, 55, 78], [22, 42, 64, 72], [11, 39, 60, 72], [28, 49, 66, 74], [20, 31, 67, 89], [27, 36, 66, 73], [14, 30, 57, 78], [12, 42, 65, 79], [18, 33, 50, 88], [14, 36, 51, 83], [20, 42, 61, 74], [25, 48, 56, 70], [10, 43, 64, 83], [20, 36, 60, 74], [26, 44, 61, 81], [10, 44, 66, 88], [29, 45, 57, 76], [14, 31, 54, 87]]
 
 # # Static random trigger_gen list
-trigger_gen_list = [[33, 43, 53, 84], [13, 45, 62, 72], [32, 54, 76, 88], [9, 71, 81, 91], [18, 28, 39, 49], [42, 52, 62, 72], [14, 24, 59, 77], [21, 40, 50, 60], [14, 27, 74, 89], [49, 60, 70, 80], [17, 27, 47, 73], [52, 62, 72, 82], [11, 21, 31, 87], [11, 21, 82, 92], [19, 29, 55, 66], [32, 42, 67, 81], [15, 78, 89, 99], [11, 36, 46, 56], [35, 60, 70, 80], [54, 74, 84, 94], [24, 34, 72, 82], [42, 52, 64, 74], [15, 30, 57, 67], [14, 34, 44, 84], [13, 27, 44, 73], [25, 35, 45, 55], [43, 53, 63, 73], [29, 39, 49, 59], [49, 59, 69, 79], [24, 51, 61, 81]]
+# trigger_gen_list = [[33, 43, 53, 84], [13, 45, 62, 72], [32, 54, 76, 88], [9, 71, 81, 91], [18, 28, 39, 49], [42, 52, 62, 72], [14, 24, 59, 77], [21, 40, 50, 60], [14, 27, 74, 89], [49, 60, 70, 80], [17, 27, 47, 73], [52, 62, 72, 82], [11, 21, 31, 87], [11, 21, 82, 92], [19, 29, 55, 66], [32, 42, 67, 81], [15, 78, 89, 99], [11, 36, 46, 56], [35, 60, 70, 80], [54, 74, 84, 94], [24, 34, 72, 82], [42, 52, 64, 74], [15, 30, 57, 67], [14, 34, 44, 84], [13, 27, 44, 73], [25, 35, 45, 55], [43, 53, 63, 73], [29, 39, 49, 59], [49, 59, 69, 79], [24, 51, 61, 81]]
 
 
 assert len(trigger_gen_list) >= num_runs, "Too many runs for number of available seeds"
@@ -169,7 +171,7 @@ for file_path in data_files:
 	HV_ref = None
 
 	# Generate SR5 HV ref point to avoid issues
-	# _,_, HV_ref ,_,_,_ = main_base.main(data, data_dict, 100-((100*5*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples), HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce)
+	_,_, HV_ref ,_,_,_ = main_base.main(data, data_dict, 100-((100*5*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples), HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce)
 
 	for index_d, delta in enumerate(delta_vals):
 		print("\nTesting delta =",delta, "(sr"+str(sr_vals[index_d])+")")
@@ -186,14 +188,14 @@ for file_path in data_files:
 		for func in funcs:
 			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
 			
-			# Don't do sr5 for any of the artif scripts
-			if strat_name != "main_base" and sr_vals[index_d]==5:
-				# print("\n",strat_name, sr_vals[index_d], delta,"\n")
-				continue
-
-			# # Don't do sr1 for base MOCK
-			# if strat_name == "main_base" and sr_vals[index_d]==1:
+			# # Don't do sr5 for any of the artif scripts
+			# if strat_name != "main_base" and sr_vals[index_d]==5:
+			# 	# print("\n",strat_name, sr_vals[index_d], delta,"\n")
 			# 	continue
+
+			# # # Don't do sr1 for base MOCK
+			# # if strat_name == "main_base" and sr_vals[index_d]==1:
+			# # 	continue
 
 			# Create arrays to save results for the given function
 			fitness_array = np.empty((num_indivs*num_runs, len(fitness_cols)))
@@ -256,16 +258,16 @@ for file_path in data_files:
 
 			if save_results:
 				# Save array data
-				np.savetxt(filename+"-fitness-sr"+str(sr_vals[index_d])+"-random.csv", fitness_array, delimiter=",")
-				np.savetxt(filename+"-hv-sr"+str(sr_vals[index_d])+"-random.csv", hv_array, delimiter=",")
-				np.savetxt(filename+"-ari-sr"+str(sr_vals[index_d])+"-random.csv", ari_array, delimiter=",")
-				np.savetxt(filename+"-numclusts-sr"+str(sr_vals[index_d])+"-random.csv", numclusts_array, delimiter=",")
-				np.savetxt(filename+"-time-sr"+str(sr_vals[index_d])+"-random.csv", time_array, delimiter=",")
+				np.savetxt(filename+"-fitness-sr"+str(sr_vals[index_d])+"-hv.csv", fitness_array, delimiter=",")
+				np.savetxt(filename+"-hv-sr"+str(sr_vals[index_d])+"-hv.csv", hv_array, delimiter=",")
+				np.savetxt(filename+"-ari-sr"+str(sr_vals[index_d])+"-hv.csv", ari_array, delimiter=",")
+				np.savetxt(filename+"-numclusts-sr"+str(sr_vals[index_d])+"-hv.csv", numclusts_array, delimiter=",")
+				np.savetxt(filename+"-time-sr"+str(sr_vals[index_d])+"-hv.csv", time_array, delimiter=",")
 
 				# Pickle delta triggers
 				# No triggers for normal delta-MOCK
 				if strat_name != "main_base":
-					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+"-random.csv","w") as f:
+					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+"-hv.csv","w") as f:
 					# 	pickle.dump(delta_triggers, f)
 						writer=csv.writer(f)
 						writer.writerows(delta_triggers)

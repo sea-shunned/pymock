@@ -683,8 +683,8 @@ def plotArtifExp_multiple2(artif_folder, metric="ari"):
 
 
 def plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False):
-	metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
-	time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
+	metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*interval*"), reverse=True)
+	time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*interval*"), reverse=True)
 
 	assert len(metric_files) == len(time_files)
 
@@ -749,12 +749,12 @@ def plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False):
 	ax2.set_ylabel("Time")
 
 	ax2.set_xticklabels(strat_names)
-	ax2.set_title("Comparison of time and performance for "+data_name)
+	ax2.set_title("Comparison of time and performance for "+data_name, fontsize=22)
 	ax2.set_ylim(-0.05,1.05)
 
 	lines, labels = ax1.get_legend_handles_labels()
 	lines2, labels2 = ax2.get_legend_handles_labels()
-	ax2.legend(lines + lines2, labels + labels2, loc=1)
+	ax2.legend(lines + lines2, labels + labels2, loc=4)
 
 	if save:
 		savename = graph_path + "artif-interval-" + data_name + "-box.pdf"
@@ -916,16 +916,18 @@ if __name__ == '__main__':
 
 	# plt.rc('font', **font)
 
-	SMALL_SIZE = 12
-	MEDIUM_SIZE = 14
-	BIGGER_SIZE = 16
-	plt.rc('font', size=MEDIUM_SIZE)          # controls default text sizes
+	SMALL_SIZE = 16
+	MEDIUM_SIZE = 18
+	BIGGER_SIZE = 20
+	# plt.rc('text', usetex=True)
+	plt.rc('font', size=MEDIUM_SIZE, family='serif')          # controls default text sizes
 	# plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
 	plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
 	plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 	plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 	plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 	plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+	# plt.rc('font', family='serif')
 
 	# for dataset in dataset_folders:
 
@@ -953,8 +955,8 @@ if __name__ == '__main__':
 	dataset_folders = glob.glob(artif_folder+os.sep+"*")
 
 	for dataset_folder in dataset_folders:
-		plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False)
+		plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=True)
 
 	# plotArtifExp_multiple(artif_folder)
 	# plotArtifExp_multiple2(artif_folder)
-	plotArtifExp_multiplebox(artif_folder)
+	# plotArtifExp_multiplebox(artif_folder)
