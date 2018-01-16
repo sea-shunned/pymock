@@ -38,11 +38,10 @@ results_folder = os.path.join(basepath,"results","artif")+os.sep
 
 # data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + [synth_data_files[52]] + real_data_files[1:2] + real_data_files[-1:]
 
-data_files = [synth_data_files[1]] + [synth_data_files[93]] + [synth_data_files[167]] + [synth_data_files[214]] + [synth_data_files[228]] + [synth_data_files[315]] + [synth_data_files[306]] + real_data_files[1:2] + real_data_files[-1:]
+# data_files = [synth_data_files[1]] + [synth_data_files[93]] + [synth_data_files[167]] + [synth_data_files[214]] + [synth_data_files[228]] + [synth_data_files[315]] + [synth_data_files[306]] + real_data_files[1:2] + real_data_files[-1:]
 
 # synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_8_*.data')
 # data_files = synth_data_files
-
 
 data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
 # data_files = sorted(glob.glob(real_data_folder+'*.txt'))
