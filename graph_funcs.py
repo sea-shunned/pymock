@@ -415,13 +415,14 @@ def fairmutComp(folder_path, graph_path, delta, styles, save=False):
 		else:
 			plt.show()
 
-def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=True):
+def plotDeltaAssump(assumption_folder, graph_path, styles_cycler, metric="ari", save=False):
 	files = glob.glob(assumption_folder+os.sep+"*"+metric+"*")
 
 	data_names = set()
 
 	for file in files:
 		data_names.add(file.split(os.sep)[-1].split("-")[0])
+		#add if "_" in data_name to reformat tevc data names
 
 	print(data_names)
 
@@ -432,28 +433,35 @@ def plotDeltaAssump(assumption_folder, graph_path, metric="ari", save=True):
 		files = glob.glob(assumption_folder+os.sep+data_name+"*"+metric+"*")		
 		files = sorted(files)
 
-
 		means = []
 		stderrs = []
 		delta_vals = []
+		data_list = []
 
 		for file in files:
 			delta = float(".".join(file.split(os.sep)[-1].split("-")[-1].split(".")[:-1]))
 			if delta < 90:
 				continue
 
-			data = np.loadtxt(file, delimiter=',')
+			data_list.append(np.max(np.loadtxt(file, delimiter=","),axis=0))
 
-			means.append(np.mean(data))
-			stderrs.append(np.std(data, ddof=0)/np.sqrt(data.shape[1]))
+			# data = np.loadtxt(file, delimiter=',')
+
+			# means.append(np.mean(data))
+			# stderrs.append(np.std(data, ddof=0)/np.sqrt(data.shape[1]))
 
 			delta_vals.append(delta)
 
-		
-		ax.errorbar(delta_vals, means, yerr=stderrs, label=data_name, capsize=5, capthick=1)
+			means.append(np.mean(data_list))
+			stderrs.append(np.std(data_list, ddof=0)/np.sqrt(len(data_list)))
+
+		ax.errorbar(delta_vals, means, yerr=stderrs, label=data_name, capsize=5, capthick=1, **next(styles_cycler))
+		# ax.errorbar(delta_vals, data_list, label=data_name, capsize=5, capthick=1, **next(styles_cycler))
 
 	ax.set_xlabel("Delta Value")
-	ax.set_ylabel(metric)
+	ax.set_xticks([x/100.0 for x in range(9000,9999,66)])
+	ax.set_ylim(-0.05,1.05)
+	ax.set_ylabel("Adjusted Rand Index (ARI)")
 
 	ax.legend(loc='lower left')
 
@@ -954,9 +962,11 @@ if __name__ == '__main__':
 	# artif_folder = os.path.join(results_path, "artif")+os.sep
 	dataset_folders = glob.glob(artif_folder+os.sep+"*")
 
-	for dataset_folder in dataset_folders:
-		plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=True)
+	# for dataset_folder in dataset_folders:
+	# 	plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=True)
 
 	# plotArtifExp_multiple(artif_folder)
 	# plotArtifExp_multiple2(artif_folder)
 	# plotArtifExp_multiplebox(artif_folder)
+
+	plotDeltaAssump(assumption_folder,graph_path,styles_cycler)

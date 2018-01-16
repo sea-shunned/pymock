@@ -40,7 +40,6 @@ results_folder = os.path.join(basepath,"results","artif")+os.sep
 
 data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
 # data_files = sorted(glob.glob(real_data_folder+'*.txt'))
-
 print(data_files)
 
 # Specify the number of runs

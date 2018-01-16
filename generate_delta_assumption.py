@@ -29,10 +29,10 @@ real_data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 
 results_folder = os.path.join(basepath,"results","delta_assump")+os.sep
 
-data_files = real_data_files[1:2] + real_data_files[-1:]
+# data_files = real_data_files[1:2] + real_data_files[-1:]
 
 # Try to select the smallest and largest UKC datasets
-
+data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
 print(data_files)
 
 # Specify the number of runs
@@ -51,7 +51,7 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 # delta_vals = [i for i in range(90,99,3)]
 # delta_vals = []
 
-delta_vals = [x/100.0 for x in range(9000,9999,66)]
+delta_vals = [x/1000.0 for x in range(90000,99999,666)]
 # delta_vals = [0, 10, 20, 30, 40, 50, 60, 70, 80]
 
 # Parameters across all strategies
@@ -197,10 +197,10 @@ for file_path in data_files:
 
 			if save_results:
 				# Save array data
-				np.savetxt(filename+"-fitness-"+str(delta)+".csv", fitness_array, delimiter=",")
-				np.savetxt(filename+"-hv-"+str(delta)+".csv", hv_array, delimiter=",")
-				np.savetxt(filename+"-ari-"+str(delta)+".csv", ari_array, delimiter=",")
-				np.savetxt(filename+"-numclusts-"+str(delta)+".csv", numclusts_array, delimiter=",")
+				np.savetxt(filename+"-fitness-"+str(delta)+"-assump.csv", fitness_array, delimiter=",")
+				np.savetxt(filename+"-hv-"+str(delta)+"-assump.csv", hv_array, delimiter=",")
+				np.savetxt(filename+"-ari-"+str(delta)+"-assump.csv", ari_array, delimiter=",")
+				np.savetxt(filename+"-numclusts-"+str(delta)+"-assump.csv", numclusts_array, delimiter=",")
 				np.savetxt(filename+"-time-"+str(delta)+".csv", time_array, delimiter=",")
 
 		# Modify the below for specific dataset folder
