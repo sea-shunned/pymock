@@ -569,6 +569,9 @@ def plotArtifExp_multiple(artif_folder, metric="ari"):
 		metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
 		time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
 
+		if metric_files == []:
+			continue
+
 		means = []
 		errs = []
 		strat_names = []
@@ -637,6 +640,11 @@ def plotArtifExp_multiple2(artif_folder, metric="ari"):
 		metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
 		time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
 
+		if metric_files == []:
+			continue
+
+		print(len(metric_files))
+
 		means = []
 		errs = []
 		strat_names = []
@@ -668,9 +676,9 @@ def plotArtifExp_multiple2(artif_folder, metric="ari"):
 			min_val = np.min(data_time)
 			denom = max_val - min_val
 
-			print(data_time)
+			# print(data_time)
 			data_time = (data_time - min_val)/denom
-			print(data_time)
+			# print(data_time)
 
 			means.append(np.mean(data_time))
 			errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
@@ -691,8 +699,9 @@ def plotArtifExp_multiple2(artif_folder, metric="ari"):
 
 
 def plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False):
-	metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*interval*"), reverse=True)
-	time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*interval*"), reverse=True)
+	metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
+	time_files = sorted(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"), reverse=True)
+	print(metric_files)
 
 	assert len(metric_files) == len(time_files)
 
@@ -767,6 +776,7 @@ def plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False):
 	if save:
 		savename = graph_path + "artif-interval-" + data_name + "-box.pdf"
 		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
+		plt.close(fig)
 	else:
 		plt.show()
 
@@ -887,6 +897,142 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 
 	# Consider saving these axes into a dict or something, and then adding them to a fig afterwards with a gridspec subplot - may be able to control axes better/make it look better
 
+def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="hv"):
+	# plt.rc('text', usetex=True)
+
+	# Using *_9 just to select the new data, can modify to get the old
+	folders = glob.glob(artif_folder+os.sep+"*_9", recursive=True)
+	folders = folders[:13]
+
+	fig = plt.figure(figsize=(18,12))
+	ax1 = fig.add_subplot(111)
+	
+	# Have the strategies here in a defined order, then just check that the one extracted from the filename matches to ensure consistency
+	# I'll need to change this for base MOCK inclusion
+	# stratname_ref = ["reinit", "hypermutspec", "hypermutall", "fairmut", "carryon"]
+	stratname_ref = ["main_base-sr1", "main_base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
+
+	# Lists to aggregate the data over all datasets
+	data_metric_list = []
+	data_time_list = []
+
+	for num_dataset, dataset_folder in enumerate(folders):
+		metric_files = glob.glob(dataset_folder+os.sep+"*main_base*"+metric+"*")
+		metric_files.extend(glob.glob(dataset_folder+os.sep+"*"+metric+"*"+method+"*"))
+
+		time_files = glob.glob(dataset_folder+os.sep+"*main_base*time*")
+		time_files.extend(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"+method+"*"))
+
+		metric_files = sorted(metric_files, reverse=False)
+		time_files = sorted(time_files, reverse=False)
+		print(metric_files)
+
+		assert len(metric_files) == len(time_files)
+
+		if metric_files == []:
+			continue
+
+		strat_names = []
+
+		# Constants for normalising the data between 0 and 1
+		min_val = np.inf
+		max_val = 0
+
+		# Extract data_name
+		data_name = dataset_folder.split(os.sep)[-1]
+
+		for index, file in enumerate(metric_files):
+			print(file)
+			
+			data_metric = np.max(np.loadtxt(file, delimiter=","),axis=0)
+
+			if "main_base" in file:
+				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
+
+				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
+				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
+				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
+
+			else:
+				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+			# Show order of strategies
+			print(strat_names[-1], index, stratname_ref[index])
+
+			assert strat_names[-1] == stratname_ref[index], "Strat name difference "+strat_names[-1]+" "+stratname_ref[index]
+
+			# Create initial arrays for the first dataset, then append afterwards
+			# The boxplot command can then handle everything
+			# We should have just a single array for each of the strategies
+
+			# strat_index = stratname_ref.index(strat_names[-1])
+			# print(strat_names[-1], index, strat_index)
+
+			# It could be useful to use stratname_ref.index(strat_names[-1]) to avoid enumerate for loop issue with empty datasets (though that shouldn't be a problem for the _9_ datasets)
+
+			if num_dataset == 0:
+				data_metric_list.append(data_metric)
+
+			else:
+				data_metric_list[index] = np.append(data_metric_list[index], data_metric)
+
+			data_time = np.loadtxt(time_files[index], delimiter=',')
+
+			if np.max(data_time) > max_val:
+				max_val = np.max(data_time)
+
+			if np.min(data_time) < min_val:
+				min_val = np.min(data_time)
+
+		denom = max_val - min_val
+
+		for index, file in enumerate(time_files):
+			data_time = np.loadtxt(file, delimiter=',')
+			data_time = (data_time - min_val)/denom
+
+			if num_dataset == 0:
+				data_time_list.append(data_time)
+
+			else:
+				# data_time_list[index].append(data_time)
+				data_time_list[index] = np.append(data_time_list[index], data_time)
+
+	print(data_metric_list)
+	assert len(data_metric_list) == len(stratname_ref)
+	assert len(data_time_list) == len(stratname_ref)
+
+	medians = []
+	errs = []
+
+	for times in data_time_list:
+		medians.append(np.median(times))
+		errs.append(np.std(times, ddof=0)/np.sqrt(times.shape[0]))
+
+	ax1.boxplot(data_metric_list)
+	ax1.set_ylabel("ARI")
+	ax1.set_xlabel("Strategy")
+	ax1.set_ylim(0.55,1.05)
+
+	ax2 = ax1.twinx()
+
+	ax2.errorbar(list(range(1,len(data_time_list)+1)), medians, color="red", linestyle="--", yerr=errs, capsize=7, capthick=1)
+
+	ax2.set_ylabel("Time")
+	ax2.set_ylim(-0.05,1.05)
+	print(strat_names)
+	print(stratname_ref)
+
+	# stratname_ref[-1] = r'$\mathit{CO}$'
+
+	for i, strat in enumerate(stratname_ref):
+		stratname_ref[i] = strat_name_dict[strat]
+
+	ax2.set_xticklabels(stratname_ref)
+
+	plt.show()
+
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
@@ -937,13 +1083,14 @@ if __name__ == '__main__':
 	plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 	# plt.rc('font', family='serif')
 
+	plt.rc('mathtext', fontset='cm')
+
 	# for dataset in dataset_folders:
 
 	# # 	plotHVgens(dataset, delta, graph_path, styles, save)
 	# 	# plotARI(dataset, delta, graph_path, save)
 	# 	# plotNumClusts(dataset, delta, graph_path, save)
 	# 	# plotTimes(dataset, delta, graph_path, styles_cycler, save)
-
 
 	# 	if "200_20_2" in dataset:
 	# 		print(dataset)
@@ -959,14 +1106,29 @@ if __name__ == '__main__':
 	# 		plotNumClusts(dataset, delta, graph_path, False)
 	# 		plotHVgens(dataset, delta, graph_path, styles, False)
 
-	# artif_folder = os.path.join(results_path, "artif")+os.sep
-	dataset_folders = glob.glob(artif_folder+os.sep+"*")
+	artif_folder = os.path.join(results_path, "artif")+os.sep
+
+	dataset_folders = glob.glob(artif_folder+os.sep+"*_9")
 
 	# for dataset_folder in dataset_folders:
-	# 	plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=True)
+	# 	plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False)
 
 	# plotArtifExp_multiple(artif_folder)
 	# plotArtifExp_multiple2(artif_folder)
 	# plotArtifExp_multiplebox(artif_folder)
 
-	plotDeltaAssump(assumption_folder,graph_path,styles_cycler)
+	# plotDeltaAssump(assumption_folder,graph_path,styles_cycler)
+
+	# Remaps strategy names with mathtext formatting
+	# Will need to add ones for base-MOCK at SR5 and SR1
+	strat_name_dict = {
+	"main_base-sr1" : r'$\Delta-MOCK (sr1)$', 
+	"main_base-sr5" : r'$\Delta-MOCK (sr5)$',
+	"carryon" : r'$\mathit{CO}$',
+	"fairmut" : r'$\mathit{FM}$',
+	"hypermutall" : r'$\mathit{TH}_{all}$',
+	"hypermutspec" : r'$\mathit{TH}_{new}$',
+	"reinit" : r'$\mathit{RO}$',
+	}
+
+	plotArtifExp_allDS(artif_folder, strat_name_dict)
