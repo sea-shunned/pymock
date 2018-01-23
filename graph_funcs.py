@@ -918,12 +918,12 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="rand
 		metric_files = glob.glob(dataset_folder+os.sep+"*base*"+metric+"*")
 		metric_files.extend(glob.glob(dataset_folder+os.sep+"*"+metric+"*"+method+"*"))
 
-		metric_files = glob.glob(dataset_folder+os.sep+"*base*"+metric+"*")
-		time_files.extend(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"+method+"*"))
+		time_files = glob.glob(dataset_folder+os.sep+"*base*time*")
+		time_files.extend(glob.glob(dataset_folder+os.sep+"*time*"+method+"*"))
 
 		metric_files = sorted(metric_files, reverse=False)
 		time_files = sorted(time_files, reverse=False)
-		print(metric_files)
+		# print(metric_files)
 
 		assert len(metric_files) == len(time_files)
 
@@ -949,7 +949,7 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="rand
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
 
 				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
-				
+
 				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
 				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
@@ -978,6 +978,8 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="rand
 				data_metric_list[index] = np.append(data_metric_list[index], data_metric)
 
 			data_time = np.loadtxt(time_files[index], delimiter=',')
+			# print(data_time)
+			# print(strat_names[-1])
 
 			if np.max(data_time) > max_val:
 				max_val = np.max(data_time)
@@ -1016,17 +1018,20 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="rand
 
 	ax2 = ax1.twinx()
 
-	ax2.errorbar(list(range(1,len(data_time_list)+1)), medians, color="red", linestyle="--", yerr=errs, capsize=7, capthick=1)
+	ax2.errorbar(list(range(1,len(data_time_list)+1)), medians, color="red", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
 
 	ax2.set_ylabel("Standarised Time per Run")
 	ax2.set_ylim(-0.05,1.05)
 	# print(strat_names)
 	# print(stratname_ref)
 
+	ax2.set_title("Comparison of strategies over all datasets using "+method+" trigger", fontsize=22)
+
 	for i, strat in enumerate(stratname_ref):
 		stratname_ref[i] = strat_name_dict[strat]
 
 	ax2.set_xticklabels(stratname_ref)
+	ax2.legend(loc=4)
 
 	if save:
 		savename = graph_path + "artif-allds-box.pdf"
@@ -1134,4 +1139,4 @@ if __name__ == '__main__':
 	"reinit" : r'$\mathit{RO}$',
 	}
 
-	plotArtifExp_allDS(artif_folder, strat_name_dict)
+	plotArtifExp_allDS(artif_folder, strat_name_dict, method="interval")
