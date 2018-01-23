@@ -4,6 +4,10 @@ import numpy as np
 import os
 import fnmatch
 
+import matplotlib.pyplot as plt
+from scipy.stats import wilcoxon
+
+
 def calcAggregates():
 	# Create a dataframe with the average, std dev, and std error for each delta value
 
@@ -145,11 +149,122 @@ def aggregHV():
 
 			df_results.to_csv(save_name,sep=",",header=True,index=False)
 
+def saveARIs(artif_folder, method, metric="ari"):
+	folders = glob.glob(artif_folder+os.sep+"*_9", recursive=True)
+
+	# Have the strategies here in a defined order, then just check that the one extracted from the filename matches to ensure consistency
+	stratname_ref = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
+
+	# Lists to aggregate the data over all datasets
+	data_metric_list = []
+
+	for num_dataset, dataset_folder in enumerate(folders):
+		metric_files = glob.glob(dataset_folder+os.sep+"*base*"+metric+"*")
+		metric_files.extend(glob.glob(dataset_folder+os.sep+"*"+metric+"*"+method+"*"))
+
+		metric_files = sorted(metric_files, reverse=False)
+
+		strat_names = []
+
+		# print(metric_files,"\n")
+
+		# Extract data_name
+		data_name = dataset_folder.split(os.sep)[-1]
+
+		for index, file in enumerate(metric_files):
+			# print(file)
+			
+			data_metric = np.max(np.loadtxt(file, delimiter=","),axis=0)
+
+			if "base" in file:
+				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
+
+				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
+
+				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
+				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
+
+			else:
+				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+			# Show order of strategies
+			# print(strat_names[-1], index, stratname_ref[index])
+
+			assert strat_names[-1] == stratname_ref[index], "Strat name difference "+strat_names[-1]+" "+stratname_ref[index]
+
+			# Create initial arrays for the first dataset, then append afterwards
+			# The boxplot command can then handle everything
+			# We should have just a single array for each of the strategies
+
+			# strat_index = stratname_ref.index(strat_names[-1])
+			# print(strat_names[-1], index, strat_index)
+
+			# It could be useful to use stratname_ref.index(strat_names[-1]) to avoid enumerate for loop issue with empty datasets (though that shouldn't be a problem for the _9_ datasets)
+
+			if num_dataset == 0:
+				data_metric_list.append(data_metric)
+
+			else:
+				data_metric_list[index] = np.append(data_metric_list[index], data_metric)
+
+
+	for i, data in enumerate(data_metric_list):
+		# print(data, stratname_ref[i])
+		if "base" in stratname_ref[i]:
+			fname = results_path + os.sep + "artif-allARI-"+stratname_ref[i]+".csv"
+			np.savetxt(fname, data, delimiter=",")
+		else:
+			fname = results_path + os.sep + "artif-allARI-"+stratname_ref[i]+"-"+method+".csv"
+			np.savetxt(fname, data, delimiter=",")
+
+
+
+def ARIWilcoxon(results_path, strat1, strat2, method1, method2):
+
+	if "base" in strat1:
+		data1_fname = glob.glob(results_path+os.sep+"*"+strat1+"*")[0]
+	else:
+		data1_fname = glob.glob(results_path+os.sep+"*"+strat1+"*"+method1+"*")[0]
+
+	if "base" in strat2:
+		data2_fname = glob.glob(results_path+os.sep+"*"+strat2+"*")[0]
+	else:
+		data2_fname = glob.glob(results_path+os.sep+"*"+strat2+"*"+method2+"*")[0]
+
+	print(data1_fname)
+	print(data2_fname)
+
+	data1 = np.loadtxt(data1_fname, delimiter=",")
+	data2 = np.loadtxt(data2_fname, delimiter=",")
+
+	# fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True)
+	# axs[0].hist(data1, bins=200)
+	# axs[1].hist(data2, bins=200)
+	# plt.show()
+
+	sum_ranks, p_val = wilcoxon(data1, data2, zero_method='wilcox')
+
+	print("Comparing strategies:",strat1,"and",strat2)
+	print("Using methods:", method1, "and", method2)
+	print("Sum Ranks:",sum_ranks)
+	print("P-Value:", p_val,"\n")
+	print("Medians:", strat1, np.median(data1), strat2, np.median(data2))
+	print("Means:", strat1, np.mean(data1), strat2, np.mean(data2))
+	print("Mins:", strat1, np.min(data1), strat2, np.min(data2))
+
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
+	results_path = os.path.join(basepath, "results")
+	artif_folder = os.path.join(results_path, "artif")
 
-	# folder_path = basepath+"/results/tevc_20_60/"
+	methods = ["random", "hv"]
+	strategies = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
 
-	# calcAggregates()
-	aggregHV()
+	# for method in methods:
+	# 	saveARIs(artif_folder, method)
+
+	ARIWilcoxon(results_path, "base-sr5", "reinit", "random","random")
+	# ARIWilcoxon(results_path, strategies[-1], strategies[-1], methods[0], methods[1])

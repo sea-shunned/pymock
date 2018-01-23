@@ -43,8 +43,8 @@ results_folder = os.path.join(basepath,"results","artif")+os.sep
 # synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_8_*.data')
 # data_files = synth_data_files
 
-data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
-# data_files = sorted(glob.glob(real_data_folder+'*.txt'))
+# data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
+data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 print(data_files)
 
 # Specify the number of runs

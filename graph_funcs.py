@@ -897,30 +897,28 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 
 	# Consider saving these axes into a dict or something, and then adding them to a fig afterwards with a gridspec subplot - may be able to control axes better/make it look better
 
-def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="hv"):
+def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="random", save=False):
 	# plt.rc('text', usetex=True)
 
 	# Using *_9 just to select the new data, can modify to get the old
 	folders = glob.glob(artif_folder+os.sep+"*_9", recursive=True)
-	folders = folders[:13]
+	# folders = folders[:13]
 
 	fig = plt.figure(figsize=(18,12))
 	ax1 = fig.add_subplot(111)
 	
 	# Have the strategies here in a defined order, then just check that the one extracted from the filename matches to ensure consistency
-	# I'll need to change this for base MOCK inclusion
-	# stratname_ref = ["reinit", "hypermutspec", "hypermutall", "fairmut", "carryon"]
-	stratname_ref = ["main_base-sr1", "main_base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
+	stratname_ref = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
 
 	# Lists to aggregate the data over all datasets
 	data_metric_list = []
 	data_time_list = []
 
 	for num_dataset, dataset_folder in enumerate(folders):
-		metric_files = glob.glob(dataset_folder+os.sep+"*main_base*"+metric+"*")
+		metric_files = glob.glob(dataset_folder+os.sep+"*base*"+metric+"*")
 		metric_files.extend(glob.glob(dataset_folder+os.sep+"*"+metric+"*"+method+"*"))
 
-		time_files = glob.glob(dataset_folder+os.sep+"*main_base*time*")
+		metric_files = glob.glob(dataset_folder+os.sep+"*base*"+metric+"*")
 		time_files.extend(glob.glob(dataset_folder+os.sep+"*"+"time"+"*"+method+"*"))
 
 		metric_files = sorted(metric_files, reverse=False)
@@ -942,15 +940,16 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="hv")
 		data_name = dataset_folder.split(os.sep)[-1]
 
 		for index, file in enumerate(metric_files):
-			print(file)
+			# print(file)
 			
 			data_metric = np.max(np.loadtxt(file, delimiter=","),axis=0)
 
-			if "main_base" in file:
+			if "base" in file:
 				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
 
-				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
+				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
+				
 				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
 				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
@@ -959,7 +958,7 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="hv")
 				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 
 			# Show order of strategies
-			print(strat_names[-1], index, stratname_ref[index])
+			# print(strat_names[-1], index, stratname_ref[index])
 
 			assert strat_names[-1] == stratname_ref[index], "Strat name difference "+strat_names[-1]+" "+stratname_ref[index]
 
@@ -999,7 +998,7 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="hv")
 				# data_time_list[index].append(data_time)
 				data_time_list[index] = np.append(data_time_list[index], data_time)
 
-	print(data_metric_list)
+	# print(data_metric_list)
 	assert len(data_metric_list) == len(stratname_ref)
 	assert len(data_time_list) == len(stratname_ref)
 
@@ -1011,27 +1010,31 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="hv")
 		errs.append(np.std(times, ddof=0)/np.sqrt(times.shape[0]))
 
 	ax1.boxplot(data_metric_list)
-	ax1.set_ylabel("ARI")
+	ax1.set_ylabel("Adjusted Rand Index (ARI)")
 	ax1.set_xlabel("Strategy")
-	ax1.set_ylim(0.55,1.05)
+	ax1.set_ylim(0.35,1.05)
 
 	ax2 = ax1.twinx()
 
 	ax2.errorbar(list(range(1,len(data_time_list)+1)), medians, color="red", linestyle="--", yerr=errs, capsize=7, capthick=1)
 
-	ax2.set_ylabel("Time")
+	ax2.set_ylabel("Standarised Time per Run")
 	ax2.set_ylim(-0.05,1.05)
-	print(strat_names)
-	print(stratname_ref)
-
-	# stratname_ref[-1] = r'$\mathit{CO}$'
+	# print(strat_names)
+	# print(stratname_ref)
 
 	for i, strat in enumerate(stratname_ref):
 		stratname_ref[i] = strat_name_dict[strat]
 
 	ax2.set_xticklabels(stratname_ref)
 
-	plt.show()
+	if save:
+		savename = graph_path + "artif-allds-box.pdf"
+		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
+		plt.close(fig)
+
+	else:
+		plt.show()
 
 
 if __name__ == '__main__':
@@ -1122,8 +1125,8 @@ if __name__ == '__main__':
 	# Remaps strategy names with mathtext formatting
 	# Will need to add ones for base-MOCK at SR5 and SR1
 	strat_name_dict = {
-	"main_base-sr1" : r'$\Delta-MOCK (sr1)$', 
-	"main_base-sr5" : r'$\Delta-MOCK (sr5)$',
+	"base-sr1" : r'$\Delta-MOCK (sr1)$', 
+	"base-sr5" : r'$\Delta-MOCK (sr5)$',
 	"carryon" : r'$\mathit{CO}$',
 	"fairmut" : r'$\mathit{FM}$',
 	"hypermutall" : r'$\mathit{TH}_{all}$',
