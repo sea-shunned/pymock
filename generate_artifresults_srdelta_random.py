@@ -38,12 +38,12 @@ results_folder = os.path.join(basepath,"results","artif")+os.sep
 
 # data_files = [synth_data_files[1]] + [synth_data_files[93]] + [synth_data_files[167]] + [synth_data_files[214]] + [synth_data_files[228]] + [synth_data_files[315]] + [synth_data_files[306]] + real_data_files[1:2] + real_data_files[-1:]
 
-data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
-# data_files = sorted(glob.glob(real_data_folder+'*.txt'))
+# data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
+data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 print(data_files)
 
 # Specify the number of runs
-num_runs = 1
+num_runs = 30
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -70,7 +70,7 @@ delta_reduce = 1
 
 funcs = [main_base.main, artif_carryon.main, artif_hypermutspec.main, artif_hypermutall.main, artif_reinit.main, artif_fairmut.main]
 
-save_results = False
+save_results = True
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
@@ -183,12 +183,12 @@ for file_path in data_files:
 			first_run = False
 
 		for func in funcs:
-			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
+			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1]
 			print(strat_name)
 			print(func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1])
 			
 			# Don't do sr5 for any of the artif scripts
-			if strat_name != "main_base" and sr_vals[index_d]==5:
+			if strat_name != "base" and sr_vals[index_d]==5:
 				# print("\n",strat_name, sr_vals[index_d], delta,"\n")
 				continue
 
@@ -212,7 +212,7 @@ for file_path in data_files:
 				print("HV ref:", HV_ref)
 
 				print("Run",run,"with", strat_name)
-				if strat_name == "main_base":
+				if strat_name == "base":
 					start_time = time.time()
 					pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
 					end_time = time.time()
@@ -265,7 +265,7 @@ for file_path in data_files:
 
 				# Pickle delta triggers
 				# No triggers for normal delta-MOCK
-				if strat_name != "main_base":
+				if strat_name != "base":
 					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+"-random.csv","w") as f:
 					# 	pickle.dump(delta_triggers, f)
 						writer=csv.writer(f)

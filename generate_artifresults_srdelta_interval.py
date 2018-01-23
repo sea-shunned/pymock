@@ -188,7 +188,7 @@ for file_path in data_files:
 			first_run = False
 
 		for func in funcs:
-			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
+			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1]
 			
 			# # Don't do sr5 for any of the artif scripts
 			# if strat_name != "main_base" and sr_vals[index_d]==5:
@@ -215,7 +215,7 @@ for file_path in data_files:
 				print("HV ref:", HV_ref)
 
 				print("Run",run,"with", strat_name)
-				if strat_name == "main_base":
+				if strat_name == "base":
 					start_time = time.time()
 					pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
 					end_time = time.time()
@@ -268,7 +268,7 @@ for file_path in data_files:
 
 				# Pickle delta triggers
 				# No triggers for normal delta-MOCK
-				if strat_name != "main_base":
+				if strat_name != "base":
 					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+"-interval.csv","w") as f:
 					# 	pickle.dump(delta_triggers, f)
 						writer=csv.writer(f)
