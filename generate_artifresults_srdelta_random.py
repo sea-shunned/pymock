@@ -43,7 +43,7 @@ data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
 print(data_files)
 
 # Specify the number of runs
-num_runs = 30
+num_runs = 1
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -70,7 +70,7 @@ delta_reduce = 1
 
 funcs = [main_base.main, artif_carryon.main, artif_hypermutspec.main, artif_hypermutall.main, artif_reinit.main, artif_fairmut.main]
 
-save_results = True
+save_results = False
 
 fitness_cols = ["VAR", "CNN", "Run"]
 
@@ -184,6 +184,8 @@ for file_path in data_files:
 
 		for func in funcs:
 			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
+			print(strat_name)
+			print(func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1])
 			
 			# Don't do sr5 for any of the artif scripts
 			if strat_name != "main_base" and sr_vals[index_d]==5:
