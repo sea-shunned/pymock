@@ -1041,6 +1041,137 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="rand
 	else:
 		plt.show()
 
+def plotArtif_specStrat(results_path, strategy="reinit"):
+	fnames = []
+
+	fnames.extend(glob.glob(results_path+os.sep+"*base*sr5*"))
+	fnames.extend(sorted(glob.glob(results_path+os.sep+"*"+strategy+"*"), reverse=True))
+
+	data = []
+
+	strat_names = []
+
+	for fname in fnames:
+		data.append(np.loadtxt(fname, delimiter=","))
+
+		strat_names.append("-".join([fname.split(os.sep)[-1].split(".")[0].split("-")[-2],fname.split(os.sep)[-1].split(".")[0].split("-")[-1]]))
+
+		# print(fname)
+		# print(strat_names[-1])
+
+	fig = plt.figure(figsize=(18,12))
+	ax1 = fig.add_subplot(111)
+	ax1.boxplot(data)
+	ax1.set_xticklabels(strat_names)
+
+	plt.show()
+
+def plotArtif_pairs(results_path, strategy="reinit"):
+	fnames = []
+	fnames.extend(glob.glob(results_path+os.sep+"*base*sr5*"))
+	fnames.extend(sorted(glob.glob(results_path+os.sep+"*"+strategy+"*"), reverse=True))
+
+	data = []
+
+	strat_names = []
+
+	for fname in fnames:
+		data.append(np.loadtxt(fname, delimiter=","))
+
+		strat_names.append("-".join([fname.split(os.sep)[-1].split(".")[0].split("-")[-2],fname.split(os.sep)[-1].split(".")[0].split("-")[-1]]))
+
+
+	d = len(data)
+	fig, axes = plt.subplots(nrows=d, ncols=d)#, sharex='col', sharey='row')
+	a=0
+	b=1
+	for i in range(d):
+		for j in range(d):
+			ax = axes[i,j]
+			if i == j:
+				# ax.text(0.5, 0.5, strat_names[i], transform=ax.transAxes,
+				# 		horizontalalignment='center', verticalalignment='center',
+				# 		fontsize=16)
+				ax.hist(data[i])
+				# ax.set_title(strat_names[i])
+			else:
+				for start_ind in range(0,1050,30):
+					ax.scatter(data[j][start_ind:start_ind+29], data[i][start_ind:start_ind+29], s=6)
+
+			if i == 0:
+				ax.set_title(strat_names[a], fontsize=18)
+				a+=1
+			if j == 0 and i != 0:
+				# title = ax.set_title(strat_names[b], fontsize=18)
+				# y_ax_label = ax.set_ylabel("")
+				# title.set_position(y_ax_label.get_position() + (-2.75,0))
+				# title.set_rotation(90)
+				ax.set_title(strat_names[b], rotation='vertical',x=-0.25,y=0.8, fontsize=18)
+				b+=1
+
+	plt.show()
+
+def plotArtif_pairs2(results_path, strategy="reinit"):
+	fnames = []
+	fnames.extend(glob.glob(results_path+os.sep+"*base*sr5*"))
+	fnames.extend(sorted(glob.glob(results_path+os.sep+"*"+strategy+"*"), reverse=True))
+
+	data = []
+
+	strat_names = []
+
+	for fname in fnames:
+		data.append(np.loadtxt(fname, delimiter=","))
+
+		strat_names.append("-".join([fname.split(os.sep)[-1].split(".")[0].split("-")[-2],fname.split(os.sep)[-1].split(".")[0].split("-")[-1]]))
+
+	interval_triggers = [[12, 40, 63, 87], [12, 40, 64, 80], [27, 41, 60, 80], [13, 38, 60, 75], [19, 31, 64, 75], [11, 41, 51, 71], [21, 39, 64, 74], [10, 32, 50, 75], [23, 31, 50, 73], [29, 39, 66, 70], [23, 31, 52, 78], [20, 44, 50, 82], [11, 34, 55, 78], [22, 42, 64, 72], [11, 39, 60, 72], [28, 49, 66, 74], [20, 31, 67, 89], [27, 36, 66, 73], [14, 30, 57, 78], [12, 42, 65, 79], [18, 33, 50, 88], [14, 36, 51, 83], [20, 42, 61, 74], [25, 48, 56, 70], [10, 43, 64, 83], [20, 36, 60, 74], [26, 44, 61, 81], [10, 44, 66, 88], [29, 45, 57, 76], [14, 31, 54, 87]]
+
+	interval_triggers = [i[-1] for i in interval_triggers]
+
+	random_triggers = [[33, 43, 53, 84], [13, 45, 62, 72], [32, 54, 76, 88], [9, 71, 81, 91], [18, 28, 39, 49], [42, 52, 62, 72], [14, 24, 59, 77], [21, 40, 50, 60], [14, 27, 74, 89], [49, 60, 70, 80], [17, 27, 47, 73], [52, 62, 72, 82], [11, 21, 31, 87], [11, 21, 82, 92], [19, 29, 55, 66], [32, 42, 67, 81], [15, 78, 89, 99], [11, 36, 46, 56], [35, 60, 70, 80], [54, 74, 84, 94], [24, 34, 72, 82], [42, 52, 64, 74], [15, 30, 57, 67], [14, 34, 44, 84], [13, 27, 44, 73], [25, 35, 45, 55], [43, 53, 63, 73], [29, 39, 49, 59], [49, 59, 69, 79], [24, 51, 61, 81]]
+
+	random_triggers = [i[-1] for i in random_triggers]
+	# print(len(random_triggers))
+
+	d = len(data)
+	fig, axes = plt.subplots(nrows=d, ncols=d)#, sharex='col', sharey='row')
+	a=0
+	b=1
+	for i in range(d):
+		for j in range(d):
+			ax = axes[i,j]
+			if i == j:
+				# ax.text(0.5, 0.5, strat_names[i], transform=ax.transAxes,
+				# 		horizontalalignment='center', verticalalignment='center',
+				# 		fontsize=16)
+				ax.hist(data[i])
+				# ax.set_title(strat_names[i])
+			else:
+				for ind, start_ind in enumerate(range(0,1050,30)):
+					# print(ind)
+					if "random" in strat_names[i]:
+						ax.scatter(data[j][start_ind:start_ind+29], data[i][start_ind:start_ind+29], c=[str(i/100) for i in random_triggers], s=6)
+
+					elif "interval" in strat_names[i]:
+						ax.scatter(data[j][start_ind:start_ind+29], data[i][start_ind:start_ind+29], c=[str(i/100) for i in interval_triggers], s=6)
+					else:
+						ax.scatter(data[j][start_ind:start_ind+29], data[i][start_ind:start_ind+29], s=6)
+
+
+			if i == 0:
+				ax.set_title(strat_names[a], fontsize=18)
+				a+=1
+			if j == 0 and i != 0:
+				# title = ax.set_title(strat_names[b], fontsize=18)
+				# y_ax_label = ax.set_ylabel("")
+				# title.set_position(y_ax_label.get_position() + (-2.75,0))
+				# title.set_rotation(90)
+				ax.set_title(strat_names[b], rotation='vertical',x=-0.25,y=0.8, fontsize=18)
+				b+=1
+
+	plt.show()
+
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
@@ -1139,4 +1270,8 @@ if __name__ == '__main__':
 	"reinit" : r'$\mathit{RO}$',
 	}
 
-	plotArtifExp_allDS(artif_folder, strat_name_dict, method="random")
+	# plotArtifExp_allDS(artif_folder, strat_name_dict, method="random")
+
+	# plotArtif_specStrat(results_path)
+	# plotArtif_pairs(results_path)
+	# plotArtif_pairs2(results_path)
