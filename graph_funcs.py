@@ -1139,4 +1139,4 @@ if __name__ == '__main__':
 	"reinit" : r'$\mathit{RO}$',
 	}
 
-	plotArtifExp_allDS(artif_folder, strat_name_dict, method="interval")
+	plotArtifExp_allDS(artif_folder, strat_name_dict, method="random")
