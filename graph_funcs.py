@@ -897,7 +897,7 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 
 	# Consider saving these axes into a dict or something, and then adding them to a fig afterwards with a gridspec subplot - may be able to control axes better/make it look better
 
-def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="random", save=False):
+def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, metric="ari", method="random", save=False):
 	# plt.rc('text', usetex=True)
 
 	# Using *_9 just to select the new data, can modify to get the old
@@ -913,6 +913,8 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="rand
 	# Lists to aggregate the data over all datasets
 	data_metric_list = []
 	data_time_list = []
+
+	# box_colours = 
 
 	for num_dataset, dataset_folder in enumerate(folders):
 		metric_files = glob.glob(dataset_folder+os.sep+"*base*"+metric+"*")
@@ -1040,6 +1042,8 @@ def plotArtifExp_allDS(artif_folder, strat_name_dict, metric="ari", method="rand
 
 	else:
 		plt.show()
+
+	return ax2
 
 def plotArtif_specStrat(results_path, strategy="reinit"):
 	fnames = []
@@ -1172,6 +1176,163 @@ def plotArtif_pairs2(results_path, strategy="reinit"):
 
 	plt.show()
 
+def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, metric="ari", save=False):
+
+	folders = glob.glob(artif_folder+os.sep+"*_9", recursive=True)
+	# folders = folders[:13]
+
+	# fig = plt.figure(figsize=(18,12))
+	
+	# Have the strategies here in a defined order, then just check that the one extracted from the filename matches to ensure consistency
+
+	fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True, figsize=(18,12))
+
+	axes_list = [ax1, ax2, ax3]
+
+	for num_subplot, method in enumerate(methods):
+		# ax1 = fig.add_subplot(1,3,num_subplot+1, sharey=)
+
+		# Lists to aggregate the data over all datasets
+		data_metric_list = []
+		data_time_list = []
+
+		# box_colours = 
+
+		stratname_ref = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
+		
+		for num_dataset, dataset_folder in enumerate(folders):
+			metric_files = glob.glob(dataset_folder+os.sep+"*base*"+metric+"*")
+			metric_files.extend(glob.glob(dataset_folder+os.sep+"*"+metric+"*"+method+"*"))
+
+			time_files = glob.glob(dataset_folder+os.sep+"*base*time*")
+			time_files.extend(glob.glob(dataset_folder+os.sep+"*time*"+method+"*"))
+
+			metric_files = sorted(metric_files, reverse=False)
+			time_files = sorted(time_files, reverse=False)
+			# print(metric_files)
+
+			assert len(metric_files) == len(time_files)
+
+			if metric_files == []:
+				continue
+
+			strat_names = []
+
+			# Constants for normalising the data between 0 and 1
+			min_val = np.inf
+			max_val = 0
+
+			# Extract data_name
+			data_name = dataset_folder.split(os.sep)[-1]
+
+			for index, file in enumerate(metric_files):
+				# print(file)
+				
+				data_metric = np.max(np.loadtxt(file, delimiter=","),axis=0)
+
+				if "base" in file:
+					# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+					# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
+
+					strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
+
+					# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+					# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
+					# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
+
+				else:
+					strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+				# Show order of strategies
+				# print(strat_names[-1], index, stratname_ref[index])
+
+				assert strat_names[-1] == stratname_ref[index], "Strat name difference "+strat_names[-1]+" "+stratname_ref[index]
+
+				# Create initial arrays for the first dataset, then append afterwards
+				# The boxplot command can then handle everything
+				# We should have just a single array for each of the strategies
+
+				# strat_index = stratname_ref.index(strat_names[-1])
+				# print(strat_names[-1], index, strat_index)
+
+				# It could be useful to use stratname_ref.index(strat_names[-1]) to avoid enumerate for loop issue with empty datasets (though that shouldn't be a problem for the _9_ datasets)
+
+				if num_dataset == 0:
+					data_metric_list.append(data_metric)
+
+				else:
+					data_metric_list[index] = np.append(data_metric_list[index], data_metric)
+
+				data_time = np.loadtxt(time_files[index], delimiter=',')
+				# print(data_time)
+				# print(strat_names[-1])
+
+				if np.max(data_time) > max_val:
+					max_val = np.max(data_time)
+
+				if np.min(data_time) < min_val:
+					min_val = np.min(data_time)
+
+			denom = max_val - min_val
+
+			for index, file in enumerate(time_files):
+				data_time = np.loadtxt(file, delimiter=',')
+				data_time = (data_time - min_val)/denom
+
+				if num_dataset == 0:
+					data_time_list.append(data_time)
+
+				else:
+					# data_time_list[index].append(data_time)
+					data_time_list[index] = np.append(data_time_list[index], data_time)
+
+		# print(data_metric_list)
+		assert len(data_metric_list) == len(stratname_ref)
+		assert len(data_time_list) == len(stratname_ref)
+
+		medians = []
+		errs = []
+
+		for times in data_time_list:
+			medians.append(np.median(times))
+			errs.append(np.std(times, ddof=0)/np.sqrt(times.shape[0]))
+
+		axes_list[num_subplot].boxplot(data_metric_list)
+		# axes_list[num_subplot].set_ylabel("Adjusted Rand Index (ARI)")
+		axes_list[num_subplot].set_xlabel("Strategy")
+		axes_list[num_subplot].set_ylim(0.35,1.05)
+
+		ax_y = axes_list[num_subplot].twinx()
+
+		ax_y.errorbar(list(range(1,len(data_time_list)+1)), medians, color="red", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
+
+		# ax_y.set_ylabel("Standarised Time per Run")
+		ax_y.set_ylim(-0.05,1.05)
+		# print(strat_names)
+		# print(stratname_ref)
+
+		# ax_y.set_title("Comparison of strategies over all datasets using "+method+" trigger", fontsize=22)
+
+		for i, strat in enumerate(stratname_ref):
+			stratname_ref[i] = strat_name_dict[strat]
+
+		ax_y.set_xticklabels(stratname_ref)
+		plt.setp(axes_list[num_subplot].get_xticklabels(), rotation=60, horizontalalignment='right')
+		ax_y.legend(loc=4)
+
+	ax1.set_ylabel("Adjusted Rand Index (ARI)")
+	ax_y.set_ylabel("Standarised Time per Run")
+	# plt.tight_layout()
+
+
+	if save:
+		savename = graph_path + "artif-allds-box.pdf"
+		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
+		plt.close(fig)
+
+	else:
+		plt.show()
+
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
@@ -1270,8 +1431,12 @@ if __name__ == '__main__':
 	"reinit" : r'$\mathit{RO}$',
 	}
 
-	# plotArtifExp_allDS(artif_folder, strat_name_dict, method="random")
+	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, method="random")
 
 	# plotArtif_specStrat(results_path)
 	# plotArtif_pairs(results_path)
 	# plotArtif_pairs2(results_path)
+
+	methods = ["random", "interval", "hv"]
+
+	plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods)

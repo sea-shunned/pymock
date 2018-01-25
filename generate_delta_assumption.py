@@ -202,7 +202,7 @@ for file_path in data_files:
 				np.savetxt(filename+"-hv-"+str(delta)+"-assump.csv", hv_array, delimiter=",")
 				np.savetxt(filename+"-ari-"+str(delta)+"-assump.csv", ari_array, delimiter=",")
 				np.savetxt(filename+"-numclusts-"+str(delta)+"-assump.csv", numclusts_array, delimiter=",")
-				np.savetxt(filename+"-time-"+str(delta)+".csv", time_array, delimiter=",")
+				np.savetxt(filename+"-time-"+str(delta)+"-assump.csv", time_array, delimiter=",")
 
 		# Modify the below for specific dataset folder
 		# np.savetxt(results_path+classes.Dataset.data_name[:-15]+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")
