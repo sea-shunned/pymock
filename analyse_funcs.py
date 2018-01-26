@@ -233,8 +233,8 @@ def ARIWilcoxon(results_path, strat1, strat2, method1, method2):
 	else:
 		data2_fname = glob.glob(results_path+os.sep+"*"+strat2+"*"+method2+"*")[0]
 
-	print(data1_fname)
-	print(data2_fname)
+	# print(data1_fname)
+	# print(data2_fname)
 
 	data1 = np.loadtxt(data1_fname, delimiter=",")
 	data2 = np.loadtxt(data2_fname, delimiter=",")
@@ -246,10 +246,15 @@ def ARIWilcoxon(results_path, strat1, strat2, method1, method2):
 
 	sum_ranks, p_val = wilcoxon(data1, data2, zero_method='wilcox')
 
-	print("Comparing strategies:",strat1,"and",strat2)
+	print("\nComparing strategies:",strat1,"and",strat2)
 	print("Using methods:", method1, "and", method2)
 	print("Sum Ranks:",sum_ranks)
 	print("P-Value:", p_val,"\n")
+
+	# sum_ranks, p_val = wilcoxon(data1, data2, zero_method='pratt')
+	# print("Sum Ranks:",sum_ranks)
+	# print("P-Value:", p_val,"\n")
+
 	print("Medians:", strat1, np.median(data1), strat2, np.median(data2))
 	print("Means:", strat1, np.mean(data1), strat2, np.mean(data2))
 	print("Mins:", strat1, np.min(data1), strat2, np.min(data2))
@@ -260,11 +265,11 @@ if __name__ == '__main__':
 	results_path = os.path.join(basepath, "results")
 	artif_folder = os.path.join(results_path, "artif")
 
-	methods = ["random", "hv"]
+	methods = ["random","interval", "hv"]
 	strategies = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
 
-	# for method in methods:
-	# 	saveARIs(artif_folder, method)
+	for method in methods:
+		saveARIs(artif_folder, method)
 
-	ARIWilcoxon(results_path, "base-sr5", "reinit", "random","random")
+	# ARIWilcoxon(results_path, "base-sr5", "reinit", "hv","hv")
 	# ARIWilcoxon(results_path, strategies[-1], strategies[-1], methods[0], methods[1])
