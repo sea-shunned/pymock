@@ -901,7 +901,7 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, metric="ari", 
 	# plt.rc('text', usetex=True)
 
 	# Using *_9 just to select the new data, can modify to get the old
-	folders = glob.glob(artif_folder+os.sep+"*_9", recursive=True)
+	folders = glob.glob(artif_folder+os.sep+"*UKC*", recursive=True)
 	# folders = folders[:13]
 
 	fig = plt.figure(figsize=(18,12))
@@ -1431,7 +1431,7 @@ if __name__ == '__main__':
 	"reinit" : r'$\mathit{RO}$',
 	}
 
-	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, method="random")
+	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, method="hv")
 
 	# plotArtif_specStrat(results_path)
 	# plotArtif_pairs(results_path)
@@ -1439,4 +1439,4 @@ if __name__ == '__main__':
 
 	methods = ["random", "interval", "hv"]
 
-	plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods)
+	# plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods)
