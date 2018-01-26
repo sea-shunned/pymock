@@ -945,18 +945,21 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, metric="ari", 
 			# print(file)
 			
 			data_metric = np.max(np.loadtxt(file, delimiter=","),axis=0)
-
+			print(file)
 			if "base" in file:
 				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
-
-				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
+				if "UKC" in file:
+					strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
+				else:
+					strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
 
 				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
 				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
 
 			else:
+				print(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 
 			# Show order of strategies
