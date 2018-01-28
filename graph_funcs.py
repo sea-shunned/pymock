@@ -897,11 +897,11 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 
 	# Consider saving these axes into a dict or something, and then adding them to a fig afterwards with a gridspec subplot - may be able to control axes better/make it look better
 
-def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, metric="ari", method="random", save=False):
+def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9*", metric="ari", method="random", save=False):
 	# plt.rc('text', usetex=True)
 
 	# Using *_9 just to select the new data, can modify to get the old
-	folders = glob.glob(artif_folder+os.sep+"*UKC*", recursive=True)
+	folders = glob.glob(artif_folder+os.sep+dataname, recursive=True)
 	# folders = folders[:13]
 
 	fig = plt.figure(figsize=(18,12))
@@ -949,10 +949,7 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, metric="ari", 
 			if "base" in file:
 				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
-				if "UKC" in file:
-					strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
-				else:
-					strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
+				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
 
 				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
@@ -983,8 +980,8 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, metric="ari", 
 				data_metric_list[index] = np.append(data_metric_list[index], data_metric)
 
 			data_time = np.loadtxt(time_files[index], delimiter=',')
-			# print(data_time)
-			# print(strat_names[-1])
+			print(data_time)
+			print(strat_names[-1],"\n")
 
 			if np.max(data_time) > max_val:
 				max_val = np.max(data_time)
@@ -1434,7 +1431,7 @@ if __name__ == '__main__':
 	"reinit" : r'$\mathit{RO}$',
 	}
 
-	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, method="hv")
+	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method="random")
 
 	# plotArtif_specStrat(results_path)
 	# plotArtif_pairs(results_path)
