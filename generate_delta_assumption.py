@@ -33,7 +33,7 @@ results_folder = os.path.join(basepath,"results","delta_assump")+os.sep
 
 # Try to select the smallest and largest UKC datasets
 # data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
-data_files = sorted(glob.glob(real_data_folder+'*.txt'))[-1]
+data_files = sorted(glob.glob(real_data_folder+'*.txt'))[-1:]
 print(data_files)
 
 # Specify the number of runs
