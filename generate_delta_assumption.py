@@ -32,7 +32,8 @@ results_folder = os.path.join(basepath,"results","delta_assump")+os.sep
 # data_files = real_data_files[1:2] + real_data_files[-1:]
 
 # Try to select the smallest and largest UKC datasets
-data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
+# data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
+data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 print(data_files)
 
 # Specify the number of runs
@@ -201,7 +202,7 @@ for file_path in data_files:
 				np.savetxt(filename+"-hv-"+str(delta)+"-assump.csv", hv_array, delimiter=",")
 				np.savetxt(filename+"-ari-"+str(delta)+"-assump.csv", ari_array, delimiter=",")
 				np.savetxt(filename+"-numclusts-"+str(delta)+"-assump.csv", numclusts_array, delimiter=",")
-				np.savetxt(filename+"-time-"+str(delta)+".csv", time_array, delimiter=",")
+				np.savetxt(filename+"-time-"+str(delta)+"-assump.csv", time_array, delimiter=",")
 
 		# Modify the below for specific dataset folder
 		# np.savetxt(results_path+classes.Dataset.data_name[:-15]+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")

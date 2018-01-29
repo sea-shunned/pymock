@@ -38,14 +38,13 @@ results_folder = os.path.join(basepath,"results","artif")+os.sep
 
 # data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + [synth_data_files[52]] + real_data_files[1:2] + real_data_files[-1:]
 
-data_files = [synth_data_files[1]] + [synth_data_files[93]] + [synth_data_files[167]] + [synth_data_files[214]] + [synth_data_files[228]] + [synth_data_files[315]] + [synth_data_files[306]] + real_data_files[1:2] + real_data_files[-1:]
+# data_files = [synth_data_files[1]] + [synth_data_files[93]] + [synth_data_files[167]] + [synth_data_files[214]] + [synth_data_files[228]] + [synth_data_files[315]] + [synth_data_files[306]] + real_data_files[1:2] + real_data_files[-1:]
 
 # synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_8_*.data')
 # data_files = synth_data_files
 
-
-data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
-# data_files = sorted(glob.glob(real_data_folder+'*.txt'))
+# data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
+data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 print(data_files)
 
 # Specify the number of runs
@@ -189,7 +188,7 @@ for file_path in data_files:
 			first_run = False
 
 		for func in funcs:
-			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
+			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1]
 			
 			# # Don't do sr5 for any of the artif scripts
 			# if strat_name != "main_base" and sr_vals[index_d]==5:
@@ -216,7 +215,7 @@ for file_path in data_files:
 				print("HV ref:", HV_ref)
 
 				print("Run",run,"with", strat_name)
-				if strat_name == "main_base":
+				if strat_name == "base":
 					start_time = time.time()
 					pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
 					end_time = time.time()
@@ -269,7 +268,7 @@ for file_path in data_files:
 
 				# Pickle delta triggers
 				# No triggers for normal delta-MOCK
-				if strat_name != "main_base":
+				if strat_name != "base":
 					with open(filename+"-triggers-sr"+str(sr_vals[index_d])+"-interval.csv","w") as f:
 					# 	pickle.dump(delta_triggers, f)
 						writer=csv.writer(f)
