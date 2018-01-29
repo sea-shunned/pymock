@@ -897,7 +897,7 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 
 	# Consider saving these axes into a dict or something, and then adding them to a fig afterwards with a gridspec subplot - may be able to control axes better/make it look better
 
-def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9*", metric="ari", method="random", save=False):
+def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", metric="ari", method="random", save=False):
 	# plt.rc('text', usetex=True)
 
 	# Using *_9 just to select the new data, can modify to get the old
@@ -945,7 +945,7 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9*
 			# print(file)
 			
 			data_metric = np.max(np.loadtxt(file, delimiter=","),axis=0)
-			print(file)
+			# print(file)
 			if "base" in file:
 				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
@@ -956,7 +956,7 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9*
 				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
 
 			else:
-				print(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+				# print(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 
 			# Show order of strategies
@@ -980,8 +980,8 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9*
 				data_metric_list[index] = np.append(data_metric_list[index], data_metric)
 
 			data_time = np.loadtxt(time_files[index], delimiter=',')
-			print(data_time)
-			print(strat_names[-1],"\n")
+			# print(data_time)
+			# print(strat_names[-1],"\n")
 
 			if np.max(data_time) > max_val:
 				max_val = np.max(data_time)
@@ -1027,7 +1027,12 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9*
 	# print(strat_names)
 	# print(stratname_ref)
 
-	ax2.set_title("Comparison of strategies over all datasets using "+method+" trigger", fontsize=22)
+	if "*_9" in dataname:
+		ax2.set_title("Synthetic Datasets with "+method+" trigger", fontsize=22)
+	elif "UKC" in dataname:
+		ax2.set_title("Real Datasets with "+method+" trigger", fontsize=22)
+	else:
+		ax2.set_title("All Datasets with "+method+" trigger", fontsize=22)
 
 	for i, strat in enumerate(stratname_ref):
 		stratname_ref[i] = strat_name_dict[strat]
@@ -1036,7 +1041,12 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9*
 	ax2.legend(loc=4)
 
 	if save:
-		savename = graph_path + "artif-allds-box.pdf"
+		if "*_9" in dataname:
+			savename = graph_path + "artif-synthds-"+method+"-box.pdf"
+		elif "UKC" in dataname:
+			savename = graph_path + "artif-realds-"+method+"-box.pdf"
+		else:
+			savename = graph_path + "artif-allds-"+method+"-box.pdf"
 		fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
 		plt.close(fig)
 
@@ -1176,16 +1186,16 @@ def plotArtif_pairs2(results_path, strategy="reinit"):
 
 	plt.show()
 
-def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, metric="ari", save=False):
+def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*_9", metric="ari", save=False):
 
-	folders = glob.glob(artif_folder+os.sep+"*_9", recursive=True)
+	folders = glob.glob(artif_folder+os.sep+dataname, recursive=True)
 	# folders = folders[:13]
 
 	# fig = plt.figure(figsize=(18,12))
 	
 	# Have the strategies here in a defined order, then just check that the one extracted from the filename matches to ensure consistency
 
-	fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True, figsize=(18,12))
+	fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True)#, figsize=(18,12))
 
 	axes_list = [ax1, ax2, ax3]
 
@@ -1431,7 +1441,7 @@ if __name__ == '__main__':
 	"reinit" : r'$\mathit{RO}$',
 	}
 
-	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method="random")
+	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method="interval")
 
 	# plotArtif_specStrat(results_path)
 	# plotArtif_pairs(results_path)
@@ -1440,3 +1450,6 @@ if __name__ == '__main__':
 	methods = ["random", "interval", "hv"]
 
 	# plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods)
+
+	for method in methods:
+		plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method=method, save=True)
