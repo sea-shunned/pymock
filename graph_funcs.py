@@ -4,7 +4,9 @@ import numpy as np
 # import matplotlib
 # matplotlib.use('PS')
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 import os
+import random
 from itertools import cycle
 
 
@@ -473,6 +475,103 @@ def plotDeltaAssump(assumption_folder, graph_path, styles_cycler, metric="ari", 
 	else:
 		plt.show()
 
+def plotDetlaAssump_single(assumption_folder, graph_path, dataname="*_9*", metric="ari", save=False):
+	delta_vals = [x/1000.0 for x in range(90000,99999,666)]
+
+	fig = plt.figure(figsize=(18,12))
+	ax = fig.add_subplot(111)
+
+	# Or we cherry pick some, or just generate some random numbers and pick those 
+
+	# let's do it by dataset
+	# Extract all dataset names, then create a set, then randomly choose those
+	# Then we can just plot and calculate what we need for each dataset at a time
+
+	# Add dataname in here
+	data_names = {i.split(os.sep)[-1].split("-")[0] for i in glob.glob(assumption_folder+os.sep+"*")}
+
+	data_sets = random.sample(data_names, 7)
+
+	# Maybe need enumerate just for style stuff?
+	for dataset in data_sets:
+		files = sorted(glob.glob(assumption_folder+os.sep+dataset+"*"+metric+"*"))
+
+		# print(files)
+
+		data = [np.max(np.loadtxt(file, delimiter=","),axis=0) for file in files]
+
+		assert len(data) == len(delta_vals)
+
+		means = [np.mean(i) for i in data]
+		stderrs = [np.std(i, ddof=0) for i in data]
+
+		ax.errorbar(delta_vals, means, yerr=stderrs, label=dataset, capsize=5, capthick=1)
+
+	ax.set_xticks(delta_vals)
+	ax.set_xticklabels(['{0:.2f}'.format(delta) for delta in delta_vals])
+	ax.legend(loc=3)
+	plt.show()
+
+
+def plotDeltaAssump_all(assumption_folder, graph_path, dataname="*_9*", metric="ari", save=False):
+	# Create a list of the delta values that we used
+	# Then just loop over these, as we want to aggregate info for each delta value
+	delta_vals = [x/1000.0 for x in range(90000,99999,666)]
+
+	data = []
+
+	# Could add a second loop here to get the UKC values too and plot separately
+	# Or we cherry pick some, or just generate some random numbers and pick those 
+
+	for num_delta, delta in enumerate(delta_vals):
+		print(delta)
+
+		# Sort might be useful if we use this code to select the same random files to plot separately
+		files = sorted(glob.glob(assumption_folder+os.sep+dataname+"*"+metric+"*"+str(delta)+"*"))
+
+		for index, file in enumerate(files):
+			# print(file)
+			# print(np.max(np.loadtxt(file, delimiter=","),axis=0))
+			if index == 0:
+				data_metric = np.max(np.loadtxt(file, delimiter=","),axis=0)
+				# print("one time")
+
+			else:
+				# print(data_metric)
+				data_metric = np.append(data_metric, np.max(np.loadtxt(file, delimiter=","),axis=0))
+				# print(data_metric,"\n")
+
+
+		# if num_delta == 0:
+			# data.append()
+
+		print(data_metric.shape)
+		# assert
+
+		data.append(data_metric)
+
+	assert len(data) == len(delta_vals)
+
+	fig = plt.figure(figsize=(18,12))
+	ax = fig.add_subplot(111)
+
+	# print([i for i in data])
+
+	# print(len(data))
+	means = [np.mean(i) for i in data]
+	# print(means, len(means))
+	stderrs = [np.std(i, ddof=0) for i in data]
+	# print(stderrs, len(stderrs))
+
+	print(data[0])
+
+	ax.errorbar(delta_vals, means, yerr=stderrs, capsize=5, capthick=1)
+	# print(delta_vals)
+	ax.set_xticks(delta_vals)
+	ax.set_xticklabels([str(delta) for delta in delta_vals])
+	# ax.legend(loc=4)
+
+	plt.show()
 
 def plotArtifExp_single(dataset_folder,graph_path,metric="ari",save=False):
 	metric_files = sorted(glob.glob(dataset_folder+os.sep+"*"+metric+"*"), reverse=True)
@@ -1343,6 +1442,83 @@ def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*
 	else:
 		plt.show()
 
+def plotArtif_HV(artif_folder, strat="reinit", save=True):
+	# Filter to ensure only directories are returned
+	folders = filter(os.path.isdir,glob.glob(artif_folder+os.sep+"*_9"))
+	print(folders)
+
+	line_names = [r'$\Delta\operatorname{-MOCK} (sr5)$', r'$\mathit{RO}-HV$', r'$\mathit{RO}-Interval$', r'$\mathit{RO}-Random$']
+
+	run_num = 11
+
+	styles = [
+	{'color':'k', 'dashes':(None,None), 'marker':"None",'ms':7},
+	{'color':'c', 'dashes':(5,2), 'marker':"None",'ms':7},
+	{'color':'m', 'dashes':(2,5), 'marker':"None",'ms':7},
+	{'color':'g', 'dashes':(2,1,2,1), 'marker':"None",'ms':7}]
+
+	# Use None to help with legend creation loop
+	markers = ["None", "o", "^", "D"]
+	# dashes = [(None,None),(5,2),(2,5),(3,1,3)]
+
+	styles_cycler = cycle(styles)
+
+	for folder in folders:
+		print(folder)
+		# Maybe add sr1 after to see how it looks?
+		files = glob.glob(folder+os.sep+"*base*hv*sr5*")
+		# print(files)
+		files.extend(sorted(glob.glob(folder+os.sep+"*"+strat+"-hv-*")))
+		# print(files)
+
+		# print(len(files))
+		assert len(files) == 4
+
+		data_list = [np.loadtxt(file, delimiter=",", usecols=run_num) for file in files]
+
+		fig = plt.figure(figsize=(18,12))
+		ax = fig.add_subplot(111)
+
+		trigger_files = sorted(glob.glob(folder+os.sep+"*"+strat+"-triggers-*"))
+		# trigger_list = [np.loadtxt(file, delimiter=",") for file in trigger_files]
+
+		trigger_list = []
+
+		for file in trigger_files:
+			trigger_list.append([list(map(int,line.split(","))) for line in open(file)][run_num][1:])
+
+		print(len(trigger_list))
+
+		for i, data in enumerate(data_list):
+			# print(data, data.shape)
+			ax.errorbar(list(range(0,data.shape[0])), data,
+				label=line_names[i],
+				**next(styles_cycler))
+
+			# No triggers for base
+			if i>0:
+				ax.plot(trigger_list[i-1], data[trigger_list[i-1]], linestyle='None',marker=markers[i], ms=10,
+					color=styles[i]['color'],label=line_names[i])
+
+		ax.set_xlabel("Generations")
+		ax.set_ylabel("Hypervolume")
+
+		handles = []
+		for i, line in enumerate(line_names):
+			handles.append(mlines.Line2D([],[], color=styles[i]['color'], dashes=styles[i]['dashes'], marker=markers[i], ms=10, label=line))
+
+		ax.legend(handles=handles, labels=line_names)
+
+		# print(graph_path + "artif-" + folder.split(os.sep)[-1] + "-hvplot-run" +str(run_num)+".pdf")
+
+		if save:
+			savename = graph_path + "artif-" + folder.split(os.sep)[-1] + "-hvplot-run" +str(run_num)+".pdf"
+			fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
+		else:
+			plt.show()
+
+		plt.close(fig)
+		print("\n")
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
@@ -1441,7 +1617,6 @@ if __name__ == '__main__':
 	"reinit" : r'$\mathit{RO}$',
 	}
 
-	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method="interval")
 
 	# plotArtif_specStrat(results_path)
 	# plotArtif_pairs(results_path)
@@ -1451,5 +1626,17 @@ if __name__ == '__main__':
 
 	# plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods)
 
-	for method in methods:
-		plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method=method, save=True)
+	# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method="interval")
+	# for method in methods:
+	# 	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method=method, save=True)
+
+	# plotDeltaAssump_all(assumption_folder, graph_path)
+	# plotDetlaAssump_single(assumption_folder, graph_path)
+
+	plotArtif_HV(artif_folder)
+
+
+	### TO DO ###
+
+	# Clean this up by using separate functions to load and format the data (i.e. extract best ARI from each run)
+	# Then we can just pass it to the relevant plotting function and reduce this code hugely
