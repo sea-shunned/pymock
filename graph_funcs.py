@@ -8,6 +8,7 @@ import matplotlib.lines as mlines
 import os
 import random
 from itertools import cycle
+from scipy.stats import wilcoxon
 
 
 plt.style.use('seaborn-paper')
@@ -1112,31 +1113,67 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 		medians.append(np.median(times))
 		errs.append(np.std(times, ddof=0)/np.sqrt(times.shape[0]))
 
-	ax1.boxplot(data_metric_list)
+	colors = []
+
+	for i, data in enumerate(data_metric_list):
+		if "sr1" in stratname_ref[i]:
+			colors.append("white")
+			continue
+
+		elif "sr5" in stratname_ref[i]:
+			colors.append("dimgray")
+			continue
+
+		else:
+			sum_ranks, p_val = wilcoxon(data_metric_list[1], data_metric_list[i], zero_method='wilcox')
+			print(stratname_ref[1], stratname_ref[i])
+			print(sum_ranks, p_val,"\n")
+
+			# if dataname=="*UKC*":
+			# 	sum_ranks, p_val = wilcoxon(data_metric_list[0], data_metric_list[i], zero_method='wilcox')
+			# 	print(stratname_ref[0], stratname_ref[i])
+			# 	print(sum_ranks, p_val,"\n")
+
+			if p_val >= 0.05:
+				colors.append("dimgray")
+			else:
+				colors.append("white")
+
+	medianprops = dict(linewidth=2, color='midnightblue')
+
+	bxplot = ax1.boxplot(data_metric_list, patch_artist=True, medianprops=medianprops)
+
+	for patch, color in zip(bxplot['boxes'],colors):
+		patch.set_facecolor(color)
+
 	ax1.set_ylabel("Adjusted Rand Index (ARI)")
 	ax1.set_xlabel("Strategy")
 	ax1.set_ylim(0.35,1.05)
 
 	ax2 = ax1.twinx()
 
-	ax2.errorbar(list(range(1,len(data_time_list)+1)), medians, color="red", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
+	ax2.errorbar(list(range(1,len(data_time_list)+1)), medians, color="darkred", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
 
 	ax2.set_ylabel("Standarised Time per Run")
 	ax2.set_ylim(-0.05,1.05)
 	# print(strat_names)
 	# print(stratname_ref)
 
-	if "*_9" in dataname:
-		ax2.set_title("Synthetic Datasets with "+method+" trigger", fontsize=22)
-	elif "UKC" in dataname:
-		ax2.set_title("Real Datasets with "+method+" trigger", fontsize=22)
-	else:
-		ax2.set_title("All Datasets with "+method+" trigger", fontsize=22)
+	# if "*_9" in dataname:
+	# 	ax2.set_title("Synthetic Datasets with "+method+" trigger", fontsize=30)
+	# elif "UKC" in dataname:
+	# 	ax2.set_title("Real Datasets with "+method+" trigger", fontsize=30)
+	# else:
+	# 	ax2.set_title("All Datasets with "+method+" trigger", fontsize=30)
 
 	for i, strat in enumerate(stratname_ref):
 		stratname_ref[i] = strat_name_dict[strat]
 
-	ax2.set_xticklabels(stratname_ref)
+	# handles, labels = ax2.get_legend_handles_labels()
+	# print(handles)
+	# print(labels)	
+
+	ax2.set_xticklabels(stratname_ref)#, fontsize=50)
 	ax2.legend(loc=4)
 
 	if save:
@@ -1556,9 +1593,9 @@ if __name__ == '__main__':
 
 	# plt.rc('font', **font)
 
-	SMALL_SIZE = 16
-	MEDIUM_SIZE = 18
-	BIGGER_SIZE = 20
+	SMALL_SIZE = 26
+	MEDIUM_SIZE = 30
+	BIGGER_SIZE = 24
 	# plt.rc('text', usetex=True)
 	plt.rc('font', size=MEDIUM_SIZE, family='serif')          # controls default text sizes
 	# plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
@@ -1608,8 +1645,8 @@ if __name__ == '__main__':
 	# Remaps strategy names with mathtext formatting
 	# Will need to add ones for base-MOCK at SR5 and SR1
 	strat_name_dict = {
-	"base-sr1" : r'$\Delta-MOCK (sr1)$', 
-	"base-sr5" : r'$\Delta-MOCK (sr5)$',
+	"base-sr1" : r'$\Delta{-}MOCK$' '\n' r'$(sr1)$', 
+	"base-sr5" : r'$\Delta{-}MOCK$' '\n' r'$(sr5)$',
 	"carryon" : r'$\mathit{CO}$',
 	"fairmut" : r'$\mathit{FM}$',
 	"hypermutall" : r'$\mathit{TH}_{all}$',
@@ -1626,14 +1663,16 @@ if __name__ == '__main__':
 
 	# plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods)
 
-	# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method="interval")
+	# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method="interval", save=False)
+	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method="random", save=False)
+
 	# for method in methods:
 	# 	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method=method, save=True)
 
 	# plotDeltaAssump_all(assumption_folder, graph_path)
 	# plotDetlaAssump_single(assumption_folder, graph_path)
 
-	plotArtif_HV(artif_folder)
+	# plotArtif_HV(artif_folder)
 
 
 	### TO DO ###
