@@ -220,9 +220,8 @@ def saveARIs(artif_folder, method, metric="ari"):
 			np.savetxt(fname, data, delimiter=",")
 
 
-
 def ARIWilcoxon(results_path, strat1, strat2, method1, method2):
-
+	print(glob.glob(results_path+os.sep+"*"+strat1+"*"))
 	if "base" in strat1:
 		data1_fname = glob.glob(results_path+os.sep+"*"+strat1+"*")[0]
 	else:
@@ -233,8 +232,8 @@ def ARIWilcoxon(results_path, strat1, strat2, method1, method2):
 	else:
 		data2_fname = glob.glob(results_path+os.sep+"*"+strat2+"*"+method2+"*")[0]
 
-	print(data1_fname)
-	print(data2_fname)
+	# print(data1_fname)
+	# print(data2_fname)
 
 	data1 = np.loadtxt(data1_fname, delimiter=",")
 	data2 = np.loadtxt(data2_fname, delimiter=",")
@@ -246,25 +245,142 @@ def ARIWilcoxon(results_path, strat1, strat2, method1, method2):
 
 	sum_ranks, p_val = wilcoxon(data1, data2, zero_method='wilcox')
 
-	print("Comparing strategies:",strat1,"and",strat2)
+	print("\nComparing strategies:",strat1,"and",strat2)
 	print("Using methods:", method1, "and", method2)
 	print("Sum Ranks:",sum_ranks)
 	print("P-Value:", p_val,"\n")
+
+	# sum_ranks, p_val = wilcoxon(data1, data2, zero_method='pratt')
+	# print("Sum Ranks:",sum_ranks)
+	# print("P-Value:", p_val,"\n")
+
 	print("Medians:", strat1, np.median(data1), strat2, np.median(data2))
 	print("Means:", strat1, np.mean(data1), strat2, np.mean(data2))
 	print("Mins:", strat1, np.min(data1), strat2, np.min(data2))
 
+def TimeDiffs(artif_folder, method, dataname="*_9*"):
+	folders = glob.glob(artif_folder+os.sep+dataname, recursive=True)
+
+	stratname_ref = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
+
+	# Lists to aggregate the data over all datasets
+	data_time_list = []
+
+	# box_colours = 
+
+	# print(folders, len(folders))
+
+	for num_dataset, dataset_folder in enumerate(folders):
+		time_files = glob.glob(dataset_folder+os.sep+"*base*time*")
+		time_files.extend(glob.glob(dataset_folder+os.sep+"*time*"+method+"*"))
+
+		time_files = sorted(time_files, reverse=False)
+
+		# print(time_files, len(time_files))
+
+		# if time_files == []:
+		# 	continue
+
+		strat_names = []
+
+		# Constants for normalising the data between 0 and 1
+		min_val = np.inf
+		max_val = 0
+
+		# Extract data_name
+		data_name = dataset_folder.split(os.sep)[-1]
+
+		for index, file in enumerate(time_files):
+			# print(file)
+			# print(time_files, len(time_files))
+			
+			data_time = np.loadtxt(time_files[index], delimiter=',')
+			
+			if "base" in file:
+				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
+				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
+
+				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
+				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
+				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
+
+			else:
+				# print(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+			# Show order of strategies
+			# print(strat_names[-1], index, stratname_ref[index])
+
+			assert strat_names[-1] == stratname_ref[index], "Strat name difference "+strat_names[-1]+" "+stratname_ref[index]
+
+			# Create initial arrays for the first dataset, then append afterwards
+			# The boxplot command can then handle everything
+			# We should have just a single array for each of the strategies
+
+			# strat_index = stratname_ref.index(strat_names[-1])
+			# print(strat_names[-1], index, strat_index)
+
+			# It could be useful to use stratname_ref.index(strat_names[-1]) to avoid enumerate for loop issue with empty datasets (though that shouldn't be a problem for the _9_ datasets)
+
+			if np.max(data_time) > max_val:
+				max_val = np.max(data_time)
+
+			if np.min(data_time) < min_val:
+				min_val = np.min(data_time)
+
+		denom = max_val - min_val
+
+		for index, file in enumerate(time_files):
+			data_time = np.loadtxt(file, delimiter=',')
+			data_time = (data_time - min_val)/denom
+
+			if num_dataset == 0:
+				data_time_list.append(data_time)
+
+			else:
+				# data_time_list[index].append(data_time)
+				data_time_list[index] = np.append(data_time_list[index], data_time)
+
+	means = []
+	medians = []
+	errs = []
+
+	# print(len(data_time_list))
+	print(method, dataname)
+	for i, times in enumerate(data_time_list):
+		means.append(np.mean(times))
+		medians.append(np.median(times))
+		errs.append(np.std(times, ddof=0)/np.sqrt(times.shape[0]))
+
+		print(strat_names[i], stratname_ref[i])
+		print("Mean:", np.mean(times))
+		print("Median:", np.median(times))
+		print("Std error:", np.std(times, ddof=0)/np.sqrt(times.shape[0]))
+
+	print((means[-1]-means[1])/means[1])
+	print((medians[-1]-medians[1])/medians[1],"\n")
 
 if __name__ == '__main__':
 	basepath = os.getcwd()
 	results_path = os.path.join(basepath, "results")
 	artif_folder = os.path.join(results_path, "artif")
 
-	methods = ["random", "hv"]
+	methods = ["random", "interval", "hv"]
 	strategies = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
 
 	# for method in methods:
 	# 	saveARIs(artif_folder, method)
 
-	ARIWilcoxon(results_path, "base-sr5", "reinit", "random","random")
+	# ARIWilcoxon(results_path, "base-sr5", "reinit", "interval","interval")
 	# ARIWilcoxon(results_path, strategies[-1], strategies[-1], methods[0], methods[1])
+
+	# for method in methods:
+	# 	ARIWilcoxon(results_path, "base-sr5", "reinit", method, method)
+
+	# ARIWilcoxon(results_path, "reinit", "reinit", methods[1], methods[2])
+
+	for method in methods:
+		TimeDiffs(artif_folder, method)
+
+	TimeDiffs(artif_folder, method="random", dataname="*UKC*")

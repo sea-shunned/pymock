@@ -65,7 +65,7 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Square root values for delta
 # Reverse to ensure lowest delta is first (in case of issues with HV ref point)
-sr_vals = [1]
+sr_vals = [5,1]
 
 # Parameters across all strategies
 L = 10
@@ -73,7 +73,8 @@ num_indivs = 100
 num_gens = 100
 delta_reduce = 1
 
-funcs = [main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
+# funcs = [main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
+funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
 
 save_results = True
 
@@ -169,7 +170,7 @@ for file_path in data_files:
 	HV_ref = None
 
 	# Generate SR5 HV ref point to avoid issues
-	_,_, HV_ref ,_,_,_ = main_base.main(data, data_dict, 100-((100*5*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples), HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce)
+	# _,_, HV_ref ,_,_,_ = main_base.main(data, data_dict, 100-((100*5*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples), HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce)
 
 	print(100-((100*5*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples))
 
@@ -189,9 +190,9 @@ for file_path in data_files:
 			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1]
 			
 			# # Don't do sr5 for any of the artif scripts
-			# if strat_name != "main_base" and sr_vals[index_d]==5:
-			# 	# print("\n",strat_name, sr_vals[index_d], delta,"\n")
-			# 	continue
+			if strat_name != "main_base" and sr_vals[index_d]==5:
+				# print("\n",strat_name, sr_vals[index_d], delta,"\n")
+				continue
 
 			# # # Don't do sr1 for base MOCK
 			# # if strat_name == "main_base" and sr_vals[index_d]==1:

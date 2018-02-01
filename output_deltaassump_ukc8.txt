@@ -1,0 +1,4849 @@
+['/local/home/shandc/Delta-MOCK/data/UKC_datasets/UKC8.txt']
+Testing: UKC8
+Delta values to test: [90.0, 90.666, 91.332, 91.998, 92.664, 93.33, 93.996, 94.662, 95.328, 95.994, 96.66, 97.326, 97.992, 98.658, 99.324, 99.99] (16)
+Number of runs per delta value: 30
+Number of datasets: 1
+Number of strategies: 1
+Number of total MOCK Runs: 480 
+
+Starting precomputation...
+Distance array done!
+NN rankings done!
+MST done! (Took 4075.9624037742615 seconds)
+DI done!
+Precomputation done!
+
+
+Testing delta = 90.0
+
+Seed number: 11
+HV ref: None
+Run 0 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55569.08028208259
+Run 0 for d=90.0 complete (Took 438.63874530792236 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55507.11562757904
+Run 1 for d=90.0 complete (Took 450.81427454948425 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55508.906508526044
+Run 2 for d=90.0 complete (Took 441.3127658367157 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55532.915014608385
+Run 3 for d=90.0 complete (Took 443.18848299980164 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55566.63142162288
+Run 4 for d=90.0 complete (Took 440.9625880718231 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55509.01860515117
+Run 5 for d=90.0 complete (Took 444.18161153793335 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55469.61055484382
+Run 6 for d=90.0 complete (Took 440.5705635547638 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55429.574350762654
+Run 7 for d=90.0 complete (Took 448.4019672870636 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55464.43639937156
+Run 8 for d=90.0 complete (Took 448.7514247894287 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55423.33017280607
+Run 9 for d=90.0 complete (Took 442.26287364959717 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55455.1612610721
+Run 10 for d=90.0 complete (Took 454.3584473133087 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55562.43552561832
+Run 11 for d=90.0 complete (Took 439.31917691230774 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55443.34032072235
+Run 12 for d=90.0 complete (Took 440.43379259109497 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55522.164059575975
+Run 13 for d=90.0 complete (Took 433.16115713119507 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55396.89858114913
+Run 14 for d=90.0 complete (Took 446.2481701374054 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55383.35001708291
+Run 15 for d=90.0 complete (Took 435.9312598705292 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55566.63646904664
+Run 16 for d=90.0 complete (Took 449.8078227043152 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55453.74338852675
+Run 17 for d=90.0 complete (Took 458.2522819042206 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55423.93686988399
+Run 18 for d=90.0 complete (Took 449.69900465011597 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55523.92181445271
+Run 19 for d=90.0 complete (Took 450.39186120033264 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55574.31957545601
+Run 20 for d=90.0 complete (Took 451.6413233280182 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55488.688443767816
+Run 21 for d=90.0 complete (Took 439.345490694046 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55439.1989467361
+Run 22 for d=90.0 complete (Took 448.95098853111267 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55457.725063316335
+Run 23 for d=90.0 complete (Took 450.22538805007935 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55494.472842876174
+Run 24 for d=90.0 complete (Took 444.9711711406708 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55489.120733632866
+Run 25 for d=90.0 complete (Took 451.82770109176636 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55391.80956045762
+Run 26 for d=90.0 complete (Took 447.8682749271393 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55529.53929053473
+Run 27 for d=90.0 complete (Took 446.225802898407 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55359.08179832362
+Run 28 for d=90.0 complete (Took 440.5375473499298 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 3466
+Max conn: 13994.360714291193
+No. base clusters: 3467
+Length cnn pair list: 7053
+Final population hypervolume is 55414.71191713847
+Run 29 for d=90.0 complete (Took 452.9041118621826 seconds)
+
+Testing delta = 90.666
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55369.254884349706
+Run 0 for d=90.666 complete (Took 417.0522494316101 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55546.45992309164
+Run 1 for d=90.666 complete (Took 414.51502323150635 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55488.075963786745
+Run 2 for d=90.666 complete (Took 420.79740262031555 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55568.44729916245
+Run 3 for d=90.666 complete (Took 414.6687788963318 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55375.13535659184
+Run 4 for d=90.666 complete (Took 411.48129296302795 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55491.59318341136
+Run 5 for d=90.666 complete (Took 418.59456610679626 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55266.96970675863
+Run 6 for d=90.666 complete (Took 418.7710716724396 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55487.699709889566
+Run 7 for d=90.666 complete (Took 412.59013414382935 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55326.08259425128
+Run 8 for d=90.666 complete (Took 416.54906010627747 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55437.80616059965
+Run 9 for d=90.666 complete (Took 417.17160153388977 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55455.09447869311
+Run 10 for d=90.666 complete (Took 415.8506999015808 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55523.67482114099
+Run 11 for d=90.666 complete (Took 420.90566968917847 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55465.26221548894
+Run 12 for d=90.666 complete (Took 420.56541538238525 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55488.04609283196
+Run 13 for d=90.666 complete (Took 410.0202844142914 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55498.99316847281
+Run 14 for d=90.666 complete (Took 420.07348799705505 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55483.93354266112
+Run 15 for d=90.666 complete (Took 417.2343657016754 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55508.43464143479
+Run 16 for d=90.666 complete (Took 425.5663480758667 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55490.46825467307
+Run 17 for d=90.666 complete (Took 420.3441593647003 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55444.70866393402
+Run 18 for d=90.666 complete (Took 417.92546105384827 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55514.78742691607
+Run 19 for d=90.666 complete (Took 426.5361740589142 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55409.576844203795
+Run 20 for d=90.666 complete (Took 429.8491311073303 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55341.055870988086
+Run 21 for d=90.666 complete (Took 421.40006399154663 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55421.287997261075
+Run 22 for d=90.666 complete (Took 418.6081876754761 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55500.59228272007
+Run 23 for d=90.666 complete (Took 421.8073751926422 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55530.38897972543
+Run 24 for d=90.666 complete (Took 421.9333600997925 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55460.70402063274
+Run 25 for d=90.666 complete (Took 419.27096724510193 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55541.76681123947
+Run 26 for d=90.666 complete (Took 418.22670817375183 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55318.70962759277
+Run 27 for d=90.666 complete (Took 418.1671941280365 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55433.93067470516
+Run 28 for d=90.666 complete (Took 419.1799557209015 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 3235
+Max conn: 13525.091666671939
+No. base clusters: 3236
+Length cnn pair list: 6545
+Final population hypervolume is 55424.77686522527
+Run 29 for d=90.666 complete (Took 428.8887367248535 seconds)
+
+Testing delta = 91.332
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55575.465867021616
+Run 0 for d=91.332 complete (Took 390.4506137371063 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55492.82137788108
+Run 1 for d=91.332 complete (Took 402.24149227142334 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55543.774666142126
+Run 2 for d=91.332 complete (Took 399.118426322937 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55479.08526796457
+Run 3 for d=91.332 complete (Took 391.2191491127014 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55508.02935247484
+Run 4 for d=91.332 complete (Took 403.7386920452118 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55541.38669848038
+Run 5 for d=91.332 complete (Took 403.10759568214417 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55455.21984885079
+Run 6 for d=91.332 complete (Took 389.9910976886749 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55436.12124399281
+Run 7 for d=91.332 complete (Took 391.8657774925232 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55495.82737964434
+Run 8 for d=91.332 complete (Took 396.43972635269165 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55529.323295753886
+Run 9 for d=91.332 complete (Took 384.40739583969116 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55520.45601529465
+Run 10 for d=91.332 complete (Took 398.39767050743103 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55485.62228794332
+Run 11 for d=91.332 complete (Took 395.1808364391327 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55467.90883413546
+Run 12 for d=91.332 complete (Took 392.63147044181824 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55573.8937988147
+Run 13 for d=91.332 complete (Took 389.28413224220276 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55560.03419624158
+Run 14 for d=91.332 complete (Took 389.51180624961853 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55456.15849022961
+Run 15 for d=91.332 complete (Took 387.6406497955322 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55403.1826425255
+Run 16 for d=91.332 complete (Took 393.23860597610474 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55524.7199595932
+Run 17 for d=91.332 complete (Took 394.0582172870636 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55386.95242803477
+Run 18 for d=91.332 complete (Took 391.8497636318207 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55444.05279161189
+Run 19 for d=91.332 complete (Took 389.67708563804626 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55519.311984643384
+Run 20 for d=91.332 complete (Took 387.718302488327 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55427.32210539971
+Run 21 for d=91.332 complete (Took 389.89002108573914 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55532.142293492936
+Run 22 for d=91.332 complete (Took 398.5524892807007 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55474.439575316
+Run 23 for d=91.332 complete (Took 391.67540287971497 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55453.59124757996
+Run 24 for d=91.332 complete (Took 398.5138854980469 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55511.32426034843
+Run 25 for d=91.332 complete (Took 394.065447807312 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55417.20588738546
+Run 26 for d=91.332 complete (Took 396.6560468673706 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55395.824477684524
+Run 27 for d=91.332 complete (Took 392.82554936408997 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55582.76679037277
+Run 28 for d=91.332 complete (Took 380.32186913490295 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 3004
+Max conn: 12332.284126988905
+No. base clusters: 3005
+Length cnn pair list: 5991
+Final population hypervolume is 55562.32114689755
+Run 29 for d=91.332 complete (Took 391.5104682445526 seconds)
+
+Testing delta = 91.998
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55451.17174771493
+Run 0 for d=91.998 complete (Took 366.72425532341003 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55500.83223692227
+Run 1 for d=91.998 complete (Took 363.7756586074829 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55526.80452124518
+Run 2 for d=91.998 complete (Took 364.2048635482788 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55457.88144564686
+Run 3 for d=91.998 complete (Took 361.2702589035034 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55403.02825665597
+Run 4 for d=91.998 complete (Took 358.85150265693665 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55427.20802297028
+Run 5 for d=91.998 complete (Took 363.37414622306824 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55512.4608464228
+Run 6 for d=91.998 complete (Took 354.9310986995697 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55417.49963733017
+Run 7 for d=91.998 complete (Took 359.7773377895355 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55459.10853837565
+Run 8 for d=91.998 complete (Took 365.75054359436035 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55367.93186410335
+Run 9 for d=91.998 complete (Took 364.41931104660034 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55452.65255578882
+Run 10 for d=91.998 complete (Took 366.84713983535767 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55542.669605314426
+Run 11 for d=91.998 complete (Took 356.1239800453186 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55483.81027173674
+Run 12 for d=91.998 complete (Took 369.413498878479 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55476.584876208275
+Run 13 for d=91.998 complete (Took 360.5665318965912 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55514.813143149804
+Run 14 for d=91.998 complete (Took 365.77517199516296 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55401.65117091383
+Run 15 for d=91.998 complete (Took 360.19492053985596 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55453.24150140239
+Run 16 for d=91.998 complete (Took 368.05481600761414 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55431.57200698391
+Run 17 for d=91.998 complete (Took 370.57464146614075 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55452.908540655684
+Run 18 for d=91.998 complete (Took 361.48937010765076 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55385.99741803645
+Run 19 for d=91.998 complete (Took 354.5558934211731 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55401.56934761565
+Run 20 for d=91.998 complete (Took 358.59075832366943 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55478.36465101066
+Run 21 for d=91.998 complete (Took 364.9734516143799 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55394.48128777666
+Run 22 for d=91.998 complete (Took 360.6880328655243 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55354.3868456379
+Run 23 for d=91.998 complete (Took 362.41081070899963 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55555.41593027418
+Run 24 for d=91.998 complete (Took 365.63860607147217 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55465.50230172119
+Run 25 for d=91.998 complete (Took 363.7199022769928 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55477.11577203032
+Run 26 for d=91.998 complete (Took 359.5515704154968 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55499.49603248063
+Run 27 for d=91.998 complete (Took 361.5640525817871 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55531.47244271065
+Run 28 for d=91.998 complete (Took 365.840389251709 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 2774
+Max conn: 11213.170634924909
+No. base clusters: 2775
+Length cnn pair list: 5450
+Final population hypervolume is 55455.38244699316
+Run 29 for d=91.998 complete (Took 363.3447222709656 seconds)
+
+Testing delta = 92.664
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55512.8581532163
+Run 0 for d=92.664 complete (Took 328.46255445480347 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55551.545493559795
+Run 1 for d=92.664 complete (Took 341.94922852516174 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55561.431258924764
+Run 2 for d=92.664 complete (Took 340.80525255203247 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55425.37508928901
+Run 3 for d=92.664 complete (Took 342.68207359313965 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55545.75888490797
+Run 4 for d=92.664 complete (Took 331.98642683029175 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55590.7797040464
+Run 5 for d=92.664 complete (Took 337.93131828308105 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55484.29214978855
+Run 6 for d=92.664 complete (Took 331.7200644016266 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55467.43987081163
+Run 7 for d=92.664 complete (Took 333.8241937160492 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55558.506818321766
+Run 8 for d=92.664 complete (Took 332.54102849960327 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55494.040342690176
+Run 9 for d=92.664 complete (Took 343.99018383026123 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55448.15876366351
+Run 10 for d=92.664 complete (Took 340.66399216651917 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55549.219300520286
+Run 11 for d=92.664 complete (Took 336.0386872291565 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55366.8373499606
+Run 12 for d=92.664 complete (Took 338.9129807949066 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55466.90873003382
+Run 13 for d=92.664 complete (Took 341.46286153793335 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55498.354368745
+Run 14 for d=92.664 complete (Took 346.7552967071533 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55605.97889862883
+Run 15 for d=92.664 complete (Took 332.36740803718567 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55503.31771236963
+Run 16 for d=92.664 complete (Took 341.0873475074768 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55507.808315417606
+Run 17 for d=92.664 complete (Took 342.3598575592041 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55474.568352210656
+Run 18 for d=92.664 complete (Took 333.966641664505 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55485.59815451335
+Run 19 for d=92.664 complete (Took 342.61024618148804 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55494.450778828024
+Run 20 for d=92.664 complete (Took 349.78648805618286 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55512.009687432204
+Run 21 for d=92.664 complete (Took 343.1451680660248 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55445.944677152664
+Run 22 for d=92.664 complete (Took 339.36420011520386 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55465.43246486353
+Run 23 for d=92.664 complete (Took 342.6754343509674 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55547.74046070295
+Run 24 for d=92.664 complete (Took 339.58144450187683 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55417.64487806814
+Run 25 for d=92.664 complete (Took 332.22720170021057 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55459.56488928349
+Run 26 for d=92.664 complete (Took 343.7551853656769 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55560.68331264568
+Run 27 for d=92.664 complete (Took 333.33061814308167 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55469.610025424074
+Run 28 for d=92.664 complete (Took 341.66229462623596 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 2543
+Max conn: 10103.646428575135
+No. base clusters: 2544
+Length cnn pair list: 4908
+Final population hypervolume is 55554.111309429645
+Run 29 for d=92.664 complete (Took 333.1805851459503 seconds)
+
+Testing delta = 93.33
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55613.69385510502
+Run 0 for d=93.33 complete (Took 316.01943492889404 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55584.93755848858
+Run 1 for d=93.33 complete (Took 316.75453448295593 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55511.23131629339
+Run 2 for d=93.33 complete (Took 315.4798457622528 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55472.21892425771
+Run 3 for d=93.33 complete (Took 310.3690507411957 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55437.41499306478
+Run 4 for d=93.33 complete (Took 318.0872657299042 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55386.878180981046
+Run 5 for d=93.33 complete (Took 311.83904790878296 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55586.523867983866
+Run 6 for d=93.33 complete (Took 320.8118374347687 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55503.68688894666
+Run 7 for d=93.33 complete (Took 308.6761243343353 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55478.996768722995
+Run 8 for d=93.33 complete (Took 321.3102560043335 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55491.187703863674
+Run 9 for d=93.33 complete (Took 318.4884934425354 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55469.951871280304
+Run 10 for d=93.33 complete (Took 306.00597500801086 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55418.13123052113
+Run 11 for d=93.33 complete (Took 313.54020524024963 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55510.04512634825
+Run 12 for d=93.33 complete (Took 312.28339529037476 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55496.488406359065
+Run 13 for d=93.33 complete (Took 312.9467611312866 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55447.82358732996
+Run 14 for d=93.33 complete (Took 316.61974453926086 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55414.65180722901
+Run 15 for d=93.33 complete (Took 311.2573003768921 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55508.48727894585
+Run 16 for d=93.33 complete (Took 311.29801654815674 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55548.89068830456
+Run 17 for d=93.33 complete (Took 315.46250891685486 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55476.21923352073
+Run 18 for d=93.33 complete (Took 318.8267731666565 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55453.04055494927
+Run 19 for d=93.33 complete (Took 315.91639828681946 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55465.589422657285
+Run 20 for d=93.33 complete (Took 312.58089232444763 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55513.98425561214
+Run 21 for d=93.33 complete (Took 313.55830121040344 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55392.88665481243
+Run 22 for d=93.33 complete (Took 314.54925560951233 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55391.40525514681
+Run 23 for d=93.33 complete (Took 309.2224352359772 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55496.788671915136
+Run 24 for d=93.33 complete (Took 315.0443150997162 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55520.26369115412
+Run 25 for d=93.33 complete (Took 315.37043952941895 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55496.29133956736
+Run 26 for d=93.33 complete (Took 315.2710335254669 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55467.16324581964
+Run 27 for d=93.33 complete (Took 316.835542678833 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55463.783247290776
+Run 28 for d=93.33 complete (Took 307.76307797431946 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 2312
+Max conn: 9000.87103174917
+No. base clusters: 2313
+Length cnn pair list: 4392
+Final population hypervolume is 55343.74869955952
+Run 29 for d=93.33 complete (Took 318.9346704483032 seconds)
+
+Testing delta = 93.996
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55407.85435871037
+Run 0 for d=93.996 complete (Took 297.40204644203186 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55526.29329426805
+Run 1 for d=93.996 complete (Took 292.4040458202362 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55491.88764064717
+Run 2 for d=93.996 complete (Took 293.39337372779846 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55453.80192621852
+Run 3 for d=93.996 complete (Took 298.2168655395508 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55545.848383102035
+Run 4 for d=93.996 complete (Took 292.548499584198 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55544.606503074625
+Run 5 for d=93.996 complete (Took 292.20198464393616 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55560.61820827824
+Run 6 for d=93.996 complete (Took 293.25435519218445 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55576.84417021779
+Run 7 for d=93.996 complete (Took 289.0190577507019 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55517.977771669044
+Run 8 for d=93.996 complete (Took 284.2115571498871 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55526.14301029188
+Run 9 for d=93.996 complete (Took 287.78408575057983 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55519.52801375472
+Run 10 for d=93.996 complete (Took 293.17266058921814 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55474.81375347765
+Run 11 for d=93.996 complete (Took 296.0802655220032 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55499.05905480976
+Run 12 for d=93.996 complete (Took 290.31353855133057 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55508.64208527329
+Run 13 for d=93.996 complete (Took 297.34698247909546 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55414.85345007653
+Run 14 for d=93.996 complete (Took 299.8214943408966 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55416.3476113058
+Run 15 for d=93.996 complete (Took 289.5276553630829 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55457.09254262358
+Run 16 for d=93.996 complete (Took 292.9537253379822 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55552.701619468535
+Run 17 for d=93.996 complete (Took 300.1380777359009 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55479.80461575145
+Run 18 for d=93.996 complete (Took 291.79749274253845 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55546.26306608478
+Run 19 for d=93.996 complete (Took 290.74376249313354 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55505.75555020587
+Run 20 for d=93.996 complete (Took 295.7988178730011 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55552.16097332174
+Run 21 for d=93.996 complete (Took 291.0049088001251 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55515.40164272712
+Run 22 for d=93.996 complete (Took 291.00289821624756 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55516.804501515755
+Run 23 for d=93.996 complete (Took 293.08368587493896 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55432.44751581661
+Run 24 for d=93.996 complete (Took 294.36913561820984 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55516.478183243424
+Run 25 for d=93.996 complete (Took 284.8283884525299 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55497.88397052285
+Run 26 for d=93.996 complete (Took 299.4515960216522 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55510.8228136905
+Run 27 for d=93.996 complete (Took 293.3139877319336 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55361.425737535734
+Run 28 for d=93.996 complete (Took 294.53070640563965 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 2081
+Max conn: 7977.267857145445
+No. base clusters: 2082
+Length cnn pair list: 3903
+Final population hypervolume is 55462.3809734631
+Run 29 for d=93.996 complete (Took 290.1551101207733 seconds)
+
+Testing delta = 94.662
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55519.84437157893
+Run 0 for d=94.662 complete (Took 269.81729197502136 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55584.82818938842
+Run 1 for d=94.662 complete (Took 265.2828905582428 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55455.23335963712
+Run 2 for d=94.662 complete (Took 268.9700028896332 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55521.14691688894
+Run 3 for d=94.662 complete (Took 266.96375155448914 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55531.903502990746
+Run 4 for d=94.662 complete (Took 256.5090250968933 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55563.32192851758
+Run 5 for d=94.662 complete (Took 261.38859391212463 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55578.2028781698
+Run 6 for d=94.662 complete (Took 261.6933641433716 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55553.860197319016
+Run 7 for d=94.662 complete (Took 259.65476393699646 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55479.343333004756
+Run 8 for d=94.662 complete (Took 259.09623622894287 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55360.30327754918
+Run 9 for d=94.662 complete (Took 266.3847453594208 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55565.72966004056
+Run 10 for d=94.662 complete (Took 265.07176876068115 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55391.11603831258
+Run 11 for d=94.662 complete (Took 262.47921800613403 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55548.099964886824
+Run 12 for d=94.662 complete (Took 269.2958014011383 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55460.28055190741
+Run 13 for d=94.662 complete (Took 266.9721415042877 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55517.197509654834
+Run 14 for d=94.662 complete (Took 260.8633301258087 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55458.47700552537
+Run 15 for d=94.662 complete (Took 264.04936718940735 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55555.02117579521
+Run 16 for d=94.662 complete (Took 268.19331526756287 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55482.03149493015
+Run 17 for d=94.662 complete (Took 258.68047189712524 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55506.082327581884
+Run 18 for d=94.662 complete (Took 267.3553774356842 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55540.77605158966
+Run 19 for d=94.662 complete (Took 266.2818624973297 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55522.665421915015
+Run 20 for d=94.662 complete (Took 266.8249878883362 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55486.67145411988
+Run 21 for d=94.662 complete (Took 260.6794443130493 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55578.29038030409
+Run 22 for d=94.662 complete (Took 263.77646017074585 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55412.698542898455
+Run 23 for d=94.662 complete (Took 268.14449405670166 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55519.779687588154
+Run 24 for d=94.662 complete (Took 263.72899627685547 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55499.61127414616
+Run 25 for d=94.662 complete (Took 263.6425082683563 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55474.13025342786
+Run 26 for d=94.662 complete (Took 264.3752794265747 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55449.789359011826
+Run 27 for d=94.662 complete (Took 257.8776652812958 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55553.75331279502
+Run 28 for d=94.662 complete (Took 259.3796384334564 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 1850
+Max conn: 7008.572222224255
+No. base clusters: 1851
+Length cnn pair list: 3414
+Final population hypervolume is 55529.09825431672
+Run 29 for d=94.662 complete (Took 262.21377754211426 seconds)
+
+Testing delta = 95.328
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55525.71500526617
+Run 0 for d=95.328 complete (Took 237.5010175704956 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55492.75634567666
+Run 1 for d=95.328 complete (Took 240.55530047416687 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55496.30526335871
+Run 2 for d=95.328 complete (Took 237.58845400810242 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55525.88826635666
+Run 3 for d=95.328 complete (Took 241.43809175491333 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55436.88404213725
+Run 4 for d=95.328 complete (Took 248.49769926071167 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55444.7023707649
+Run 5 for d=95.328 complete (Took 240.7196056842804 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55486.61055771328
+Run 6 for d=95.328 complete (Took 251.59809684753418 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55469.32874600442
+Run 7 for d=95.328 complete (Took 243.67520308494568 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55522.721955807516
+Run 8 for d=95.328 complete (Took 242.76173424720764 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55568.70468340828
+Run 9 for d=95.328 complete (Took 240.4827425479889 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55586.95257039361
+Run 10 for d=95.328 complete (Took 244.7716817855835 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55552.0342535759
+Run 11 for d=95.328 complete (Took 245.9487500190735 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55563.85122215451
+Run 12 for d=95.328 complete (Took 239.42487692832947 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55588.98260007552
+Run 13 for d=95.328 complete (Took 242.57492995262146 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55438.32343098298
+Run 14 for d=95.328 complete (Took 241.8581998348236 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55424.06792519417
+Run 15 for d=95.328 complete (Took 241.66962718963623 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55504.23316195795
+Run 16 for d=95.328 complete (Took 238.9351019859314 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55526.01900884079
+Run 17 for d=95.328 complete (Took 233.0270426273346 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55394.434636951904
+Run 18 for d=95.328 complete (Took 242.80300641059875 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55526.34452217631
+Run 19 for d=95.328 complete (Took 246.09244203567505 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55550.82936240107
+Run 20 for d=95.328 complete (Took 242.35256147384644 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55588.40350644115
+Run 21 for d=95.328 complete (Took 246.03821992874146 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55497.34946272854
+Run 22 for d=95.328 complete (Took 241.4396243095398 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55596.634173529405
+Run 23 for d=95.328 complete (Took 241.69506931304932 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55511.6543885668
+Run 24 for d=95.328 complete (Took 242.8275020122528 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55521.544612099504
+Run 25 for d=95.328 complete (Took 248.59167170524597 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55517.639997493665
+Run 26 for d=95.328 complete (Took 244.15774583816528 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55590.087086323634
+Run 27 for d=95.328 complete (Took 244.69601559638977 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55492.45733256344
+Run 28 for d=95.328 complete (Took 238.4807529449463 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 1620
+Max conn: 6095.953968255423
+No. base clusters: 1621
+Length cnn pair list: 2922
+Final population hypervolume is 55573.133575249485
+Run 29 for d=95.328 complete (Took 237.33960008621216 seconds)
+
+Testing delta = 95.994
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55462.976586123965
+Run 0 for d=95.994 complete (Took 224.11414647102356 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55495.76662983225
+Run 1 for d=95.994 complete (Took 224.31706881523132 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55525.62185465229
+Run 2 for d=95.994 complete (Took 231.64975476264954 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55566.678461878815
+Run 3 for d=95.994 complete (Took 226.22243762016296 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55493.33752670815
+Run 4 for d=95.994 complete (Took 220.9370563030243 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55563.407397620445
+Run 5 for d=95.994 complete (Took 229.2049925327301 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55473.34875829506
+Run 6 for d=95.994 complete (Took 226.71156406402588 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55488.7152111425
+Run 7 for d=95.994 complete (Took 224.28621435165405 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55467.15256656308
+Run 8 for d=95.994 complete (Took 229.19727087020874 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55450.69361255171
+Run 9 for d=95.994 complete (Took 214.0030014514923 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55548.03968318193
+Run 10 for d=95.994 complete (Took 227.02788949012756 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55452.809273441635
+Run 11 for d=95.994 complete (Took 228.74550819396973 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55552.89282552709
+Run 12 for d=95.994 complete (Took 221.29365134239197 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55458.22674772532
+Run 13 for d=95.994 complete (Took 226.54925298690796 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55509.066336317206
+Run 14 for d=95.994 complete (Took 220.79916143417358 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55563.49554938491
+Run 15 for d=95.994 complete (Took 222.7144582271576 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55580.89515842493
+Run 16 for d=95.994 complete (Took 221.96448731422424 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55570.65149503846
+Run 17 for d=95.994 complete (Took 219.9406578540802 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55614.31123260613
+Run 18 for d=95.994 complete (Took 229.96285724639893 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55532.90034091786
+Run 19 for d=95.994 complete (Took 225.95878171920776 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55482.7377169455
+Run 20 for d=95.994 complete (Took 223.35141849517822 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55517.920859186146
+Run 21 for d=95.994 complete (Took 233.8461775779724 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55502.117419261696
+Run 22 for d=95.994 complete (Took 222.75027680397034 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55575.311858246634
+Run 23 for d=95.994 complete (Took 219.20962142944336 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55507.880758808365
+Run 24 for d=95.994 complete (Took 217.89565420150757 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55436.98742019251
+Run 25 for d=95.994 complete (Took 220.7215313911438 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55613.58209522362
+Run 26 for d=95.994 complete (Took 221.42314219474792 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55496.63613323299
+Run 27 for d=95.994 complete (Took 223.39209461212158 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55571.23537167286
+Run 28 for d=95.994 complete (Took 227.50436782836914 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 1389
+Max conn: 5320.421825397774
+No. base clusters: 1390
+Length cnn pair list: 2462
+Final population hypervolume is 55564.84292697051
+Run 29 for d=95.994 complete (Took 218.81577372550964 seconds)
+
+Testing delta = 96.66
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55539.6470446272
+Run 0 for d=96.66 complete (Took 205.16770458221436 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55472.57634846984
+Run 1 for d=96.66 complete (Took 204.6661024093628 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55533.54545702205
+Run 2 for d=96.66 complete (Took 205.36291122436523 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55494.9767574805
+Run 3 for d=96.66 complete (Took 206.72382807731628 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55539.00430832981
+Run 4 for d=96.66 complete (Took 205.19295454025269 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55569.36357010575
+Run 5 for d=96.66 complete (Took 208.5407910346985 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55515.95998725075
+Run 6 for d=96.66 complete (Took 208.0148298740387 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55537.332190107205
+Run 7 for d=96.66 complete (Took 203.83264994621277 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55569.6965097964
+Run 8 for d=96.66 complete (Took 210.6454451084137 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55522.94806860671
+Run 9 for d=96.66 complete (Took 207.3999593257904 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55459.361033256675
+Run 10 for d=96.66 complete (Took 208.38354325294495 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55511.16713850035
+Run 11 for d=96.66 complete (Took 204.68768525123596 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55518.875875061734
+Run 12 for d=96.66 complete (Took 208.57672834396362 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55557.41911297316
+Run 13 for d=96.66 complete (Took 202.9403522014618 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55575.32917924367
+Run 14 for d=96.66 complete (Took 207.9201738834381 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55462.345762269586
+Run 15 for d=96.66 complete (Took 206.03677821159363 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55571.796427560585
+Run 16 for d=96.66 complete (Took 200.5850706100464 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55479.348400385825
+Run 17 for d=96.66 complete (Took 203.96250677108765 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55492.66913219254
+Run 18 for d=96.66 complete (Took 202.63131546974182 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55595.615153006824
+Run 19 for d=96.66 complete (Took 204.91197872161865 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55479.65746186099
+Run 20 for d=96.66 complete (Took 209.38468527793884 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55519.91800627096
+Run 21 for d=96.66 complete (Took 205.73501062393188 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55419.60584806818
+Run 22 for d=96.66 complete (Took 204.4816770553589 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55543.920732324834
+Run 23 for d=96.66 complete (Took 203.52438402175903 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55592.44667365801
+Run 24 for d=96.66 complete (Took 203.4071123600006 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55468.2673901104
+Run 25 for d=96.66 complete (Took 206.88282108306885 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55568.27387324668
+Run 26 for d=96.66 complete (Took 212.516991853714 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55475.27859161489
+Run 27 for d=96.66 complete (Took 202.04252910614014 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55530.343032795965
+Run 28 for d=96.66 complete (Took 202.97972321510315 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 1158
+Max conn: 4664.027777778273
+No. base clusters: 1159
+Length cnn pair list: 2034
+Final population hypervolume is 55447.04198210727
+Run 29 for d=96.66 complete (Took 203.92126393318176 seconds)
+
+Testing delta = 97.326
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55517.77255495364
+Run 0 for d=97.326 complete (Took 195.62357449531555 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55534.782723100594
+Run 1 for d=97.326 complete (Took 191.5307195186615 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55556.887645172326
+Run 2 for d=97.326 complete (Took 192.14440846443176 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55561.40565584655
+Run 3 for d=97.326 complete (Took 190.93325066566467 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55634.08105446565
+Run 4 for d=97.326 complete (Took 187.86218857765198 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55582.86012135939
+Run 5 for d=97.326 complete (Took 196.83495092391968 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55595.1665520894
+Run 6 for d=97.326 complete (Took 190.43923473358154 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55551.7504557202
+Run 7 for d=97.326 complete (Took 186.19162225723267 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55496.48763877208
+Run 8 for d=97.326 complete (Took 189.3641972541809 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55612.74182375653
+Run 9 for d=97.326 complete (Took 197.40804886817932 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55552.42547872143
+Run 10 for d=97.326 complete (Took 196.6274540424347 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55545.347541673415
+Run 11 for d=97.326 complete (Took 188.00301265716553 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55522.78659472462
+Run 12 for d=97.326 complete (Took 189.90139055252075 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55556.76485263733
+Run 13 for d=97.326 complete (Took 189.6142749786377 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55581.36944871906
+Run 14 for d=97.326 complete (Took 184.08201360702515 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55471.14290640162
+Run 15 for d=97.326 complete (Took 188.29226636886597 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55615.688435156044
+Run 16 for d=97.326 complete (Took 193.40986275672913 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55479.461211993104
+Run 17 for d=97.326 complete (Took 189.98865842819214 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55528.33534488741
+Run 18 for d=97.326 complete (Took 195.53130316734314 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55551.79684914841
+Run 19 for d=97.326 complete (Took 193.14099287986755 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55605.583336339136
+Run 20 for d=97.326 complete (Took 194.35862398147583 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55489.670049470464
+Run 21 for d=97.326 complete (Took 194.18404936790466 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55475.02361789166
+Run 22 for d=97.326 complete (Took 188.7420530319214 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55533.458084594015
+Run 23 for d=97.326 complete (Took 188.6286039352417 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55376.23965148343
+Run 24 for d=97.326 complete (Took 191.40854144096375 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55607.56936463366
+Run 25 for d=97.326 complete (Took 189.00387144088745 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55523.58995290329
+Run 26 for d=97.326 complete (Took 189.10637497901917 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55589.39467954428
+Run 27 for d=97.326 complete (Took 194.39549827575684 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55574.40783532446
+Run 28 for d=97.326 complete (Took 194.01366901397705 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 927
+Max conn: 3426.209920634946
+No. base clusters: 928
+Length cnn pair list: 1565
+Final population hypervolume is 55562.66139816435
+Run 29 for d=97.326 complete (Took 191.0690360069275 seconds)
+
+Testing delta = 97.992
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55647.97125931303
+Run 0 for d=97.992 complete (Took 185.39489150047302 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55626.14780412547
+Run 1 for d=97.992 complete (Took 167.98091316223145 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55497.04660544199
+Run 2 for d=97.992 complete (Took 184.70706272125244 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55605.00347877755
+Run 3 for d=97.992 complete (Took 179.77787351608276 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55651.15221244224
+Run 4 for d=97.992 complete (Took 171.86713218688965 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55650.43987135721
+Run 5 for d=97.992 complete (Took 176.8235981464386 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55546.76204665897
+Run 6 for d=97.992 complete (Took 175.08337116241455 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55591.72487468545
+Run 7 for d=97.992 complete (Took 173.69272875785828 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55649.55289151038
+Run 8 for d=97.992 complete (Took 182.37654161453247 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55567.94202716328
+Run 9 for d=97.992 complete (Took 186.05358505249023 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55504.54123478523
+Run 10 for d=97.992 complete (Took 173.36933541297913 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55584.64039208982
+Run 11 for d=97.992 complete (Took 172.51968002319336 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55590.12074704189
+Run 12 for d=97.992 complete (Took 174.24443244934082 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55557.295940854754
+Run 13 for d=97.992 complete (Took 173.88700151443481 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55493.787130429584
+Run 14 for d=97.992 complete (Took 174.42970085144043 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55583.15746330741
+Run 15 for d=97.992 complete (Took 174.39426493644714 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55539.348712329826
+Run 16 for d=97.992 complete (Took 185.52579069137573 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55501.353058318404
+Run 17 for d=97.992 complete (Took 173.54801988601685 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55485.70869284031
+Run 18 for d=97.992 complete (Took 179.9659366607666 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55592.76190877088
+Run 19 for d=97.992 complete (Took 179.7138774394989 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55557.821382729126
+Run 20 for d=97.992 complete (Took 174.8185532093048 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55480.71505887948
+Run 21 for d=97.992 complete (Took 178.7301890850067 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55573.338938760484
+Run 22 for d=97.992 complete (Took 178.71889805793762 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55470.34594502722
+Run 23 for d=97.992 complete (Took 177.21254873275757 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55606.17670816965
+Run 24 for d=97.992 complete (Took 172.9348452091217 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55588.11310250102
+Run 25 for d=97.992 complete (Took 176.35231828689575 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55537.11424312493
+Run 26 for d=97.992 complete (Took 177.7552239894867 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55568.34363009484
+Run 27 for d=97.992 complete (Took 177.8700680732727 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55575.229049121444
+Run 28 for d=97.992 complete (Took 176.4394347667694 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 696
+Max conn: 2312.9817460316153
+No. base clusters: 697
+Length cnn pair list: 1137
+Final population hypervolume is 55542.31857852889
+Run 29 for d=97.992 complete (Took 177.84964513778687 seconds)
+
+Testing delta = 98.658
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55598.592641379895
+Run 0 for d=98.658 complete (Took 169.69643187522888 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55590.27525564937
+Run 1 for d=98.658 complete (Took 162.31214594841003 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55539.37043901936
+Run 2 for d=98.658 complete (Took 164.9727692604065 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55540.172222978144
+Run 3 for d=98.658 complete (Took 158.60184264183044 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55533.06104904829
+Run 4 for d=98.658 complete (Took 164.6641674041748 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55516.635114189055
+Run 5 for d=98.658 complete (Took 158.82787346839905 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55544.7500734812
+Run 6 for d=98.658 complete (Took 160.69658756256104 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55605.773343276545
+Run 7 for d=98.658 complete (Took 161.71830534934998 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55596.250132078174
+Run 8 for d=98.658 complete (Took 158.67845916748047 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55593.1219682194
+Run 9 for d=98.658 complete (Took 160.81628894805908 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55580.5518894042
+Run 10 for d=98.658 complete (Took 161.49204349517822 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55582.452841327424
+Run 11 for d=98.658 complete (Took 161.71515154838562 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55623.86903806135
+Run 12 for d=98.658 complete (Took 164.58972239494324 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55470.721980086
+Run 13 for d=98.658 complete (Took 161.59539890289307 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55589.03904836392
+Run 14 for d=98.658 complete (Took 165.90300869941711 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55551.24226864897
+Run 15 for d=98.658 complete (Took 163.00580310821533 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55518.93624123566
+Run 16 for d=98.658 complete (Took 161.8000099658966 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55612.79090980896
+Run 17 for d=98.658 complete (Took 166.98303198814392 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55517.588155426994
+Run 18 for d=98.658 complete (Took 157.963613986969 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55621.27905338236
+Run 19 for d=98.658 complete (Took 162.32283329963684 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55548.42184169273
+Run 20 for d=98.658 complete (Took 162.3271951675415 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55531.335050862755
+Run 21 for d=98.658 complete (Took 160.98986172676086 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55588.50508236745
+Run 22 for d=98.658 complete (Took 163.05233192443848 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55579.62913498513
+Run 23 for d=98.658 complete (Took 164.01570439338684 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55483.19092532905
+Run 24 for d=98.658 complete (Took 163.10029697418213 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55627.06692307955
+Run 25 for d=98.658 complete (Took 157.90025901794434 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55567.94177208063
+Run 26 for d=98.658 complete (Took 157.35141515731812 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55523.25543540901
+Run 27 for d=98.658 complete (Took 163.91473269462585 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55554.71112087571
+Run 28 for d=98.658 complete (Took 161.74700593948364 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 466
+Max conn: 1489.4674603173667
+No. base clusters: 467
+Length cnn pair list: 735
+Final population hypervolume is 55557.91622864683
+Run 29 for d=98.658 complete (Took 159.77154302597046 seconds)
+
+Testing delta = 99.324
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55634.33462038285
+Run 0 for d=99.324 complete (Took 148.61626410484314 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55615.71807625486
+Run 1 for d=99.324 complete (Took 150.14597988128662 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55592.332011990584
+Run 2 for d=99.324 complete (Took 144.13503980636597 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55638.008352595956
+Run 3 for d=99.324 complete (Took 146.57109093666077 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55572.548025250864
+Run 4 for d=99.324 complete (Took 150.6833393573761 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55620.37357218949
+Run 5 for d=99.324 complete (Took 145.31083965301514 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55621.264307146215
+Run 6 for d=99.324 complete (Took 145.82595872879028 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55647.63826652977
+Run 7 for d=99.324 complete (Took 146.4313428401947 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55616.1578109353
+Run 8 for d=99.324 complete (Took 147.62093567848206 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55542.83610432788
+Run 9 for d=99.324 complete (Took 145.98658418655396 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55637.19200065292
+Run 10 for d=99.324 complete (Took 144.71094870567322 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55679.31480055012
+Run 11 for d=99.324 complete (Took 147.27268266677856 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55639.917029761724
+Run 12 for d=99.324 complete (Took 149.3244616985321 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55578.00982108328
+Run 13 for d=99.324 complete (Took 146.13555145263672 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55596.701076350306
+Run 14 for d=99.324 complete (Took 145.3759787082672 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55646.40505905859
+Run 15 for d=99.324 complete (Took 146.4182014465332 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55611.2024943718
+Run 16 for d=99.324 complete (Took 148.94709992408752 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55660.345506677186
+Run 17 for d=99.324 complete (Took 148.0105586051941 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55613.41927260261
+Run 18 for d=99.324 complete (Took 142.62633681297302 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55612.729710275155
+Run 19 for d=99.324 complete (Took 146.0224108695984 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55635.95444838545
+Run 20 for d=99.324 complete (Took 151.71319031715393 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55653.58713320481
+Run 21 for d=99.324 complete (Took 143.5125334262848 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55602.540730135705
+Run 22 for d=99.324 complete (Took 143.6319544315338 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55609.14743627138
+Run 23 for d=99.324 complete (Took 146.26669359207153 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55596.984320961885
+Run 24 for d=99.324 complete (Took 147.3739194869995 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55621.28712489733
+Run 25 for d=99.324 complete (Took 145.50108408927917 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55641.87768583227
+Run 26 for d=99.324 complete (Took 139.13557076454163 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55622.743789708526
+Run 27 for d=99.324 complete (Took 145.54470109939575 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55654.46553683766
+Run 28 for d=99.324 complete (Took 145.01023387908936 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 235
+Max conn: 584.4972222222272
+No. base clusters: 236
+Length cnn pair list: 325
+Final population hypervolume is 55597.77740747412
+Run 29 for d=99.324 complete (Took 145.8500680923462 seconds)
+
+Testing delta = 99.99
+
+Seed number: 11
+HV ref: [4.0, 13996.0]
+Run 0 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 0 for d=99.99 complete (Took 123.05001378059387 seconds)
+
+Seed number: 472
+HV ref: [4.0, 13996.0]
+Run 1 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 1 for d=99.99 complete (Took 121.89946174621582 seconds)
+
+Seed number: 6560
+HV ref: [4.0, 13996.0]
+Run 2 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 2 for d=99.99 complete (Took 122.98751831054688 seconds)
+
+Seed number: 15159
+HV ref: [4.0, 13996.0]
+Run 3 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 3 for d=99.99 complete (Took 122.95554828643799 seconds)
+
+Seed number: 25560
+HV ref: [4.0, 13996.0]
+Run 4 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 4 for d=99.99 complete (Took 123.59211111068726 seconds)
+
+Seed number: 4062
+HV ref: [4.0, 13996.0]
+Run 5 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 5 for d=99.99 complete (Took 126.75732779502869 seconds)
+
+Seed number: 24052
+HV ref: [4.0, 13996.0]
+Run 6 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 6 for d=99.99 complete (Took 127.00769209861755 seconds)
+
+Seed number: 56256
+HV ref: [4.0, 13996.0]
+Run 7 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 7 for d=99.99 complete (Took 126.48966836929321 seconds)
+
+Seed number: 66978
+HV ref: [4.0, 13996.0]
+Run 8 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 8 for d=99.99 complete (Took 119.8480293750763 seconds)
+
+Seed number: 64800
+HV ref: [4.0, 13996.0]
+Run 9 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 9 for d=99.99 complete (Took 123.65472149848938 seconds)
+
+Seed number: 6413
+HV ref: [4.0, 13996.0]
+Run 10 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 10 for d=99.99 complete (Took 123.86127281188965 seconds)
+
+Seed number: 119628
+HV ref: [4.0, 13996.0]
+Run 11 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 11 for d=99.99 complete (Took 125.4256501197815 seconds)
+
+Seed number: 2808
+HV ref: [4.0, 13996.0]
+Run 12 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 12 for d=99.99 complete (Took 123.9897243976593 seconds)
+
+Seed number: 115892
+HV ref: [4.0, 13996.0]
+Run 13 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 13 for d=99.99 complete (Took 123.15268993377686 seconds)
+
+Seed number: 118905
+HV ref: [4.0, 13996.0]
+Run 14 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 14 for d=99.99 complete (Took 121.35605144500732 seconds)
+
+Seed number: 140784
+HV ref: [4.0, 13996.0]
+Run 15 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 15 for d=99.99 complete (Took 123.4403235912323 seconds)
+
+Seed number: 47889
+HV ref: [4.0, 13996.0]
+Run 16 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 16 for d=99.99 complete (Took 119.72251963615417 seconds)
+
+Seed number: 26838
+HV ref: [4.0, 13996.0]
+Run 17 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 17 for d=99.99 complete (Took 121.15501356124878 seconds)
+
+Seed number: 142234
+HV ref: [4.0, 13996.0]
+Run 18 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 18 for d=99.99 complete (Took 125.42870354652405 seconds)
+
+Seed number: 139740
+HV ref: [4.0, 13996.0]
+Run 19 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 19 for d=99.99 complete (Took 128.9995617866516 seconds)
+
+Seed number: 163359
+HV ref: [4.0, 13996.0]
+Run 20 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 20 for d=99.99 complete (Took 120.04745626449585 seconds)
+
+Seed number: 127666
+HV ref: [4.0, 13996.0]
+Run 21 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 21 for d=99.99 complete (Took 125.68458652496338 seconds)
+
+Seed number: 10764
+HV ref: [4.0, 13996.0]
+Run 22 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 22 for d=99.99 complete (Took 122.67745351791382 seconds)
+
+Seed number: 62256
+HV ref: [4.0, 13996.0]
+Run 23 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 23 for d=99.99 complete (Took 125.20985651016235 seconds)
+
+Seed number: 191875
+HV ref: [4.0, 13996.0]
+Run 24 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 24 for d=99.99 complete (Took 121.52876400947571 seconds)
+
+Seed number: 30472
+HV ref: [4.0, 13996.0]
+Run 25 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 25 for d=99.99 complete (Took 121.42709016799927 seconds)
+
+Seed number: 66150
+HV ref: [4.0, 13996.0]
+Run 26 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 26 for d=99.99 complete (Took 125.78776383399963 seconds)
+
+Seed number: 169008
+HV ref: [4.0, 13996.0]
+Run 27 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 27 for d=99.99 complete (Took 124.48699712753296 seconds)
+
+Seed number: 285012
+HV ref: [4.0, 13996.0]
+Run 28 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 28 for d=99.99 complete (Took 121.6479697227478 seconds)
+
+Seed number: 4890
+HV ref: [4.0, 13996.0]
+Run 29 with main_base
+Genotype length: 4
+Max conn: 0.2
+No. base clusters: 5
+Length cnn pair list: 1
+Final population hypervolume is 42006.61658796167
+Run 29 for d=99.99 complete (Took 122.1689248085022 seconds)
+UKC8 complete! Took 134924.64644289017 seconds 
+
