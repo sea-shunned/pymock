@@ -265,7 +265,7 @@ def graphARI(files, data_name):
 	ax.boxplot(data_list, labels=strat_names)
 	ax.set_ylim(-0.05,1.05)
 
-	ax.set_xlabel("Strategy")
+	ax.set_xlabel("Search Strategy")
 	ax.set_ylabel("Adjusted Rand Index (ARI)")
 
 	ax.set_title("ARI for "+data_name)
@@ -313,7 +313,7 @@ def graphNumClusts(files, data_name):
 	ax.boxplot(data_list, labels=strat_names)
 	# ax.set_ylim(-0.05,1.05)
 
-	ax.set_xlabel("Strategy")
+	ax.set_xlabel("Search Strategy")
 	ax.set_ylabel("Number of Clusters")
 
 	ax.set_title("Number of Clusters for {}".format(data_name))
@@ -379,7 +379,7 @@ def graphTime(files, styles_cycler, data_name):
 	ax.set_xticks(np.arange(len(strat_names)))
 	ax.set_xticklabels((strat_names))
 
-	ax.set_xlabel("Strategy")
+	ax.set_xlabel("Search Strategy")
 	ax.set_ylabel("Time Taken")
 
 	ax.set_title("Time taken for {}".format(data_name))
@@ -616,7 +616,7 @@ def plotArtifExp_single(dataset_folder,graph_path,metric="ari",save=False):
 		errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
 
 	ax1.set_ylabel("ARI")
-	ax1.set_xlabel("Strategy")
+	ax1.set_xlabel("Search Strategy")
 	ax1.set_ylim(-0.05,1.05)
 
 	ax2 = ax1.twinx()
@@ -702,7 +702,7 @@ def plotArtifExp_multiple(artif_folder, metric="ari"):
 			errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
 
 		ax1.set_ylabel("ARI")
-		ax1.set_xlabel("Strategy")
+		ax1.set_xlabel("Search Strategy")
 		ax1.set_ylim(-0.05,1.05)
 
 		ax2 = ax1.twinx()
@@ -857,7 +857,7 @@ def plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False):
 	ax1.boxplot(data_metric_list, labels=strat_names)
 
 	ax1.set_ylabel("ARI")
-	ax1.set_xlabel("Strategy")
+	ax1.set_xlabel("Search Strategy")
 	ax1.set_ylim(-0.05,1.05)
 
 	ax2 = ax1.twinx()
@@ -962,7 +962,7 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 
 		ax1.boxplot(data_metric_list, labels=strat_names)
 		# ax1.set_ylabel("ARI")
-		# ax1.set_xlabel("Strategy")
+		# ax1.set_xlabel("Search Strategy")
 		ax1.set_ylim(-0.05,1.05)
 
 		ax2 = ax1.twinx()
@@ -976,7 +976,7 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 		ax2.set_xticklabels(strat_names)
 
 	ax1.set_ylabel("ARI")
-	ax1.set_xlabel("Strategy")
+	ax1.set_xlabel("Search Strategy")
 	ax2.set_ylabel("Time")
 
 	# print(len(fig.get_axes()))
@@ -1020,6 +1020,9 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 
 		time_files = glob.glob(dataset_folder+os.sep+"*base*time*")
 		time_files.extend(glob.glob(dataset_folder+os.sep+"*time*"+method+"*"))
+
+		# for new UKC results
+		# time_files = glob.glob(dataset_folder+os.sep+"*time*"+method+"*")
 
 		metric_files = sorted(metric_files, reverse=False)
 		time_files = sorted(time_files, reverse=False)
@@ -1151,8 +1154,12 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 		patch.set_facecolor("None")
 
 	ax1.set_ylabel("Adjusted Rand Index (ARI)")
-	ax1.set_xlabel("Strategy")
-	ax1.set_ylim(0.35,1.05)
+	ax1.set_xlabel("Search Strategy")
+
+	if dataname == "*UKC*":
+		ax1.set_ylim(0.75,1.01)
+	else:
+		ax1.set_ylim(0.35,1.05)
 
 	ax2 = ax1.twinx()
 
@@ -1160,8 +1167,6 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 
 	ax2.set_ylabel("Standarised Time per Run")
 	ax2.set_ylim(-0.05,1.05)
-	# print(strat_names)
-	# print(stratname_ref)
 
 	# if "*_9" in dataname:
 	# 	ax2.set_title("Synthetic Datasets with "+method+" trigger", fontsize=30)
@@ -1449,7 +1454,7 @@ def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*
 
 		axes_list[num_subplot].boxplot(data_metric_list)
 		# axes_list[num_subplot].set_ylabel("Adjusted Rand Index (ARI)")
-		axes_list[num_subplot].set_xlabel("Strategy")
+		axes_list[num_subplot].set_xlabel("Search Strategy")
 		axes_list[num_subplot].set_ylim(0.35,1.05)
 
 		ax_y = axes_list[num_subplot].twinx()
@@ -1483,9 +1488,9 @@ def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*
 	else:
 		plt.show()
 
-def plotArtif_HV(artif_folder, strat="reinit", save=False):
+def plotArtif_HV(artif_folder, strat="reinit", dataname="*_9", save=False):
 	# Filter to ensure only directories are returned
-	folders = filter(os.path.isdir,glob.glob(artif_folder+os.sep+"*_9"))
+	folders = filter(os.path.isdir,glob.glob(artif_folder+os.sep+dataname))
 	print(folders)
 
 	line_names = [r'$\Delta\operatorname{-MOCK} (sr5)$', r'$\mathit{RO}-HV$', r'$\mathit{RO}-Interval$', r'$\mathit{RO}-Random$']
@@ -1604,10 +1609,10 @@ def plotArtifClusts_all(artif_folder, graph_path, strat_name_dict, dataname="*UK
 
 
 			# Select the number of clusters represented by the best 30 ARIs
-			best_ari_indices = np.argmax(np.loadtxt(ari_files[index], delimiter=","),axis=0)
-			print(data_metric)
-			data_metric = data_metric.T[np.arange(len(data_metric.T)),best_ari_indices]
-			print(data_metric)
+			# best_ari_indices = np.argmax(np.loadtxt(ari_files[index], delimiter=","),axis=0)
+			# print(data_metric)
+			# data_metric = data_metric.T[np.arange(len(data_metric.T)),best_ari_indices]
+			# print(data_metric)
 
 			# print(file)
 			if "base" in file:
@@ -1653,9 +1658,9 @@ def plotArtifClusts_all(artif_folder, graph_path, strat_name_dict, dataname="*UK
 		ax1.plot(list(range(0,len(strat_names)+2)), [int(true_clusts)]*(len(strat_names)+2), linestyle = "--", label="True no. clusters", color="darkred")
 
 		ax1.set_ylabel("Number of Clusters")
-		ax1.set_xlabel("Strategy")
-		ax1.set_ylim(0,30)
-		ax1.set_title(dataset_name)
+		ax1.set_xlabel("Search Strategy")
+		ax1.set_ylim(0,600)
+		# ax1.set_title(dataset_name)
 
 		for i, strat in enumerate(stratname_ref):
 			strat_names[i] = strat_name_dict[strat]
@@ -1664,7 +1669,7 @@ def plotArtifClusts_all(artif_folder, graph_path, strat_name_dict, dataname="*UK
 		ax1.legend(loc=2)
 
 		if save:
-			savename = graph_path + "artif-"+dataset_name+"-"+method+"-box.pdf"
+			savename = graph_path + "artif-"+dataset_name+"-numclusts-"+method+"-box.pdf"
 			fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
 			plt.close(fig)
 
@@ -1691,16 +1696,9 @@ if __name__ == '__main__':
 
 	styles_cycler = cycle(styles)
 
-	dataset_folders = glob.glob(results_path+os.sep+"*")
-	# dataset_folders.remove(aggregate_folder)
-	dataset_folders.remove(graph_path)
-	dataset_folders.remove(artif_folder)
-
-	graph_path = os.path.join(results_path, "graphs")+os.sep
-
-	delta = "sr5"
-
-	save = False
+	# dataset_folders = glob.glob(results_path+os.sep+"*")
+	# dataset_folders.remove(graph_path)
+	# dataset_folders.remove(artif_folder)
 
 	# font = {'family' : 'normal',
 	# 	'weight' : 'medium',
@@ -1723,30 +1721,8 @@ if __name__ == '__main__':
 
 	plt.rc('mathtext', fontset='cm')
 
-	# for dataset in dataset_folders:
-
-	# # 	plotHVgens(dataset, delta, graph_path, styles, save)
-	# 	# plotARI(dataset, delta, graph_path, save)
-	# 	# plotNumClusts(dataset, delta, graph_path, save)
-	# 	# plotTimes(dataset, delta, graph_path, styles_cycler, save)
-
-	# 	if "200_20_2" in dataset:
-	# 		print(dataset)
-	# 		# fairmutComp(dataset, graph_path, delta, styles, True)
-	# 		plotNumClusts(dataset, delta, graph_path, False)
-	# 		# plt.rc('text', usetex=True)
-	# 		plt.rc('font', family='serif')
-	# 		plotNumClusts(dataset, delta, graph_path, False)
-	# 		plotHVgens(dataset, delta, graph_path, styles, False)
-	# 	elif "20_100_10" in dataset:
-	# 		print(dataset)
-	# 		# fairmutComp(dataset, graph_path, delta, styles, True)
-	# 		plotNumClusts(dataset, delta, graph_path, False)
-	# 		plotHVgens(dataset, delta, graph_path, styles, False)
-
 	artif_folder = os.path.join(results_path, "artif")+os.sep
-
-	dataset_folders = glob.glob(artif_folder+os.sep+"*_9")
+	graph_path = os.path.join(results_path, "graphs")+os.sep
 
 	# for dataset_folder in dataset_folders:
 	# 	plotArtifExp_singlebox(dataset_folder,graph_path,metric="ari",save=False)
@@ -1769,7 +1745,6 @@ if __name__ == '__main__':
 	"reinit" : r'$\mathit{RO}$',
 	}
 
-
 	# plotArtif_specStrat(results_path)
 	# plotArtif_pairs(results_path)
 	# plotArtif_pairs2(results_path)
@@ -1783,13 +1758,12 @@ if __name__ == '__main__':
 
 	for method in methods:
 		plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method=method, save=True)
+		# plotArtifClusts_all(artif_folder, graph_path, strat_name_dict,method=method, dataname="*UKC*", save=True)
 
 	# plotDeltaAssump_all(assumption_folder, graph_path)
 	# plotDetlaAssump_single(assumption_folder, graph_path)
 
-	# plotArtif_HV(artif_folder, save=True)
-
-	# plotArtifClusts_all(artif_folder, graph_path, strat_name_dict, save=False)
+	# plotArtif_HV(artif_folder, dataname="*UKC*",save=False)
 
 	### TO DO ###
 

@@ -372,8 +372,8 @@ if __name__ == '__main__':
 	methods = ["random", "interval", "hv"]
 	strategies = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
 
-	for method in methods:
-		saveARIs(artif_folder, method, dataname="*UKC*")
+	# for method in methods:
+	# 	saveARIs(artif_folder, method, dataname="*UKC*")
 
 	# ARIWilcoxon(results_path, "base-sr5", "reinit", "interval","interval")
 	# ARIWilcoxon(results_path, strategies[-1], strategies[-1], methods[0], methods[1])
@@ -383,7 +383,7 @@ if __name__ == '__main__':
 
 	# ARIWilcoxon(results_path, "reinit", "reinit", methods[1], methods[2])
 
-	# for method in methods:
-	# 	TimeDiffs(artif_folder, method)
+	for method in methods:
+		TimeDiffs(artif_folder, method)#, dataname="*UKC*")
 
 	# TimeDiffs(artif_folder, method="random", dataname="*UKC*")
