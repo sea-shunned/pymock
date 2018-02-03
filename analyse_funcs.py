@@ -6,6 +6,7 @@ import fnmatch
 
 import matplotlib.pyplot as plt
 from scipy.stats import wilcoxon
+from scipy.stats import friedmanchisquare
 
 
 def calcAggregates():
@@ -149,8 +150,8 @@ def aggregHV():
 
 			df_results.to_csv(save_name,sep=",",header=True,index=False)
 
-def saveARIs(artif_folder, method, metric="ari"):
-	folders = glob.glob(artif_folder+os.sep+"*_9", recursive=True)
+def saveARIs(artif_folder, method, dataname="*_9", metric="ari"):
+	folders = glob.glob(artif_folder+os.sep+dataname, recursive=True)
 
 	# Have the strategies here in a defined order, then just check that the one extracted from the filename matches to ensure consistency
 	stratname_ref = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
@@ -209,14 +210,17 @@ def saveARIs(artif_folder, method, metric="ari"):
 			else:
 				data_metric_list[index] = np.append(data_metric_list[index], data_metric)
 
+	if dataname == "*UKC*":
+		datatype = "real"
+	else:
+		datatype = "synth"
 
 	for i, data in enumerate(data_metric_list):
-		# print(data, stratname_ref[i])
 		if "base" in stratname_ref[i]:
-			fname = results_path + os.sep + "artif-allARI-"+stratname_ref[i]+".csv"
+			fname = results_path + os.sep + "artif-allARI-"+datatype+"-"+stratname_ref[i]+".csv"
 			np.savetxt(fname, data, delimiter=",")
 		else:
-			fname = results_path + os.sep + "artif-allARI-"+stratname_ref[i]+"-"+method+".csv"
+			fname = results_path + os.sep + "artif-allARI-"+datatype+"-"+stratname_ref[i]+"-"+method+".csv"
 			np.savetxt(fname, data, delimiter=",")
 
 
@@ -361,6 +365,16 @@ def TimeDiffs(artif_folder, method, dataname="*_9*"):
 	print((means[-1]-means[1])/means[1])
 	print((medians[-1]-medians[1])/medians[1],"\n")
 
+def ARIFriedman(results_path, dataset_type="*synth*", method="*interval*"):
+	files = glob.glob(results_path+os.sep+dataset_type+"base*")
+	files.extend(glob.glob(results_path+os.sep+dataset_type+method))
+
+	assert len(files) == 7, "Don't have 7 files, double check (probably base MOCK issue)"
+
+	data = [np.loadtxt(file, delimiter=",") for file in files]
+
+	print(friedmanchisquare(*data))
+
 if __name__ == '__main__':
 	basepath = os.getcwd()
 	results_path = os.path.join(basepath, "results")
@@ -370,7 +384,7 @@ if __name__ == '__main__':
 	strategies = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
 
 	# for method in methods:
-	# 	saveARIs(artif_folder, method)
+	# 	saveARIs(artif_folder, method, dataname="*UKC*")
 
 	# ARIWilcoxon(results_path, "base-sr5", "reinit", "interval","interval")
 	# ARIWilcoxon(results_path, strategies[-1], strategies[-1], methods[0], methods[1])
@@ -381,6 +395,8 @@ if __name__ == '__main__':
 	# ARIWilcoxon(results_path, "reinit", "reinit", methods[1], methods[2])
 
 	for method in methods:
-		TimeDiffs(artif_folder, method)
+		TimeDiffs(artif_folder, method)#, dataname="*UKC*")
 
-	TimeDiffs(artif_folder, method="random", dataname="*UKC*")
+	# TimeDiffs(artif_folder, method="random", dataname="*UKC*")
+
+	ARIFriedman(results_path, dataset_type="*real*", method="*interval*")

@@ -1,0 +1,25 @@
+['/local/home/shandc/Delta-MOCK/data/UKC_datasets/UKC2.txt']
+Testing: UKC2
+Delta values to test: [0, 10, 20, 30, 40, 50, 60, 70, 80] (9)
+Number of runs per delta value: 30
+Number of datasets: 1
+Number of strategies: 1
+Number of total MOCK Runs: 270 
+
+Starting precomputation...
+Distance array done!
+NN rankings done!
+MST done! (Took 1994.0278685092926 seconds)
+DI done!
+Precomputation done!
+
+
+Testing delta = 0
+
+Seed number: 11
+HV ref: None
+Run 0 with main_base
+Genotype length: 26739
+Max conn: 51578.68214277659
+No. base clusters: 26739
+Length cnn pair list: 150201
