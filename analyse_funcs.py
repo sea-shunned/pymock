@@ -6,6 +6,7 @@ import fnmatch
 
 import matplotlib.pyplot as plt
 from scipy.stats import wilcoxon
+from scipy.stats import friedmanchisquare
 
 
 def calcAggregates():
@@ -364,6 +365,16 @@ def TimeDiffs(artif_folder, method, dataname="*_9*"):
 	print((means[-1]-means[1])/means[1])
 	print((medians[-1]-medians[1])/medians[1],"\n")
 
+def ARIFriedman(results_path, dataset_type="*synth*", method="*interval*"):
+	files = glob.glob(results_path+os.sep+dataset_type+"base*")
+	files.extend(glob.glob(results_path+os.sep+dataset_type+method))
+
+	assert len(files) == 7, "Don't have 7 files, double check (probably base MOCK issue)"
+
+	data = [np.loadtxt(file, delimiter=",") for file in files]
+
+	print(friedmanchisquare(*data))
+
 if __name__ == '__main__':
 	basepath = os.getcwd()
 	results_path = os.path.join(basepath, "results")
@@ -372,8 +383,8 @@ if __name__ == '__main__':
 	methods = ["random", "interval", "hv"]
 	strategies = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
 
-	for method in methods:
-		saveARIs(artif_folder, method, dataname="*UKC*")
+	# for method in methods:
+	# 	saveARIs(artif_folder, method, dataname="*UKC*")
 
 	# ARIWilcoxon(results_path, "base-sr5", "reinit", "interval","interval")
 	# ARIWilcoxon(results_path, strategies[-1], strategies[-1], methods[0], methods[1])
@@ -387,3 +398,5 @@ if __name__ == '__main__':
 	# 	TimeDiffs(artif_folder, method)
 
 	# TimeDiffs(artif_folder, method="random", dataname="*UKC*")
+
+	ARIFriedman(results_path, dataset_type="*real*", method="*interval*")
