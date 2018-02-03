@@ -394,8 +394,8 @@ if __name__ == '__main__':
 
 	# ARIWilcoxon(results_path, "reinit", "reinit", methods[1], methods[2])
 
-	# for method in methods:
-	# 	TimeDiffs(artif_folder, method)
+	for method in methods:
+		TimeDiffs(artif_folder, method)#, dataname="*UKC*")
 
 	# TimeDiffs(artif_folder, method="random", dataname="*UKC*")
 
