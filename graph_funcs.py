@@ -1015,11 +1015,22 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 	data_time_list = []
 
 	for num_dataset, dataset_folder in enumerate(folders):
-		metric_files = glob.glob(dataset_folder+os.sep+"*base*"+metric+"*")
-		metric_files.extend(glob.glob(dataset_folder+os.sep+"*"+metric+"*"+method+"*"))
 
-		time_files = glob.glob(dataset_folder+os.sep+"*base*time*")
-		time_files.extend(glob.glob(dataset_folder+os.sep+"*time*"+method+"*"))
+		if dataname!="*UKC*":
+			metric_files = glob.glob(dataset_folder+os.sep+"*base*"+metric+"*")
+			metric_files.extend(glob.glob(dataset_folder+os.sep+"*"+metric+"*"+method+"*"))
+
+			time_files = glob.glob(dataset_folder+os.sep+"*base*time*")
+			time_files.extend(glob.glob(dataset_folder+os.sep+"*time*"+method+"*"))
+
+		else:
+			metric_files = glob.glob(dataset_folder+os.sep+"*"+metric+"*"+method+"*")
+			time_files = glob.glob(dataset_folder+os.sep+"*time*"+method+"*")
+			if method == "hv":
+				metric_files.extend(glob.glob(dataset_folder+os.sep+"*base*"+metric+"*sr5*random*"))
+				time_files.extend(glob.glob(dataset_folder+os.sep+"*base*time*sr5*random*"))
+
+		print(metric_files, len(metric_files))
 
 		# for new UKC results
 		# time_files = glob.glob(dataset_folder+os.sep+"*time*"+method+"*")
@@ -1058,7 +1069,6 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 				else:
 					strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
 
-				print(strat_names[-1])
 				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
 				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
@@ -1066,6 +1076,9 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 			else:
 				# print(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
+
+			# print(strat_names[-1])
+			# print(data_metric, np.max(data_metric))
 
 			# Show order of strategies
 			# print(strat_names[-1], index, stratname_ref[index])
@@ -1760,10 +1773,10 @@ if __name__ == '__main__':
 	# plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods)
 
 	# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method="interval", save=False)
-	# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method="random", save=False)
+	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method="interval", save=False)
 
-	for method in methods:
-		plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method=method, save=False)
+	# for method in methods:
+		# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method=method, save=False)
 		# plotArtifClusts_all(artif_folder, graph_path, strat_name_dict,method=method, dataname="*UKC*", save=True)
 
 	# plotDeltaAssump_all(assumption_folder, graph_path)
