@@ -74,7 +74,8 @@ num_gens = 100
 delta_reduce = 1
 
 # funcs = [main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
-funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
+# funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
+funcs = [main_base.main]
 
 save_results = True
 
@@ -190,7 +191,7 @@ for file_path in data_files:
 			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1]
 			
 			# # Don't do sr5 for any of the artif scripts
-			if strat_name != "main_base" and sr_vals[index_d]==5:
+			if strat_name != "base" and sr_vals[index_d]==5:
 				# print("\n",strat_name, sr_vals[index_d], delta,"\n")
 				continue
 

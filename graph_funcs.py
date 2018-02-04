@@ -1049,11 +1049,16 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 			# print(np.argmax(np.loadtxt(file, delimiter=","),axis=0))
 			# print(data_metric)
 
+
 			if "base" in file:
 				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
-				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
+				if dataname == "*UKC*":
+					strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
+				else:
+					strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
 
+				print(strat_names[-1])
 				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
 				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
@@ -1618,6 +1623,7 @@ def plotArtifClusts_all(artif_folder, graph_path, strat_name_dict, dataname="*UK
 			if "base" in file:
 				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
+
 				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
 
 				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
@@ -1757,7 +1763,7 @@ if __name__ == '__main__':
 	# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method="random", save=False)
 
 	for method in methods:
-		plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method=method, save=True)
+		plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method=method, save=False)
 		# plotArtifClusts_all(artif_folder, graph_path, strat_name_dict,method=method, dataname="*UKC*", save=True)
 
 	# plotDeltaAssump_all(assumption_folder, graph_path)
