@@ -14,47 +14,21 @@ class PartialClust(object):
 	# base_members = np.asarray([obj.num_members for obj in part_clust.values()])[:,None]
 	# base_centres = np.asarray([obj.centroid for obj in part_clust.values()]).squeeze()
 
+	# Useful access to the info
 	base_members = None
 	base_centres = None
 
-
 	def __init__(self, cluster):
 		self.id = next(PartialClust.id_value) # Starts at cluster 0
-		# print(self.id)
 		self.members = cluster
-		self.num_members = len(cluster) # Avoid repeated len() calls for delta-VAR
+		self.num_members = len(cluster) # To avoid repeated len() calls for delta-VAR
 		# Can call the two below if we convert them to method
 		self.centroid = None # Call the function here?
 		self.intraclust_var = None # Same as above
 
-	# Consider at some point trying to integrate self or something into this
-	# Or just create as a static method
-	# @profile
-	# def partClustCNN_old(base_clusters, argsortdists, L):
-	# 	# Initialise array of with number of base clusters as dims
-	# 	conn_array = np.zeros((len(base_clusters),len(base_clusters)))
-	# 	# Loop through the base clusters
-	# 	for num_clust, cluster in enumerate(base_clusters):
-	# 		# Look at each point in the base cluster
-	# 		for point in cluster:
-	# 			# Get the L nearest neighbours (nns) for the point
-	# 			l_nns = argsortdists[point][1:L+1]
-	# 			# Loop through the nn list
-	# 			for pos, nn in enumerate(l_nns):
-	# 				# Check if in same cluster first before looping through others
-	# 				if nn not in cluster:
-	# 					# Compare with other clusters yet to compare with
-	# 					for num_clust_other, other_clust in enumerate(base_clusters):
-	# 						# Skip current cluster we're on
-	# 						if num_clust_other == num_clust:
-	# 							continue
-	# 						if nn in other_clust:
-	# 							conn_array[num_clust,num_clust_other] += 1/(pos+1)
-	# 	return conn_array, np.sum(conn_array)
 
 	def partClustCNN(base_clusters, data_dict, argsortdists, L):
 		conn_array = np.zeros((len(base_clusters),len(base_clusters)))
-
 		# pairs = np.zeros((int(len(base_clusters)*(len(base_clusters)/2)),),dtype=(int,2))
 
 		# cnn_pair = 0
@@ -63,7 +37,7 @@ class PartialClust(object):
 		max_conn = 0
 
 		# Easier (one less nested loop, though same number of items) 
-			# than looping through base clusters - equivalent
+			# than looping through base clusters - though it's equivalent
 		for point in data_dict.values():
 
 			# Get the L nearest neighbours
@@ -83,18 +57,20 @@ class PartialClust(object):
 
 					# Mario's code uses <0.1, don't know why, need to ask
 					# That only really works if you're def using L=10
+					# We'll just use 0 now to make sure
 					if conn_array[curr_number, clust_num] == 0:
 						cnn_pair_list.append((curr_number,clust_num))
 
 					# As we've skipped the first datapoint (itself)
 					# and to account for 0-based indexing and 1-based ranking
-					# we ned to add 2 to the denominator to get the same as the C++
+					# we need to add 2 to the denominator to get the same as the C++
 					penalty = 1.0/(index+2.0)
-					# print(np.around(penalty, decimals=3), index, l_nns[index])
+					
 					max_conn += penalty
 
 					# Add contribution to relevant place in array
 					conn_array[curr_number,clust_num] += penalty
+
 					# Make array symmetrical (as in Mario's code)
 					# Helps with the if statement above
 					conn_array[clust_num,curr_number] = conn_array[curr_number,clust_num]
@@ -105,11 +81,9 @@ class PartialClust(object):
 
 	# @profile
 	def partClustVAR(self, data):
-		###### TO DO ######
-		# Try using the np.dot method here
-		# Less important as this is just done once the start, not for every cluster merge for every
-			# individual for every generation!
+		# Makes the else irrelevant, but may be useful for memory issues
 		dist_meth = 'scipy'
+		
 		if dist_meth == 'scipy':
 			# Scipy cdist, more precise, speed sometimes worse
 			from scipy.spatial.distance import cdist
@@ -119,19 +93,15 @@ class PartialClust(object):
 			# u_v = data[self.members].squeeze() - centroid.squeeze()
 			# dists2 = np.dot(u_v,np.transpose(u_v))
 
-			# print(dists,dists.shape)
-			# print(dists2,dists2.shape)
-			# print(dists==dists2)
 		else:
 			# Sklearn metrics.pairwise.euclidean_distance
 			# Fast, but not as precise (not guaranteed symmetry)
 			from sklearn.metrics.pairwise import euclidean_distances
 			centroid = np.mean(data[self.members],axis=0)[np.newaxis,:]
 			dists = euclidean_distances(data[self.members],centroid,squared = True)
-		return centroid, np.sum(dists)#np.einsum('ij->',dists)
+		return centroid, np.sum(dists) #np.einsum('ij->',dists)
 
-# Not sure if this can even be put as a method (static method?)
-# and if it even should be
+# Not sure if this can even be put as a method (static method?) and if it even should be
 # @profile
 def partialClustering(base_clusters, data, data_dict, argsortdists, L):
 	# partial_clustering = OrderedDict() # Don't think it's needed
@@ -143,8 +113,6 @@ def partialClustering(base_clusters, data, data_dict, argsortdists, L):
 		
 		# Calculate centroid and intracluster variance for cluster object
 		curr_cluster.centroid, curr_cluster.intraclust_var = PartialClust.partClustVAR(curr_cluster, data)
-
-		# print(curr_cluster.id, curr_cluster.intraclust_var)
 		
 		# Add objective to dictionary, where key is the cluster ID number
 		part_clust[curr_cluster.id] = curr_cluster
@@ -152,8 +120,6 @@ def partialClustering(base_clusters, data, data_dict, argsortdists, L):
 		# Assign base cluster number to relevant datapoint object
 		for point in cluster:
 			data_dict[point].base_cluster_num = curr_cluster.id
-
-		# print(curr_cluster.id, curr_cluster.num_members)
 
 	# Once all objectives have been created, calculate max_conn score for partial clustering
 	PartialClust.conn_array, PartialClust.max_conn, cnn_pairs = PartialClust.partClustCNN(base_clusters, data_dict, argsortdists, L)
@@ -168,10 +134,13 @@ def partialClustering(base_clusters, data, data_dict, argsortdists, L):
 
 	print("No. base clusters:",len(part_clust))
 	print("Length cnn pair list:",len(cnn_pairs))
-	# print(cnn_pairs)
+
 	return part_clust, cnn_pairs
 
 class Dataset(object):
+	# We only ever handle one instance at a time
+	# If we were to handle more, we'd need to actually move these into the __init__
+
 	num_examples = None
 	num_features = None
 	labels = False
@@ -182,9 +151,8 @@ class Dataset(object):
 	def __init__(self, id_value, values):
 		self.id = id_value
 		self.values = values
-		self.base_cluster_num = None
-		#self.true_label = None # We don't actually use this - is it useful?
-	
+		self.base_cluster_num = None	
+		# self.true_label = None # See discussion above
 
 def createDataset(data_path, labels):
 	# Auto identify delimiters and create array from data
@@ -203,9 +171,9 @@ def createDataset(data_path, labels):
 	# If we have labels, split array
 	if labels:
 		Dataset.labels = True
+
 		# Assuming labels are the final column
 		label_vals = data[:,-1]
-
 		Dataset.label_vals = label_vals
 
 		# We've stored the labels elsewhere so let's delete them from the data
@@ -251,6 +219,8 @@ def createDatasetGarza(data):
 
 	return data, data_dict
 
+# Possibly useful class to implement some way down the line
+# Currently doesn't feel worth the effort as everything works reasonably well
 class Genotype(list):
 	mst_genotype = None # the MST genotype
 	unfixed_indices = None # To replace int_links_indices
@@ -293,15 +263,3 @@ class Genotype(list):
 	# Could we actually implement some of the functionality we want from this class into the existing dataset class?
 	# Each datapoint is a node on the graph, after all, so we can just give it a value (what it points to in the MST)
 	# And then we can track whether it is fixed or not - or more importantly, if it needs fair mutation
-
-if __name__ == "__main__":
-	import os
-
-	base_path = os.getcwd()
-	data_folder = base_path+"/data/data_handl/"
-	data_name = "2d-4c-no0.dat"
-	data_name = "10d-20c-no0.dat"
-	data_path = data_folder+data_name
-
-	data, data_dict = createDataset(data_path, True)
-

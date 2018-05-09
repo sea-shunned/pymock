@@ -13,9 +13,7 @@ import random
 from os import cpu_count
 import multiprocessing
 
-from deap import base
-from deap import creator
-from deap import tools
+from deap import base, creator, tools
 from deap.benchmarks.tools import hypervolume
 
 # To measure sections

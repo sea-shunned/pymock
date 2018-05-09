@@ -22,7 +22,7 @@ def clusterChains(genotype, data_dict, part_clust, reduced_clust_nums):
 	chains = list(g.components(mode="WEAK"))
 
 	# Assign supercluster numbers to every member in each chain for easy membership check
-	superclusts = np.empty(len(part_clust),dtype=int)
+	superclusts = np.empty(len(part_clust), dtype=int)
 	for i, chain in enumerate(chains):
 		superclusts[chain] = i
 
@@ -41,31 +41,32 @@ def objCNN(chains, superclusts, cnn_pairs, conn_array, max_conn):
 		for pair in cnn_pairs:
 			# See if they are part of the same supercluster i.e. have they merged
 			if superclusts[pair[0]] == superclusts[pair[1]]:
-				conn_score -= conn_array[pair[0],pair[1]]
+				conn_score -= conn_array[pair[0], pair[1]]
 
 	return conn_score
 
 # @profile
 def objVAR(chains, part_clust, base_members, base_centres, superclusts):
-	members = np.zeros((len(chains),1))
-	centres = np.zeros((len(chains),part_clust[0].centroid.squeeze().shape[0]))
+	members = np.zeros((len(chains), 1))
+	centres = np.zeros((len(chains), part_clust[0].centroid.squeeze().shape[0]))
 	variances = np.sum([obj.intraclust_var for obj in part_clust.values()])
 
 	wcss_vec = np.zeros((len(chains),1))
 
+	# Loop over all the chains/superclusters
 	for superclust, chain in enumerate(chains):
-		centres[superclust,:] = np.sum(np.multiply(base_centres[chain],base_members[chain]),axis=0)
+		centres[superclust, :] = np.sum(np.multiply(base_centres[chain], base_members[chain]), axis=0)
 		members[superclust] = np.sum(base_members[chain])
 
 		# wcss_vec[superclust] = members[superclust] * np.dot(base_centres[chain]-centres[superclust],base_centres[chain]-centres[superclust])
 		sub_res = base_centres[chain]-centres[superclust]		
 		# wcss_vec[superclust] = np.sum(np.einsum('ij,ij->i',sub_res,sub_res) * base_members[chain].squeeze())
 
-		wcss_vec[superclust] = np.sum(np.multiply(base_members[chain], np.einsum('ij,ij->i',sub_res,sub_res)))
+		wcss_vec[superclust] = np.sum(np.multiply(base_members[chain], np.einsum('ij,ij->i', sub_res, sub_res)))
 
 	centres = np.divide(centres, members)
 
-	wcss = np.sum([part_clust[index].num_members * np.dot(part_clust[index].centroid.squeeze() - centres[value],part_clust[index].centroid.squeeze() - centres[value]) for index,value in enumerate(superclusts)])
+	wcss = np.sum([part_clust[index].num_members * np.dot(part_clust[index].centroid.squeeze() - centres[value], part_clust[index].centroid.squeeze() - centres[value]) for index, value in enumerate(superclusts)])
 
 	# print(wcss, np.sum(wcss_vec), wcss_vec)
 
@@ -98,7 +99,7 @@ def objVAR(chains, part_clust, base_members, base_centres, superclusts):
 
 # @profile
 def evalMOCK(genotype, part_clust, reduced_clust_nums, conn_array, max_conn, num_examples, data_dict, cnn_pairs, base_members, base_centres):
-	# Maybe abstract this out? (As all individuals should be equal length, but thi smay not be true some time)
+	# Not really necessary but just in case
 	if len(genotype) != len(reduced_clust_nums):
 		raise ValueError("The genotype being evaluated is not the same length as the reduced, partial genotype")
 
@@ -118,28 +119,27 @@ def evalMOCK(genotype, part_clust, reduced_clust_nums, conn_array, max_conn, num
 	if CNN < 0.00001: # Value that Garza/Handl uses, presumably to smooth small values
 		CNN = 0
 
-	# Divide by number of examples as per the paper and code
+	# Divide by number of examples as per the paper and Mario's code
 	return np.sum(VAR)/num_examples, CNN
 
-def evalMOCKAdaptive(genotype, part_clust, reduced_clust_nums, conn_array, max_conn, num_examples, data_dict, cnn_pairs, int_links_indices, relev_links_len):
-	# Maybe abstract this out? (As all individuals should be equal length, but thi smay not be true some time)
-	if len(genotype) != len(reduced_clust_nums):
-		raise ValueError("The genotype being evaluated is not the same length as the reduced, partial genotype")
+# def evalMOCKAdaptive(genotype, part_clust, reduced_clust_nums, conn_array, max_conn, num_examples, data_dict, cnn_pairs, int_links_indices, relev_links_len):
+# 	# Not really necessary but just in case
+# 	if len(genotype) != len(reduced_clust_nums):
+# 		raise ValueError("The genotype being evaluated is not the same length as the reduced, partial genotype")
 
-	chains, superclusts = clusterChains(genotype, data_dict, part_clust, reduced_clust_nums)
+# 	chains, superclusts = clusterChains(genotype, data_dict, part_clust, reduced_clust_nums)
 
-	CNN = objCNN(chains, superclusts, cnn_pairs, conn_array, max_conn)
-	VAR = obj_red_intraclust(chains, part_clust)
+# 	CNN = objCNN(chains, superclusts, cnn_pairs, conn_array, max_conn)
+# 	VAR = obj_red_intraclust(chains, part_clust)
 
-	# print(np.isclose(CNN,CNN2),CNN,CNN2)
+# 	# print(np.isclose(CNN,CNN2),CNN,CNN2)
 
-	# Edge cases with large datasets, as single cluster solutions get given a 0 score
-	if CNN < 0.00001: # Value that Garza/Handl uses, presumably to smooth small values
-		CNN = 0
+# 	# Edge cases with large datasets, as single cluster solutions get given a 0 score
+# 	if CNN < 0.00001: # Value that Garza/Handl uses, presumably to smooth small values
+# 		CNN = 0
 
-	# Divide by number of examples as per the paper and code
-	return np.sum(VAR)/num_examples, CNN
-
+# 	# Divide by number of examples as per the paper and Mario's code
+# 	return np.sum(VAR)/num_examples, CNN
 
 # Profiling doesn't work for multiprocessing
 # So will need a single core version in order to profile the specific lines of the functions here
