@@ -1,10 +1,8 @@
-# Have a single script that I can use to run MOCK a couple of times with different configs and compare results to ensure that the results I get are the same
-
 import random
 import os
 import glob
 import numpy as np
-import precompute
+import precompute, evaluation
 import main_base
 
 def loadData():
@@ -13,34 +11,35 @@ def loadData():
     data_folder = os.path.join(basepath, "data")+os.sep
     synth_data_folder = os.path.join(data_folder, "synthetic_datasets")+os.sep
     synth_data_files = glob.glob(synth_data_folder+'tevc_20_60_9*.data')
-    results_folder = basepath+"/results/"
+    results_folder = basepath+"/test_data/"
     data_files = synth_data_files
 
     # add assert here for data_name? Need to make sure we're using a particular dataset
 
-    return data_files
+    return data_files, results_folder
 
 def loadArtifs():
-    # import main_base # for DEAP indiv declaration
     import artif_carryon
     import artif_hypermutspec
     import artif_hypermutall
     import artif_reinit
     import artif_fairmut
 
-    funcs = [artif_carryon.main, artif_hypermutspec.main, artif_hypermutall.main, artif_reinit.main, artif_fairmut.main]
+    funcs = [
+        artif_carryon.main, artif_hypermutspec.main, 
+        artif_hypermutall.main, artif_reinit.main, artif_fairmut.main]
     return funcs
 
 def loadMains():
-    pass
-    # import main_base # for DEAP indiv declaration
     import main_carryon
     import main_hypermutspec
     import main_hypermutall
     import main_reinit
     import main_fairmut
 
-    funcs = [main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
+    funcs = [
+        main_carryon.main, main_hypermutspec.main, 
+        main_hypermutall.main, main_reinit.main, main_fairmut.main]
     return funcs
 
 def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_reduce=1):
@@ -68,10 +67,8 @@ def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_r
     # Remove labels if present and create data_dict
     data, data_dict = classes.createDatasetGarza(data)
 
-    results_folder_data = results_folder+classes.Dataset.data_name+os.sep
-
     # Add square root delta values
-    delta_val = 100-((100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples)
+    delta = 100-((100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples)
 
     distarray = precompute.compDists(data, data)
     distarray = precompute.normaliseDistArray(distarray)
@@ -85,55 +82,77 @@ def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_r
 
     HV_ref = None    
 
-    args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
-    return args
+    args = data, data_dict, delta, HV_ref, argsortdists, 
+    nn_rankings, mst_genotype, int_links_indices, L, 
+    num_indivs, num_gens, delta_reduce
+    return args, mst_genotype
 
-
-
-def runMOCK(file_path, funcs):
+def runMOCK(file_path, funcs, results_folder):
     fitness_cols = ["VAR", "CNN", "Run"]
-    args = prepareArgs(file_path)
+    args, mst_genotype = prepareArgs(file_path)
+
+    num_indivs = 100
+    num_gens = 100
 
     for func in funcs:
         strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1]
 
         # Create arrays to save results for the given function
-        fitness_array = np.empty((num_indivs, len(fitness_cols)))
+        fit_array = np.empty((num_indivs, len(fitness_cols)))
         hv_array = np.empty((num_gens, 1))
         ari_array = np.empty((num_indivs, 1))
         delta_triggers = []
 
         random.seed(11)
 
-        pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
+        pop, HV, _, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
 
-        fitness_array[ind:ind+num_indivs,0:3] = [indiv.fitness.values+(run+1,) for indiv in pop]
+        fit_array[num_indivs,0:3] = [indiv.fitness.values+(1,) for indiv in pop]
 
-        _, aris = evaluation.finalPopMetrics(pop, mst_genotype, int_links_indices_spec, relev_links_len)
+        _, aris = evaluation.finalPopMetrics(
+            pop, mst_genotype, int_links_indices_spec, relev_links_len)
 
         ari_array[:, 1] = aris
-        hv_array[:, run] = HV
+        hv_array[:, 1] = HV
         delta_triggers.append(adapt_gens)
 
-        valid = validateResults(strat_name, ari_array, hv_array, delta_triggers)
+        valid = validateResults(results_folder, strat_name, ari_array, fit_array, hv_array, delta_triggers)
 
         if not valid:
             raise ValueError(f"Results incorrect for {strat_name}")
 
-def validateResults(strat_name, ari_array, hv_array, delta_triggers):
+def validateResults(
+    results_folder, strat_name, ari_array, fit_array, hv_array, delta_triggers):
     # Take the hypervolume and/or ARI results generated and compare them to a saved version of the results for each strategy to ensure it's the same
-    pass
+
+    ari_path, fit_path, hv_path, trigger_path = sorted(glob.glob(results_folder+"*"+strat_name+"*"))
+
+    ari_orig = np.loadtxt(ari_path, delimiter=",")[:, 1]
+    print(ari_orig.shape, ari_array.shape)
+
+    fit_orig = np.loadtxt(fit_path, delimiter=",")[:100, :]
+    print(fit_orig.shape, fit_array.shape)
+
+    hv_orig = np.loadtxt(hv_path, delimiter=",")[:, 1]
+    print(hv_orig.shape, hv_array.shape)
+
+    trigger_orig = [list(map(int, line.split(","))) for line in open(trigger_path)][0]
+    print(trigger_orig, delta_triggers)
+
+    # Need to add asserts/checks here so it's True if it reaches the end
+
+    return True
 
 def main():
-    data_files = loadData()
+    data_files, results_folder = loadData()
 
-    return data_files
+    # validateResults(results_folder, 'carryon', None, None, None)
 
     funcs = [main_base.main]
     funcs.extend(loadMains())
 
     for file_path in data_files:
-        runMOCK(file_path, funcs)
+        runMOCK(file_path, funcs, results_folder)
 
     ## Artif scripts are for the random or interval triggers, which we're unlikely to use in the future
     # funcs = [main_base.main]
@@ -146,6 +165,7 @@ def main():
 
 ############# To Do #############
 # Possible to delete MST/graph stuff once we get the MST genotype? Free some memory?
+# Have a single script that I can use to run MOCK a couple of times with different configs and compare results to ensure that the results I get are the same
 
 if __name__ == '__main__':
-    print(main())
+    main()
