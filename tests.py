@@ -82,9 +82,7 @@ def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_r
 
     HV_ref = None    
 
-    args = data, data_dict, delta, HV_ref, argsortdists, 
-    nn_rankings, mst_genotype, int_links_indices, L, 
-    num_indivs, num_gens, delta_reduce
+    args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings,mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
     return args, mst_genotype
 
 def runMOCK(file_path, funcs, results_folder):
@@ -107,13 +105,13 @@ def runMOCK(file_path, funcs, results_folder):
 
         pop, HV, _, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
 
-        fit_array[num_indivs,0:3] = [indiv.fitness.values+(1,) for indiv in pop]
+        fit_array[:num_indivs,0:3] = [indiv.fitness.values+(1,) for indiv in pop]
 
         _, aris = evaluation.finalPopMetrics(
             pop, mst_genotype, int_links_indices_spec, relev_links_len)
 
-        ari_array[:, 1] = aris
-        hv_array[:, 1] = HV
+        ari_array[:, 0] = aris
+        hv_array[:, 0] = HV
         delta_triggers.append(adapt_gens)
 
         valid = validateResults(results_folder, strat_name, ari_array, fit_array, hv_array, delta_triggers)
@@ -121,23 +119,31 @@ def runMOCK(file_path, funcs, results_folder):
         if not valid:
             raise ValueError(f"Results incorrect for {strat_name}")
 
+        else:
+            print(f"{strat_name} validated!")
+
 def validateResults(
     results_folder, strat_name, ari_array, fit_array, hv_array, delta_triggers):
     # Take the hypervolume and/or ARI results generated and compare them to a saved version of the results for each strategy to ensure it's the same
-
-    ari_path, fit_path, hv_path, trigger_path = sorted(glob.glob(results_folder+"*"+strat_name+"*"))
+    if strat_name != "base":
+        ari_path, fit_path, hv_path, trigger_path = sorted(glob.glob(results_folder+"*"+strat_name+"*"))
+    else:
+        ari_path, fit_path, hv_path = sorted(glob.glob(results_folder+"*"+strat_name+"*"))
 
     ari_orig = np.loadtxt(ari_path, delimiter=",")[:, 1]
-    print(ari_orig.shape, ari_array.shape)
+    print(ari_orig)
+    print(ari_array)
+    print(ari_orig.shape, ari_array.shape, "\n")
 
     fit_orig = np.loadtxt(fit_path, delimiter=",")[:100, :]
-    print(fit_orig.shape, fit_array.shape)
+    print(fit_orig.shape, fit_array.shape, "\n")
 
     hv_orig = np.loadtxt(hv_path, delimiter=",")[:, 1]
-    print(hv_orig.shape, hv_array.shape)
+    print(hv_orig.shape, hv_array.shape, "\n")
 
-    trigger_orig = [list(map(int, line.split(","))) for line in open(trigger_path)][0]
-    print(trigger_orig, delta_triggers)
+    if strat_name != "base":
+        trigger_orig = [list(map(int, line.split(","))) for line in open(trigger_path)][0]
+        print(trigger_orig, delta_triggers)
 
     # Need to add asserts/checks here so it's True if it reaches the end
 

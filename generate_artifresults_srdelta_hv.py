@@ -34,7 +34,7 @@ real_data_folder = os.path.join(data_folder, "UKC_datasets")+os.sep
 synth_data_files = sorted(glob.glob(synth_data_folder+'*.data'))
 real_data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 
-results_folder = os.path.join(basepath,"results","artif")+os.sep
+results_folder = os.path.join(basepath,"results","artif", "test")+os.sep
 
 # data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + [synth_data_files[52]] + real_data_files[1:2] + real_data_files[-1:]
 
@@ -45,10 +45,11 @@ results_folder = os.path.join(basepath,"results","artif")+os.sep
 
 # data_files = sorted(glob.glob(synth_data_folder+'*_9_*.data'))
 data_files = sorted(glob.glob(real_data_folder+'*.txt'))
+data_files = glob.glob(synth_data_folder+'tevc_20_60_9*.data')
 print(data_files)
 
 # Specify the number of runs
-num_runs = 30
+num_runs = 1
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -65,7 +66,7 @@ assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Square root values for delta
 # Reverse to ensure lowest delta is first (in case of issues with HV ref point)
-sr_vals = [5,1]
+sr_vals = [1]
 
 # Parameters across all strategies
 L = 10
@@ -232,6 +233,7 @@ for file_path in data_files:
 
 				# Assign these values
 				numclusts_array[:,run] = numclusts
+				print(aris)
 				ari_array[:,run] = aris
 
 				# Assign the HV
