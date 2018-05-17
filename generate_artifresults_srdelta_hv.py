@@ -76,7 +76,7 @@ delta_reduce = 1
 
 # funcs = [main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
 # funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
-funcs = [main_base.main]
+funcs = [main_fairmut.main]
 
 save_results = True
 
@@ -233,8 +233,9 @@ for file_path in data_files:
 
 				# Assign these values
 				numclusts_array[:,run] = numclusts
-				print(aris)
 				ari_array[:,run] = aris
+
+				print(aris)
 
 				# Assign the HV
 				hv_array[:,run] = HV

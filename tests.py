@@ -23,11 +23,11 @@ def loadArtifs():
     import artif_hypermutspec
     import artif_hypermutall
     import artif_reinit
-    import artif_fairmut
+    # import artif_fairmut
 
     funcs = [
         artif_carryon.main, artif_hypermutspec.main, 
-        artif_hypermutall.main, artif_reinit.main, artif_fairmut.main]
+        artif_hypermutall.main, artif_reinit.main]
     return funcs
 
 def loadMains():
@@ -35,11 +35,11 @@ def loadMains():
     import main_hypermutspec
     import main_hypermutall
     import main_reinit
-    import main_fairmut
+    # import main_fairmut # inconsistent between runs with same seed
 
     funcs = [
         main_carryon.main, main_hypermutspec.main, 
-        main_hypermutall.main, main_reinit.main, main_fairmut.main]
+        main_hypermutall.main, main_reinit.main]
     return funcs
 
 def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_reduce=1):
@@ -70,7 +70,7 @@ def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_r
     # Add square root delta values
     delta = 100-((100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples)
 
-    print(f"Delta = {delta}")
+    print(f"Testing delta = {delta}")
 
     distarray = precompute.compDists(data, data)
     distarray = precompute.normaliseDistArray(distarray)
@@ -82,7 +82,8 @@ def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_r
     int_links_indices = precompute.interestLinksIndices(degree_int)
     print("Precomputation done!\n")
 
-    HV_ref = None    
+    # Hard-coded HV_ref to this dataset so that we can compare and make sure the HV is right
+    HV_ref = [3.0, 1469.0]    
 
     args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings,mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
     return args, mst_genotype
@@ -96,10 +97,11 @@ def runMOCK(file_path, funcs, results_folder):
 
     for func in funcs:
         strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1]
+        print(f"Testing {strat_name}")
 
         # Create arrays to save results for the given function
         fit_array = np.empty((num_indivs, len(fitness_cols)))
-        hv_array = np.empty((num_gens, 1))
+        # hv_array = np.empty((num_gens, 1))
         ari_array = np.empty((num_indivs, 1))
         delta_triggers = []
 
@@ -112,42 +114,45 @@ def runMOCK(file_path, funcs, results_folder):
         _, aris = evaluation.finalPopMetrics(
             pop, mst_genotype, int_links_indices_spec, relev_links_len)
 
-        ari_array[:, 0] = aris
-        hv_array[:, 0] = HV
+        # ari_array[:, 0] = aris
+        # hv_array[:, 0] = HV
         delta_triggers.append(adapt_gens)
 
-        valid = validateResults(results_folder, strat_name, ari_array, fit_array, hv_array, delta_triggers)
+        valid = validateResults(results_folder, strat_name, np.asarray(aris), np.asarray(HV), fit_array, delta_triggers)
 
         if not valid:
             raise ValueError(f"Results incorrect for {strat_name}")
 
         else:
-            print(f"{strat_name} validated!")
+            print(f"{strat_name} validated!\n")
 
 def validateResults(
-    results_folder, strat_name, ari_array, fit_array, hv_array, delta_triggers):
+    results_folder, strat_name, ari_array, hv_array, fit_array, delta_triggers):
     # Take the hypervolume and/or ARI results generated and compare them to a saved version of the results for each strategy to ensure it's the same
     if strat_name != "base":
         ari_path, fit_path, hv_path, trigger_path = sorted(glob.glob(results_folder+"*"+strat_name+"*"))
     else:
         ari_path, fit_path, hv_path = sorted(glob.glob(results_folder+"*"+strat_name+"*"))
 
-    ari_orig = np.loadtxt(ari_path, delimiter=",")[:, 1]
-    print(ari_orig)
-    print(ari_array)
-    print(ari_orig.shape, ari_array.shape, "\n")
+    ari_orig = np.loadtxt(ari_path, delimiter=",")[:, 0]
+    if not np.array_equal(ari_array, ari_orig):
+        print(ari_array)
+        print(ari_orig)
+        raise ValueError("ARI not equal")
 
     fit_orig = np.loadtxt(fit_path, delimiter=",")[:100, :]
-    print(fit_orig.shape, fit_array.shape, "\n")
+    if not np.array_equal(fit_array, fit_orig):
+        raise ValueError("Fitness values not equal")
 
-    hv_orig = np.loadtxt(hv_path, delimiter=",")[:, 1]
-    print(hv_orig.shape, hv_array.shape, "\n")
+    # Only useful if we have fixed the same HV ref point as the orig experiments (which we have)
+    hv_orig = np.loadtxt(hv_path, delimiter=",")[:, 0]
+    if not np.array_equal(hv_array, hv_orig):
+        raise ValueError("HV values not equal")
 
     if strat_name != "base":
         trigger_orig = [list(map(int, line.split(","))) for line in open(trigger_path)][0]
-        print(trigger_orig, delta_triggers)
-
-    # Need to add asserts/checks here so it's True if it reaches the end
+        if trigger_orig != delta_triggers[0]:
+            raise ValueError("Trigger generations not equal")
 
     return True
 
