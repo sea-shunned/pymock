@@ -125,6 +125,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 	# Calculate HV of initialised population
 	HV.append(hypervolume(pop, HV_ref))
 
+	print("Initial HV:", HV[-1])
+
 	# ari_vals = np.empty((num_indivs, num_gens))
 	# numclusts_vals = np.empty((num_indivs, num_gens))
 	# numclusts_vals[:,0], ari_vals[:,0] = finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len)

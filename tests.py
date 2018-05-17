@@ -70,6 +70,8 @@ def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_r
     # Add square root delta values
     delta = 100-((100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples)
 
+    print(f"Delta = {delta}")
+
     distarray = precompute.compDists(data, data)
     distarray = precompute.normaliseDistArray(distarray)
 
