@@ -93,87 +93,6 @@ def plotObjectives(csv_path):
 	plt.scatter(data[0:99,0], data[0:99,1], s=2, marker="x")
 	plt.show()
 
-# https://matplotlib.org/examples/color/color_cycle_demo.html
-# def plotHV(csv_path):
-# 	df_hv = pd.read_csv(csv_path)
-
-# 	fig = plt.figure()
-# 	ax = fig.add_subplot(111)
-
-# 	# is below a list or a generator?
-# 	colors = plt.cm.rainbow(np.linspace(0, 5, len(df_hv)))
-# 	# colors = iter(cm.rainbow(np.linspace(0, 1, len(df_hv))))
-
-# 	for index, column in enumerate(df_hv):
-# 		# print(len(df_hv[column]))
-# 		plt.plot(range(0,100), df_hv[column], color=colors[index], label=list(df_hv)[index]) #next(colors)
-# 	plt.legend()
-# 	plt.show()
-
-# def plotHV_adaptdelta(HV, adapt_gens):
-# 	fig = plt.figure()
-# 	ax = fig.add_subplot(111)
-
-# 	# print(HV)
-# 	# print(adapt_gens)
-
-# 	# This is to create some nicer max/min limits for the y-xis (HV)
-# 	max_HV = round(np.ceil(np.max(HV)), -1)
-# 	min_HV = round(np.floor(np.min(HV)), -1)
-
-# 	ax.plot(range(0, len(HV)), HV, 'g-')
-# 	for gen in adapt_gens:
-# 		ax.plot([gen,gen], [0,max_HV+10], 'r--' )
-
-# 	# -10 and +10 to avoid issues with rounding, to give some distance for our max and min
-# 	ax.set_ylim([min_HV-10,max_HV+10])
-
-# 	plt.show()
-
-# 	# return ax
-
-# def plotHVgens(folder_path, delta, styles_cycler, graph_path):
-# 	files = glob.glob(folder_path+os.sep+"*"+"HVgens"+"*")
-# 	print(folder_path)
-
-
-# 	for file in files:
-
-# 		# Read the csv in, and filter just the columns with the delta value we're plotting
-# 		df = pd.read_csv(file)
-
-# 		# Account for differences with numerical and sr5 etc.
-# 		if isinstance(delta,int):
-# 			df = df.filter(regex="d"+str(delta))
-# 		else:
-# 			df = df.filter(regex=delta)
-
-# 		num_gens = df.shape[0]
-
-# 		fig = plt.figure(figsize=(18,12))
-# 		ax = fig.add_subplot(111)
-
-# 		for i in range(0,len(df.columns),3):
-# 			strat_name = df.columns[i].split("_")[2]
-
-# 			ax.errorbar(list(range(0,num_gens)),df[df.columns[i]],
-# 				yerr=df[df.columns[i+2]],
-# 				label=strat_name,
-# 				**next(styles_cycler)
-# 				)
-
-# 			ax.set_title("HV during Evolution for "+folder_path.split(os.sep)[-2])
-# 			ax.set_xlabel("Generation")
-# 			ax.set_ylabel("Hypervolume")
-# 			ax.legend()
-
-# 		# print(fig.dpi)
-# 		plt.show()
-# 		# print(fig.dpi)
-
-# 		savename = graph_path+file.split('/')[-1].split('-')[0]+'-d'+str(delta)+'-HVplot.pdf'
-# 		# fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
-
 def plotHVgens(folder_path, delta, graph_path, styles, save=False):
 	files = glob.glob(folder_path+os.sep+"*"+"hv-"+str(delta)+"*")
 	files.sort()
@@ -402,7 +321,6 @@ def fairmutComp(folder_path, graph_path, delta, styles, save=False):
 		files = glob.glob(folder_path+os.sep+"*"+"fairmut*"+metric+"*"+str(delta)+"*")
 
 		## Fix what files we send through etc.
-
 		if metric == "hv":
 			ax, fig = graphHVgens(files, data_name, styles_cycler)
 
@@ -448,11 +366,6 @@ def plotDeltaAssump(assumption_folder, graph_path, styles_cycler, metric="ari", 
 
 			data_list.append(np.max(np.loadtxt(file, delimiter=","),axis=0))
 
-			# data = np.loadtxt(file, delimiter=',')
-
-			# means.append(np.mean(data))
-			# stderrs.append(np.std(data, ddof=0)/np.sqrt(data.shape[1]))
-
 			delta_vals.append(delta)
 
 			means.append(np.mean(data_list))
@@ -482,9 +395,6 @@ def plotDetlaAssump_single(assumption_folder, graph_path, dataname="*_9*", metri
 	fig = plt.figure(figsize=(18,12))
 	ax = fig.add_subplot(111)
 
-	# Or we cherry pick some, or just generate some random numbers and pick those 
-
-	# let's do it by dataset
 	# Extract all dataset names, then create a set, then randomly choose those
 	# Then we can just plot and calculate what we need for each dataset at a time
 
@@ -496,8 +406,6 @@ def plotDetlaAssump_single(assumption_folder, graph_path, dataname="*_9*", metri
 	# Maybe need enumerate just for style stuff?
 	for dataset in data_sets:
 		files = sorted(glob.glob(assumption_folder+os.sep+dataset+"*"+metric+"*"))
-
-		# print(files)
 
 		data = [np.max(np.loadtxt(file, delimiter=","),axis=0) for file in files]
 
@@ -525,50 +433,27 @@ def plotDeltaAssump_all(assumption_folder, graph_path, metric="ari", save=False)
 	for dataname in ["*_9*","*UKC*"]:
 		data = []
 
-		# Could add a second loop here to get the UKC values too and plot separately
-		# Or we cherry pick some, or just generate some random numbers and pick those 
-
 		for num_delta, delta in enumerate(delta_vals):
 			print(delta)
-
 			# Sort might be useful if we use this code to select the same random files to plot separately
 			files = sorted(glob.glob(assumption_folder+os.sep+dataname+"*"+metric+"*"+str(delta)+"*"))
 
 			for index, file in enumerate(files):
-				# print(file)
-				# print(np.max(np.loadtxt(file, delimiter=","),axis=0))
 				if index == 0:
 					data_metric = np.max(np.loadtxt(file, delimiter=","),axis=0)
-					# print("one time")
 
 				else:
-					# print(data_metric)
 					data_metric = np.append(data_metric, np.max(np.loadtxt(file, delimiter=","),axis=0))
-					# print(data_metric,"\n")
-
-
-			# if num_delta == 0:
-				# data.append()
-
-			print(data_metric.shape)
-			# assert
 
 			data.append(data_metric)
 
 		assert len(data) == len(delta_vals)
 
-		# print([i for i in data])
-
-		# print(len(data))
 		means = [np.mean(i) for i in data]
-		# print(means, len(means))
 		stderrs = [np.std(i, ddof=0) for i in data]
-		# print(stderrs, len(stderrs))
-
-		# print(data[0])
 
 		ax.errorbar(delta_vals, means, yerr=stderrs, capsize=5, capthick=1)
-	# print(delta_vals)
+
 	ax.set_xticks(delta_vals)
 	ax.set_xticklabels(['{0:.2f}'.format(delta) for delta in delta_vals], fontsize=20)
 	ax.legend(loc=3, labels=["Synthetic","Real"])
@@ -709,12 +594,7 @@ def plotArtifExp_multiple(artif_folder, metric="ari"):
 
 		ax2.errorbar(list(range(len(strat_names))), means, color="black", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
 
-		# https://stackoverflow.com/questions/12919230/how-to-share-secondary-y-axis-between-subplots-in-matplotlib
-		## Use the above to get_shared_y_axes()
-
 		ax2.set_ylabel("Time")
-
-		# print(strat_names)
 		ax2.set_xticks(np.arange(len(strat_names)))
 		ax2.set_xticklabels(strat_names)
 		ax2.set_title("Comparison of time and performance for "+data_name)
@@ -776,10 +656,7 @@ def plotArtifExp_multiple2(artif_folder, metric="ari"):
 			max_val = np.max(data_time)
 			min_val = np.min(data_time)
 			denom = max_val - min_val
-
-			# print(data_time)
 			data_time = (data_time - min_val)/denom
-			# print(data_time)
 
 			means.append(np.mean(data_time))
 			errs.append(np.std(data_time, ddof=0)/np.sqrt(data_time.shape[0]))
@@ -787,9 +664,6 @@ def plotArtifExp_multiple2(artif_folder, metric="ari"):
 		# Plot the line here for each dataset
 		# Similar method to above, basically mirroring the bars but with lines
 		# ax2 = ax1.twinx()
-
-		# print(means, len(means))
-		# print([i+2*dataset_num for i in ind], len([i+2*dataset_num for i in ind[:len(means)]]))
 
 		ax2.errorbar([i+2*dataset_num for i in ind[:len(means)]], means, color="red", linestyle="--", yerr=errs, capsize=7, capthick=1)
 		# ax2.errorbar(list(range(len(strat_names))), means, color="black", linestyle="--", yerr=errs, capsize=7, capthick=1, label="Time")
@@ -894,8 +768,6 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 	hatches = ["/" , "\\" , "|" , "-" , "+" , "x", "."]
 
 	fig = plt.figure(figsize=(18,12))
-	# ax1 = fig.add_subplot(111)
-	
 
 	for subplot_num, dataset_folder in enumerate(folders):
 		subplot_num += 1
@@ -936,18 +808,11 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 
 			data_time = np.loadtxt(time_files[index], delimiter=',')
 
-			# Need to normalise the times here
-			##### Not here, we need to loop through and find the max over all strategies first!
-			# max_val = np.max(data_time)
-			# min_val = np.min(data_time)
-			# denom = max_val - min_val
-
 			if np.max(data_time) > max_val:
 				max_val = np.max(data_time)
 
 			if np.min(data_time) < min_val:
 				min_val = np.min(data_time)
-
 
 		denom = max_val - min_val
 
@@ -979,15 +844,7 @@ def plotArtifExp_multiplebox(artif_folder, metric="ari"):
 	ax1.set_xlabel("Search Strategy")
 	ax2.set_ylabel("Time")
 
-	# print(len(fig.get_axes()))
-
 	axes = fig.get_axes()
-	# print(axes, axes[0])
-
-	# for i in range(2, len(axes),2):
-	# 	print(axes[i])
-		# axes[0].get_shared_x_axes().join(axes[0],axes[i])
-		# axes[0].get_shared_y_axes().join(axes[0],axes[i])
 
 	# -4 just means the bottom 2 with 7 dataset results
 	for i in range(len(axes)-4):
@@ -1037,7 +894,6 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 
 		metric_files = sorted(metric_files, reverse=False)
 		time_files = sorted(time_files, reverse=False)
-		# print(metric_files)
 
 		assert len(metric_files) == len(time_files)
 
@@ -1053,13 +909,8 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 		# Extract data_name
 		data_name = dataset_folder.split(os.sep)[-1]
 
-		for index, file in enumerate(metric_files):
-			# print(file)
-			
+		for index, file in enumerate(metric_files):	
 			data_metric = np.max(np.loadtxt(file, delimiter=","),axis=0)
-			# print(np.argmax(np.loadtxt(file, delimiter=","),axis=0))
-			# print(data_metric)
-
 
 			if "base" in file:
 				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
@@ -1069,19 +920,8 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 				else:
 					strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
 
-				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
-				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
-				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
-
 			else:
-				# print(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
-
-			# print(strat_names[-1])
-			# print(data_metric, np.max(data_metric))
-
-			# Show order of strategies
-			# print(strat_names[-1], index, stratname_ref[index])
 
 			assert strat_names[-1] == stratname_ref[index], "Strat name difference "+strat_names[-1]+" "+stratname_ref[index]
 
@@ -1197,8 +1037,6 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 		stratname_ref[i] = strat_name_dict[strat]
 
 	# handles, labels = ax2.get_legend_handles_labels()
-	# print(handles)
-	# print(labels)	
 
 	ax2.set_xticklabels(stratname_ref)#, fontsize=50)
 	ax2.legend(loc=4)
@@ -1232,9 +1070,6 @@ def plotArtif_specStrat(results_path, strategy="reinit"):
 		data.append(np.loadtxt(fname, delimiter=","))
 
 		strat_names.append("-".join([fname.split(os.sep)[-1].split(".")[0].split("-")[-2],fname.split(os.sep)[-1].split(".")[0].split("-")[-1]]))
-
-		# print(fname)
-		# print(strat_names[-1])
 
 	fig = plt.figure(figsize=(18,12))
 	ax1 = fig.add_subplot(111)
@@ -1309,7 +1144,6 @@ def plotArtif_pairs2(results_path, strategy="reinit"):
 	random_triggers = [[33, 43, 53, 84], [13, 45, 62, 72], [32, 54, 76, 88], [9, 71, 81, 91], [18, 28, 39, 49], [42, 52, 62, 72], [14, 24, 59, 77], [21, 40, 50, 60], [14, 27, 74, 89], [49, 60, 70, 80], [17, 27, 47, 73], [52, 62, 72, 82], [11, 21, 31, 87], [11, 21, 82, 92], [19, 29, 55, 66], [32, 42, 67, 81], [15, 78, 89, 99], [11, 36, 46, 56], [35, 60, 70, 80], [54, 74, 84, 94], [24, 34, 72, 82], [42, 52, 64, 74], [15, 30, 57, 67], [14, 34, 44, 84], [13, 27, 44, 73], [25, 35, 45, 55], [43, 53, 63, 73], [29, 39, 49, 59], [49, 59, 69, 79], [24, 51, 61, 81]]
 
 	random_triggers = [i[-1] for i in random_triggers]
-	# print(len(random_triggers))
 
 	d = len(data)
 	fig, axes = plt.subplots(nrows=d, ncols=d)#, sharex='col', sharey='row')
@@ -1355,7 +1189,7 @@ def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*
 	# folders = folders[:13]
 
 	# fig = plt.figure(figsize=(18,12))
-	
+
 	# Have the strategies here in a defined order, then just check that the one extracted from the filename matches to ensure consistency
 
 	fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True)#, figsize=(18,12))
@@ -1368,8 +1202,6 @@ def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*
 		# Lists to aggregate the data over all datasets
 		data_metric_list = []
 		data_time_list = []
-
-		# box_colours = 
 
 		stratname_ref = ["base-sr1", "base-sr5", "carryon", "fairmut", "hypermutall", "hypermutspec", "reinit"]
 		
@@ -1409,10 +1241,6 @@ def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*
 
 					strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
 
-					# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
-					# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
-					# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
-
 				else:
 					strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 
@@ -1437,8 +1265,6 @@ def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*
 					data_metric_list[index] = np.append(data_metric_list[index], data_metric)
 
 				data_time = np.loadtxt(time_files[index], delimiter=',')
-				# print(data_time)
-				# print(strat_names[-1])
 
 				if np.max(data_time) > max_val:
 					max_val = np.max(data_time)
@@ -1459,7 +1285,6 @@ def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*
 					# data_time_list[index].append(data_time)
 					data_time_list[index] = np.append(data_time_list[index], data_time)
 
-		# print(data_metric_list)
 		assert len(data_metric_list) == len(stratname_ref)
 		assert len(data_time_list) == len(stratname_ref)
 
@@ -1481,8 +1306,6 @@ def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*
 
 		# ax_y.set_ylabel("Standarised Time per Run")
 		ax_y.set_ylim(-0.05,1.05)
-		# print(strat_names)
-		# print(stratname_ref)
 
 		# ax_y.set_title("Comparison of strategies over all datasets using "+method+" trigger", fontsize=22)
 
@@ -1496,7 +1319,6 @@ def plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods, dataname="*
 	ax1.set_ylabel("Adjusted Rand Index (ARI)")
 	ax_y.set_ylabel("Standarised Time per Run")
 	# plt.tight_layout()
-
 
 	if save:
 		savename = graph_path + "artif-allds-box.pdf"
@@ -1532,9 +1354,7 @@ def plotArtif_HV(artif_folder, strat="reinit", dataname="*_9", save=False):
 		print(folder)
 		# Maybe add sr1 after to see how it looks?
 		files = glob.glob(folder+os.sep+"*base*hv*sr5*")
-		# print(files)
 		files.extend(sorted(glob.glob(folder+os.sep+"*"+strat+"-hv-*")))
-		# print(files)
 
 		# print(len(files))
 		assert len(files) == 4
@@ -1574,8 +1394,6 @@ def plotArtif_HV(artif_folder, strat="reinit", dataname="*_9", save=False):
 			handles.append(mlines.Line2D([],[], color=styles[i]['color'], dashes=styles[i]['dashes'], marker=markers[i], ms=15, linewidth=linewidth, label=line))
 
 		ax.legend(handles=handles, labels=line_names)
-
-		# print(graph_path + "artif-" + folder.split(os.sep)[-1] + "-hvplot-run" +str(run_num)+".pdf")
 
 		if save:
 			savename = graph_path + "artif-" + folder.split(os.sep)[-1] + "-hvplot-run" +str(run_num)+".pdf"
@@ -1620,35 +1438,22 @@ def plotArtifClusts_all(artif_folder, graph_path, strat_name_dict, dataname="*UK
 		# Extract data_name
 		data_name = dataset_folder.split(os.sep)[-1]
 
-		for index, file in enumerate(metric_files):
-			# print(file)
-			
+		for index, file in enumerate(metric_files):	
 			data_metric = np.loadtxt(file, delimiter=",")
-
-
 			# Select the number of clusters represented by the best 30 ARIs
 			# best_ari_indices = np.argmax(np.loadtxt(ari_files[index], delimiter=","),axis=0)
-			# print(data_metric)
 			# data_metric = data_metric.T[np.arange(len(data_metric.T)),best_ari_indices]
-			# print(data_metric)
 
-			# print(file)
 			if "base" in file:
 				# strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
 				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0][:3]]))
 
 				strat_names.append("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3][:-4]]))
 
-				# print("-".join([file.split(os.sep)[-1].split("-")[1].split("_")[-1],
-				# 	file.split(os.sep)[-1].split("-")[-1].split(".")[0]]))
-				# print("-".join([file.split(os.sep)[-1].split("-")[1],file.split(os.sep)[-1].split("-")[3]]))
-
 			else:
-				# print(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 				strat_names.append(file.split(os.sep)[-1].split("-")[1].split("_")[-1])
 
 			# Show order of strategies
-			# print(strat_names[-1], index, stratname_ref[index])
 
 			assert strat_names[-1] == stratname_ref[index], "Strat name difference "+strat_names[-1]+" "+stratname_ref[index]
 

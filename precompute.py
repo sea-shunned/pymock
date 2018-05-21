@@ -9,127 +9,127 @@ import igraph
 # Shouldn't need this if the setup.py is done properly
 
 def compDists(data1,data2):
-	'''
-	Compute distances between two datasets. Usually the same dataset will be passed as data1 and data2
-	as we wish to get the dissimilarity matrix of the dataset
+    '''
+    Compute distances between two datasets. Usually the same dataset will be passed as data1 and data2
+    as we wish to get the dissimilarity matrix of the dataset
 
-	:return: Distance array (or dissimilarity matrix) of the data
-	'''
-	return metrics.pairwise.euclidean_distances(data1, data2)
-	
+    :return: Distance array (or dissimilarity matrix) of the data
+    '''
+    return metrics.pairwise.euclidean_distances(data1, data2)
+    
 def compDists_sp(data):
-	'''
-	Compute the distance array of some data
+    '''
+    Compute the distance array of some data
 
-	:return: Distance array (or dissimilarity matrix) of the data
-	'''
-	# Some say this should be faster, but I haven't really found to be
-	# May be more memory efficient, so perhaps try this if that is a problem
-	
-	# Perhaps have a single function and try to catch a memory error, and use this distance if it fails
-	return spt.distance.squareform(spt.distance.pdist(data,'euclidean'))
+    :return: Distance array (or dissimilarity matrix) of the data
+    '''
+    # Some say this should be faster, but I haven't really found to be
+    # May be more memory efficient, so perhaps try this if that is a problem
+    
+    # Perhaps have a single function and try to catch a memory error, and use this distance if it fails
+    return spt.distance.squareform(spt.distance.pdist(data,'euclidean'))
 
 def createMST(distarray):
-	# Create directed, weighted graph (loops=False means ignore diagonal)
-	G = igraph.Graph.Weighted_Adjacency(distarray.tolist(), mode="DIRECTED", loops=False)
+    # Create directed, weighted graph (loops=False means ignore diagonal)
+    G = igraph.Graph.Weighted_Adjacency(distarray.tolist(), mode="DIRECTED", loops=False)
 
-	# Get the MST
-	# Does not randomise starting node(!)
-	mst_ig = igraph.Graph.spanning_tree(G, weights=G.es["weight"], return_tree=False)
+    # Get the MST
+    # Does not randomise starting node(!)
+    mst_ig = igraph.Graph.spanning_tree(G, weights=G.es["weight"], return_tree=False)
 
-	# Create an array of infinities, so we get an error if we miss something!
-	# We have one more vertex than edges, so +1
-	gen_ig = np.full(len(mst_ig)+1, np.inf)
+    # Create an array of infinities, so we get an error if we miss something!
+    # We have one more vertex than edges, so +1
+    gen_ig = np.full(len(mst_ig)+1, np.inf)
 
-	# The below is MOSTLY equivalent to a Python version of Mario's code
-	# Differences seem minor
-	# The general idea is to loop over every edge in the MST
-		# and then fill in our genotype
-		# if an edge has already been seen (not np.inf) then we fill in the reverse
-	for i, edge in enumerate(mst_ig):
-		edge_tup = G.es[edge].tuple
-		
-		if np.isinf(gen_ig[edge_tup[1]]):
-			gen_ig[edge_tup[1]] = edge_tup[0]
-		else:
-			gen_ig[edge_tup[0]] = edge_tup[1]
+    # The below is MOSTLY equivalent to a Python version of Mario's code
+    # Differences seem minor
+    # The general idea is to loop over every edge in the MST
+        # and then fill in our genotype
+        # if an edge has already been seen (not np.inf) then we fill in the reverse
+    for i, edge in enumerate(mst_ig):
+        edge_tup = G.es[edge].tuple
+        
+        if np.isinf(gen_ig[edge_tup[1]]):
+            gen_ig[edge_tup[1]] = edge_tup[0]
+        else:
+            gen_ig[edge_tup[0]] = edge_tup[1]
 
-	# As there is one more vertex than edges, find and fill in the missing one
-	if np.isinf(gen_ig).any():
-		index = np.where(np.isinf(gen_ig))[0][0]
-		gen_ig[index] = np.where(gen_ig == index)[0][0]
-		
-	# Cast types to integers
-	gen_ig = gen_ig.astype(int)
+    # As there is one more vertex than edges, find and fill in the missing one
+    if np.isinf(gen_ig).any():
+        index = np.where(np.isinf(gen_ig))[0][0]
+        gen_ig[index] = np.where(gen_ig == index)[0][0]
+        
+    # Cast types to integers
+    gen_ig = gen_ig.astype(int)
 
-	## The below is for error checking
-	H = igraph.Graph()
-	H.add_vertices(len(gen_ig))
-	H.add_edges([(index,edge) for index,edge in enumerate(gen_ig)])
-	# Check we have a single connected component i.e. a fully-connected graph
-	assert len(H.components(mode="WEAK")) == 1
+    ## The below is for error checking
+    H = igraph.Graph()
+    H.add_vertices(len(gen_ig))
+    H.add_edges([(index,edge) for index,edge in enumerate(gen_ig)])
+    # Check we have a single connected component i.e. a fully-connected graph
+    assert len(H.components(mode="WEAK")) == 1
 
-	# Return as a list
-	return gen_ig.tolist()
+    # Return as a list
+    return gen_ig.tolist()
 
 def normaliseDistArray(distarray):
-	max_val = np.max(distarray)
-	min_val = np.min(distarray)
-	denom = max_val - min_val
+    max_val = np.max(distarray)
+    min_val = np.min(distarray)
+    denom = max_val - min_val
 
-	# Inefficient, should vectorise
-	for row, val in enumerate(distarray):
-		distarray[row] = (val - min_val)/denom
-	return distarray
+    # Inefficient, should vectorise
+    for row, val in enumerate(distarray):
+        distarray[row] = (val - min_val)/denom
+    return distarray
 
 def degreeInterest(mst_genotype, L, nn_rankings, distarray):
-	# Calculate the degree of interest for each edge in the MST
-	# This reads pretty much exactly as the formula
-	return [min(nn_rankings[i][j],nn_rankings[j][i])+distarray[i][j] for i,j in enumerate(mst_genotype)]
+    # Calculate the degree of interest for each edge in the MST
+    # This reads pretty much exactly as the formula
+    return [min(nn_rankings[i][j],nn_rankings[j][i])+distarray[i][j] for i,j in enumerate(mst_genotype)]
 
 def interestLinksIndices(degree_int):
-	'''
-	Argsort the degree of interestingness list to get the indices of the most interesting links first
+    '''
+    Argsort the degree of interestingness list to get the indices of the most interesting links first
 
-	Notes:
-	Merge sort is stable and gives better ordering
-	We use negative so that the lower indices appear first in the list
+    Notes:
+    Merge sort is stable and gives better ordering
+    We use negative so that the lower indices appear first in the list
 
-	:param degree_int: Degree of interestingness for each link in MST
-	:return: Indices of most interesting links, in order of most to last (i.e. last is 0, as it connects to itself
-			 and will be the least interesting link)
-	'''
-	return np.argsort(-(np.asarray(degree_int)), kind='mergesort').tolist()
+    :param degree_int: Degree of interestingness for each link in MST
+    :return: Indices of most interesting links, in order of most to last (i.e. last is 0, as it connects to itself
+             and will be the least interesting link)
+    '''
+    return np.argsort(-(np.asarray(degree_int)), kind='mergesort').tolist()
 
 def LARfromMST(edgelist, mst):
-	'''
-	Convert the MST into a locus-based adjacency representation/encoding
+    '''
+    Convert the MST into a locus-based adjacency representation/encoding
 
-	:param edgelist: Edgelist of the MST
-	:param mst: The MST
-	:return: A list in the format of a locus-based adjacency genotype
-	'''
-	# Initialise an array of the right length (number of nodes in the MST)
-	indiv_array = np.zeros(len(list(mst.nodes())),).astype(int)
+    :param edgelist: Edgelist of the MST
+    :param mst: The MST
+    :return: A list in the format of a locus-based adjacency genotype
+    '''
+    # Initialise an array of the right length (number of nodes in the MST)
+    indiv_array = np.zeros(len(list(mst.nodes())),).astype(int)
 
-	# We first connect the first data item with itself
-	# As the MST has one fewer edge than nodes, but LAR is of length #nodes
-	indiv_array[0] = 0
-	for edge in edgelist:
-		indiv_array[edge[0]] = edge[1]
-	return indiv_array.tolist()
+    # We first connect the first data item with itself
+    # As the MST has one fewer edge than nodes, but LAR is of length #nodes
+    indiv_array[0] = 0
+    for edge in edgelist:
+        indiv_array[edge[0]] = edge[1]
+    return indiv_array.tolist()
 
 def decodingLAR(indiv):
-	# This function identifies the connected components of an individual
-	# It is used to identify our starting base clusters or components
-	g = igraph.Graph()
-	g.add_vertices(len(indiv))
-	g.add_edges(zip(range(len(indiv)),indiv))
-	return list(g.components(mode="WEAK"))
+    # This function identifies the connected components of an individual
+    # It is used to identify our starting base clusters or components
+    g = igraph.Graph()
+    g.add_vertices(len(indiv))
+    g.add_edges(zip(range(len(indiv)),indiv))
+    return list(g.components(mode="WEAK"))
 
 def nnRankings(distarray, num_examples):
-	# This function calculates the nearest neighbour ranking between all examples
-	nn_rankings = np.zeros((num_examples,num_examples),dtype=int)
-	for i, row in enumerate(distarray):
-		nn_rankings[i] = rankdata(row, method='ordinal')-1 # minus 1 so that 0 rank is itself
-	return nn_rankings
+    # This function calculates the nearest neighbour ranking between all examples
+    nn_rankings = np.zeros((num_examples,num_examples),dtype=int)
+    for i, row in enumerate(distarray):
+        nn_rankings[i] = rankdata(row, method='ordinal')-1 # minus 1 so that 0 rank is itself
+    return nn_rankings
