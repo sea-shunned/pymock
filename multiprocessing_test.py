@@ -4,13 +4,15 @@ import glob
 import numpy as np
 import precompute, evaluation
 import main_base
+import time
 
 def loadData():
     basepath = os.getcwd()
 
     data_folder = os.path.join(basepath, "data")+os.sep
     synth_data_folder = os.path.join(data_folder, "synthetic_datasets")+os.sep
-    synth_data_files = glob.glob(synth_data_folder+'tevc_20_60_9*.data')
+    synth_data_files = glob.glob(synth_data_folder+'tevc_200_120_9*.data')
+    # synth_data_files = glob.glob(synth_data_folder+'tevc_20_60_9*.data')
     results_folder = basepath+"/test_data/"
     data_files = synth_data_files
 
@@ -83,7 +85,8 @@ def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_r
     print("Precomputation done!\n")
 
     # Hard-coded HV_ref to this dataset so that we can compare and make sure the HV is right
-    HV_ref = [3.0, 1469.0]    
+    HV_ref = [3.0, 1469.0]
+    # HV_ref = [3.0, 1683.0]
 
     args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings,mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
     return args, mst_genotype
@@ -99,23 +102,23 @@ def runMOCK(file_path, funcs, results_folder):
         strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1]
         print(f"Testing {strat_name}")
 
-        # Create arrays to save results for the given function
+        # Create variables to save results for the given function
         fit_array = np.empty((num_indivs, len(fitness_cols)))
-        # hv_array = np.empty((num_gens, 1))
-        ari_array = np.empty((num_indivs, 1))
         delta_triggers = []
 
+        # Fixed to validate results
         random.seed(11)
 
+        start_time = time.time()
         pop, HV, _, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
+        end_time = time.time()
+        print(strat_name+" took",end_time-start_time,"seconds")
 
         fit_array[:num_indivs,0:3] = [indiv.fitness.values+(1,) for indiv in pop]
 
         _, aris = evaluation.finalPopMetrics(
             pop, mst_genotype, int_links_indices_spec, relev_links_len)
 
-        # ari_array[:, 0] = aris
-        # hv_array[:, 0] = HV
         delta_triggers.append(adapt_gens)
 
         valid = validateResults(results_folder, strat_name, np.asarray(aris), np.asarray(HV), fit_array, delta_triggers)
@@ -129,10 +132,13 @@ def runMOCK(file_path, funcs, results_folder):
 def validateResults(
     results_folder, strat_name, ari_array, hv_array, fit_array, delta_triggers):
     # Take the hypervolume and/or ARI results generated and compare them to a saved version of the results for each strategy to ensure it's the same
-    if strat_name != "base":
-        ari_path, fit_path, hv_path, trigger_path = sorted(glob.glob(results_folder+"*"+strat_name+"*"))
-    else:
-        ari_path, fit_path, hv_path = sorted(glob.glob(results_folder+"*"+strat_name+"*"))
+    # if strat_name != "base":
+    #     ari_path, fit_path, hv_path, trigger_path = sorted(glob.glob(results_folder+"*"+strat_name+"*"))
+    # else:
+    #     ari_path, fit_path, hv_path = sorted(glob.glob(results_folder+"*"+strat_name+"*"))
+
+    # ari_path, fit_path, hv_path = sorted(glob.glob(results_folder+"*60*base*"))
+    ari_path, fit_path, hv_path = sorted(glob.glob(results_folder+"*120*base*"))
 
     ari_orig = np.loadtxt(ari_path, delimiter=",")[:, 0]
     if not np.array_equal(ari_array, ari_orig):
@@ -142,17 +148,21 @@ def validateResults(
 
     fit_orig = np.loadtxt(fit_path, delimiter=",")[:100, :]
     if not np.array_equal(fit_array, fit_orig):
+        print(fit_array)
+        print(fit_orig)
         raise ValueError("Fitness values not equal")
 
     # Only useful if we have fixed the same HV ref point as the orig experiments (which we have)
-    hv_orig = np.loadtxt(hv_path, delimiter=",")[:, 0]
-    if not np.array_equal(hv_array, hv_orig):
-        raise ValueError("HV values not equal")
+    # hv_orig = np.loadtxt(hv_path, delimiter=",")[:, 0]
+    # if not np.array_equal(hv_array, hv_orig):
+    #     print(hv_array)
+    #     print(hv_orig)
+    #     raise ValueError("HV values not equal")
 
-    if strat_name != "base":
-        trigger_orig = [list(map(int, line.split(","))) for line in open(trigger_path)][0]
-        if trigger_orig != delta_triggers[0]:
-            raise ValueError("Trigger generations not equal")
+    # if strat_name != "base":
+    #     trigger_orig = [list(map(int, line.split(","))) for line in open(trigger_path)][0]
+    #     if trigger_orig != delta_triggers[0]:
+    #         raise ValueError("Trigger generations not equal")
 
     return True
 
@@ -166,7 +176,10 @@ def main():
     # funcs.extend(loadMains())
 
     for file_path in data_files:
+        start_time = time.time()
         runMOCK(file_path, funcs, results_folder)
+        end_time = time.time()
+        print("Took "+str(end_time-start_time)+" seconds")
 
     ## Artif scripts are for the random or interval triggers, which we're unlikely to use in the future
     # funcs = [main_base.main]

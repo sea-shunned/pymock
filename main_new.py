@@ -4,20 +4,19 @@ import objectives
 import operators
 import classes
 
-# For multiprocessing
-# from os import cpu_count
-import multiprocessing
+import numpy as np
+from itertools import count
+import random
 
 from deap import base, creator, tools
 from deap.benchmarks.tools import hypervolume
 
-import random
-
 # Run outside of multiprocessing scope
+# Can consieer trying to move this, though we just run it once anyway so eh
 creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
 creator.create("Individual", list, fitness=creator.Fitness, fairmut=None)
 
-def delta_precomp(delta_val, mst_genotype, int_links_indices):
+def delta_precomp(data, data_dict, argsortdists, L, delta_val, mst_genotype, int_links_indices):
     relev_links_len = initialisation.relevantLinks(
         delta_val, classes.Dataset.num_examples)
     print("Genotype length:", relev_links_len)
@@ -36,7 +35,7 @@ def delta_precomp(delta_val, mst_genotype, int_links_indices):
     return relev_links_len, reduced_clust_nums
 
 # Consider trying to integrate the use of **kwargs here
-def create_base_toolbox(num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L, data_dict, nn_rankings):
+def create_base_toolbox(num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums):
     toolbox = base.Toolbox()
 
     # Register the initialisation function
@@ -101,7 +100,7 @@ def create_base_toolbox(num_indivs, mst_genotype, int_links_indices, relev_links
     
     return toolbox
 
-def initial_setup(toolbox):
+def initial_setup(toolbox, HV, HV_ref):
     pop = toolbox.population()
 
 	# Convert each individual of class list to class deap.creator.Individual
@@ -115,7 +114,7 @@ def initial_setup(toolbox):
     CNN_init = []
 
     # Evaluate the initial pop
-    fitnesses = toolbox.map(toolbox.evaluate, pop)
+    fitnesses = [toolbox.evaluate(indiv) for indiv in pop]
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit	
         VAR_init.append(fit[0])
@@ -124,15 +123,17 @@ def initial_setup(toolbox):
     # This is just to assign the crowding distance to the individuals, no actual selection is done
     pop = toolbox.select(pop, len(pop))
 
-    return pop, VAR_init, CNN_init
+    HV.append(hypervolume(pop, HV_ref))
 
-def generation(pop, toolbox, HV, HV_ref):
+    return pop, HV, VAR_init, CNN_init
+
+def generation(pop, toolbox, HV, HV_ref, num_indivs):
     # Shuffle the population
     random.shuffle(pop)
 
     # Select and clone the offspring (to allow modification)
     offspring = tools.selTournamentDCD(pop, len(pop))
-    offspring = toolbox.map(toolbox.clone, offspring)
+    offspring = [toolbox.clone(ind) for ind in offspring]
 
     # Tournament
     for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
@@ -144,7 +145,7 @@ def generation(pop, toolbox, HV, HV_ref):
         toolbox.mutate(ind2)
 
     # Evaluate the offspring
-    fitnesses = toolbox.map(toolbox.evaluate, offspring)
+    fitnesses = [toolbox.evaluate(indiv) for indiv in offspring]
     for ind, fit in zip(offspring, fitnesses):
         ind.fitness.values = fit
 
@@ -155,7 +156,7 @@ def generation(pop, toolbox, HV, HV_ref):
 
     return pop, HV
 
-def reinit_generation(pop, toolbox, HV, HV_ref):
+def generation_reinit(pop, toolbox, HV, HV_ref, num_indivs):
     random.shuffle(pop)
 
     # Generate the offspring from the initialisation routine
@@ -165,7 +166,7 @@ def reinit_generation(pop, toolbox, HV, HV_ref):
         offspring[index] = indiv
 
     # Evaluate the offspring
-    fitnesses = toolbox.map(toolbox.evaluate, offspring)
+    fitnesses = [toolbox.evaluate(indiv) for indiv in offspring]
     for ind, fit in zip(offspring, fitnesses):
         ind.fitness.values = fit
 
@@ -175,6 +176,9 @@ def reinit_generation(pop, toolbox, HV, HV_ref):
     HV.append(hypervolume(pop, HV_ref))   
 
     return pop, HV
+
+# def generation_hypermut(pop, toolbox, HV, HV_ref, num_indivs, adapt_gens, gen):
+#     pass    
 
 def calc_HV_ref(VAR_init):
     return [np.ceil(np.max(VAR_init)*1.5), np.ceil(classes.PartialClust.max_conn+1)]
@@ -199,7 +203,7 @@ def check_trigger(delta_val, gen, adapt_gens, max_adapts, block_trigger_gens, HV
 
     return False, ref_grad
 
-def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduce, relev_links_len, mst_genotype, int_links_indices, num_indivs, argsortdists, L, data_dict, nn_rankings):
+def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduce, relev_links_len, mst_genotype, int_links_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data):
 
     # Need to re-register the functions with new arguments
     toolbox.unregister("evaluate")
@@ -224,7 +228,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
     print(f"Adaptive delta engaged at gen {gen}! Going down to delta = {delta_val}")
 
     # Re-do the relevant precomputation
-    relev_links_len, reduced_clust_nums = delta_precomp(delta_val, mst_genotype, int_links_indices)
+    relev_links_len, reduced_clust_nums = delta_precomp(data, data_dict, argsortdists, L, delta_val, mst_genotype, int_links_indices)
     newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
 
     # Extend the individuals to the new genotype length
@@ -287,9 +291,20 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
             raised_mut = 50
             )
     
-    elif strat_name == "reinit"       
+    elif strat_name == "reinit":
         toolbox.register("initDelta", initialisation.initDeltaMOCKadapt, classes.Dataset.k_user, num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L)
+        
         toolbox.register("population", tools.initIterate, list, toolbox.initDelta)
+        
+        toolbox.register(
+            "mutate", operators.neighbourMutation, 
+            MUTPB = 1.0, 
+            gen_length = relev_links_len, 
+            argsortdists = argsortdists, 
+            L = L, 
+            int_links_indices = int_links_indices, 
+            nn_rankings = nn_rankings
+            )
 
     else:
         toolbox.register(
@@ -304,26 +319,14 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
 
     return pop, toolbox, delta_val, relev_links_len, reduced_clust_nums
 
-# def main(**kwargs):
-def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce):
-    relev_links_len, reduced_clust_nums = delta_precomp(delta_val, mst_genotype, int_links_indices)
 
-    toolbox = create_base_toolbox(num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L, data_dict, nn_rankings)
-
-    # Possibly try to modify this
-    # Even consider using the with pool to limit no. pools
-    # Can compare time
-    pool = multiprocessing.Pool(processes = multiprocessing.cpu_count())
-    toolbox.register("map", pool.map, chunksize=20)
-
-    pop, VAR_init, CNN_init = initial_setup(toolbox)
-
-    if HV_ref == None:
-        HV_ref = calc_HV_ref(pop)
-
-    # Check that the HV_ref reference point is valid
-    if classes.PartialClust.max_conn >= HV_ref[1]:
-        raise ValueError(f"Max CNN value ({classes.PartialClust.max_conn}) has exceeded that set for HV reference point ({HV_ref[1]}); HV values may be unreliable")
+def runMOCK(
+    data, data_dict, delta_val, HV_ref, argsortdists, 
+    nn_rankings, mst_genotype, int_links_indices, L, 
+    num_indivs, num_gens, delta_reduce, strat_name, adapt_delta
+    ):
+    HV = []
+    adapt_gens = None
 
     if adapt_delta:
         window_size = 3 # Moving average of HV gradients to look at
@@ -333,17 +336,23 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
         delta_reduce = 1 # Amount to reduce delta by
         ref_grad = None
 
-    for gen in range(1, num_gens):
-        # Select the right generation for the strategy employed
-        if adapt_delta:
-            if strat_name == "reinit":
-                if adapt_gens[-1] == gen-1 and gen != 1:
-                    pop, HV = reinit_generation(pop, toolbox, HV, HV_ref)
-                else:
-                    pop, HV = generation(pop, toolbox, HV, HV_ref)
+    relev_links_len, reduced_clust_nums = delta_precomp(
+        data, data_dict, argsortdists, L, delta_val, mst_genotype, int_links_indices)
 
-        else:
-            pop, HV = generation(pop, toolbox, HV, HV_ref)
+    toolbox = create_base_toolbox(
+        num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums)
+
+    pop, HV, VAR_init, CNN_init = initial_setup(toolbox, HV, HV_ref)
+
+    if HV_ref == None:
+        HV_ref = calc_HV_ref(pop)
+
+    # Check that the HV_ref reference point is valid
+    if classes.PartialClust.max_conn >= HV_ref[1]:
+        raise ValueError(f"Max CNN value ({classes.PartialClust.max_conn}) has exceeded that set for HV reference point ({HV_ref[1]}); HV values may be unreliable")
+
+    for gen in range(1, num_gens):
+        pop, HV, toolbox = select_generation_strategy(pop, toolbox, HV, HV_ref, num_indivs, gen, adapt_delta, adapt_gens, strat_name, relev_links_len, argsortdists, L, int_links_indices, nn_rankings)
 
         if adapt_delta:
             trigger_bool, ref_grad = check_trigger(delta_val, gen, adapt_gens, max_adapts, block_trigger_gens, HV, window_size, ref_grad)
@@ -351,11 +360,44 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
             if trigger_bool:
                 adapt_gens.append(gen)
 
-                pop, toolbox, delta_val, relev_links_len, reduced_clust_nums = adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduce, relev_links_len, mst_genotype, int_links_indices, num_indivs, argsortdists, L, data_dict, nn_rankings)
-
-    pool.close()
-    pool.join()
+                pop, toolbox, delta_val, relev_links_len, reduced_clust_nums = adaptive_delta_trigger(
+                    pop, gen, strat_name, delta_val, toolbox, delta_reduce, relev_links_len, mst_genotype, int_links_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data)
 
     classes.PartialClust.id_value = count()
 
     return pop, HV, HV_ref, int_links_indices, relev_links_len, adapt_gens
+
+def select_generation_strategy(
+    pop, toolbox, HV, HV_ref, num_indivs, gen, 
+    adapt_delta, adapt_gens, strat_name, relev_links_len, 
+    argsortdists, L, int_links_indices, nn_rankings):
+    if adapt_delta:
+        if strat_name == "reinit":
+            if adapt_gens[-1] == gen-1 and gen != 1:
+                pop, HV = generation_reinit(pop, toolbox, HV, HV_ref, num_indivs)
+            else:
+                pop, HV = generation(pop, toolbox, HV, HV_ref, num_indivs)
+        
+        else:
+            pop, HV = generation(pop, toolbox, HV, HV_ref, num_indivs)
+
+        if "hypermut" in strat_name:
+            if adapt_gens[-1] == gen-1 and gen != 1:
+                toolbox.unregister("mutate")
+                toolbox.register(
+                    "mutate", operators.neighbourMutation, 
+                    MUTPB = 1.0, 
+                    gen_length = relev_links_len, 
+                    argsortdists = argsortdists, 
+                    L = L, 
+                    int_links_indices = int_links_indices, 
+                    nn_rankings = nn_rankings
+                    )
+
+    else:
+        pop, HV = generation(pop, toolbox, HV, HV_ref, num_indivs)
+
+    return pop, HV, toolbox
+
+# add a main func here if we just want to run this thing once
+# a main func is used within a script only, a main should not be imported

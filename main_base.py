@@ -35,7 +35,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
     # Could abstract some of this out so that for big experiments it is only run once per dataset
 
     base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
-    part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
+    # part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
+    classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
     conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
     reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
 
@@ -44,7 +45,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
     toolbox.register("initDelta", initialisation.initDeltaMOCK, classes.Dataset.k_user, num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L)
     toolbox.register("population", tools.initIterate, list, toolbox.initDelta)
-    toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
+    toolbox.register("evaluate", objectives.evalMOCK, part_clust = classes.PartialClust.part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=classes.PartialClust.cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
     # In the new paper they put the crossover probability as 1
     toolbox.register("mate", operators.uniformCrossover, cxpb = 1.0)
     # We just use the MUTPB = 1 in the (1/num-examples) term, as per the Garza/Handl code

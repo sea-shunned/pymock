@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import csv
-# import matplotlib.pyplot as plt
+
 import numpy as np
 import pickle
 import glob
@@ -14,12 +14,8 @@ import precompute
 import evaluation
 
 # Import strategies here
-import main_base
-import main_carryon
-import main_hypermutspec
-import main_hypermutall
-import main_reinit
-import main_fairmut
+# import main_base # for DEAP indiv declaration
+import main_new
 
 # Get our current wd as the base path
 basepath = os.getcwd()
@@ -29,22 +25,16 @@ data_folder = os.path.join(basepath, "data")+os.sep
 synth_data_folder = os.path.join(data_folder, "synthetic_datasets")+os.sep
 real_data_folder = os.path.join(data_folder, "UKC_datasets")+os.sep
 
-synth_data_files = glob.glob(synth_data_folder+'*.data')
+synth_data_files = sorted(glob.glob(synth_data_folder+'*.data'))
 real_data_files = sorted(glob.glob(real_data_folder+'*.txt'))
 
-results_folder = os.path.join(basepath,"results")+os.sep
+results_folder = os.path.join(basepath,"results","artif", "test")+os.sep
 
-# data_files = synth_data_files[:3] + [synth_data_files[8]] + [synth_data_files[11]] + [synth_data_files[19]] + [synth_data_files[37]] + real_data_files[:1]
-
-data_files = real_data_files[1:2]
-
-# synth_data_files = glob.glob(synth_data_folder+'tevc_20_10_6_*.data')
-# data_files = synth_data_files
-
+data_files = glob.glob(synth_data_folder+'tevc_20_60_9*.data')
 print(data_files)
 
 # Specify the number of runs
-num_runs = 30
+num_runs = 1
 
 # Randomly generated numbers to use as the fixed seeds
 # 50 unique seeds, should be enough as unlikely to run more than 50 times
@@ -56,8 +46,12 @@ assert len(seeds) == len(set(seeds)), "Non-unique seed numbers"
 assert len(seeds) >= num_runs, "Too many runs for number of available seeds"
 
 # Set range of delta values to test for each file
-delta_vals = [i for i in range(0,81,10)]
-# delta_vals = [50,80]
+# delta_vals = [i for i in range(90,99,3)]
+# delta_vals = []
+
+# Square root values for delta
+# Reverse to ensure lowest delta is first (in case of issues with HV ref point)
+sr_vals = [1]
 
 # Parameters across all strategies
 L = 10
@@ -65,177 +59,186 @@ num_indivs = 100
 num_gens = 100
 delta_reduce = 1
 
-# funcs = [main_base.main, main_carryon.main, main_hypermutspec.main, main_hypermutall.main, main_reinit.main, main_fairmut.main]
-# funcs = [main_fairmut.main, main_base.main]
-funcs = [main_base.main]
-save_results = True
-
+funcs = [main_new.runMOCK]
+save_results = False
 fitness_cols = ["VAR", "CNN", "Run"]
 
+print('Number of delta values to test:', len(sr_vals))
+print("Number of runs per delta value:", num_runs)
+print("Number of datasets:", len(data_files))
+print("Number of strategies:", len(funcs))
+print("Number of total MOCK Runs:", len(data_files)*len(sr_vals)*num_runs*len(funcs),"\n")
 
 for file_path in data_files:
-	file_time = time.time()
-	import classes # May need to put this here to ensure counts etc. are reset - TEST THIS
-	classes.Dataset.data_name = file_path.split("/")[-1].split(".")[0][:-15]
-	
-	# Correction for real dataset
-	if classes.Dataset.data_name == "":
-		classes.Dataset.data_name = file_path.split("/")[-1].split(".")[0]
+    file_time = time.time()
+    import classes # May need to put this here to ensure counts etc. are reset - TEST THIS
+    classes.Dataset.data_name = file_path.split("/")[-1].split(".")[0][:-15]
+    
+    # Correction for real dataset
+    if classes.Dataset.data_name == "":
+        classes.Dataset.data_name = file_path.split("/")[-1].split(".")[0]
 
-	print("Testing:",classes.Dataset.data_name)
+    print("Testing:",classes.Dataset.data_name)
 
-	# USE A TRY EXCEPT HERE TO CREATE A DATA FOLDER
-	# '_'.join()
-	# ['_'.join(file.split("/")[-1].split("_")[:-4]) for file in files]
+    # USE A TRY EXCEPT HERE TO CREATE A DATA FOLDER
+    # '_'.join()
+    # ['_'.join(file.split("/")[-1].split("_")[:-4]) for file in files]
 
-	# Get header info (only for Mario's data!)
-	with open(file_path) as file:
-		head = [int(next(file)[:-1]) for _ in range(4)]
+    # Get header info (only for Mario's data!)
+    with open(file_path) as file:
+        head = [int(next(file)[:-1]) for _ in range(4)]
 
-	# Read the data into an array
-	data = np.genfromtxt(file_path, delimiter="\t", skip_header=4)
+    # Read the data into an array
+    data = np.genfromtxt(file_path, delimiter="\t", skip_header=4)
 
-	# Set the values for the data
-	classes.Dataset.num_examples = head[0] # Num examples
-	classes.Dataset.num_features = head[1] # Num features/dimensions
-	classes.Dataset.k_user = head[3] # Num real clusters
+    # Set the values for the data
+    classes.Dataset.num_examples = head[0] # Num examples
+    classes.Dataset.num_features = head[1] # Num features/dimensions
+    classes.Dataset.k_user = head[3] # Num real clusters
 
-	# Do we have labels?
-	if head[2] == 1:
-		classes.Dataset.labels = True
-	else:
-		classes.Dataset.labels = False
+    # Do we have labels?
+    if head[2] == 1:
+        classes.Dataset.labels = True
+    else:
+        classes.Dataset.labels = False
 
-	# Remove labels if present and create data_dict
-	data, data_dict = classes.createDatasetGarza(data)
+    # Remove labels if present and create data_dict
+    data, data_dict = classes.createDatasetGarza(data)
 
-	results_folder_data = results_folder+classes.Dataset.data_name+"/"
+    results_folder_data = results_folder+classes.Dataset.data_name+os.sep
 
-	# Print some outputs about the experiment configuration
-	print("Delta values to test:", delta_vals, "("+str(len(delta_vals))+")")
-	print("Number of runs per delta value:", num_runs)
-	print("Number of datasets:", len(data_files))
-	print("Number of strategies:", len(funcs))
-	print("Number of total MOCK Runs:", len(data_files)*len(delta_vals)*num_runs*len(funcs),"\n")
+    # Add square root delta values
+    delta_vals = [100-((100*i*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples) for i in sr_vals]
 
+    # Print some outputs about the experiment configuration
+    print("Delta values to test:", delta_vals, "("+str(len(delta_vals))+")")
 
-	###	Try to create a folder for results, group by the k & d
-	if not os.path.isdir(results_folder_data):
-		print("Created a results folder for dataset "+classes.Dataset.data_name)
-		os.makedirs(results_folder_data)
+    ###	Try to create a folder for results, group by the k & d
+    if not os.path.isdir(results_folder_data):
+        print("Created a results folder for dataset "+classes.Dataset.data_name)
+        os.makedirs(results_folder_data)
 
-	# Precomputation for this dataset
-	print("Starting precomputation...")
+    # Precomputation for this dataset
+    print("Starting precomputation...")
 
-	# start_time = time.time()
-	distarray = precompute.compDists(data, data)
-	# end_time = time.time()
-	distarray = precompute.normaliseDistArray(distarray)
-	print("Distance array done!")
+    # start_time = time.time()
+    distarray = precompute.compDists(data, data)
+    # end_time = time.time()
+    distarray = precompute.normaliseDistArray(distarray)
+    print("Distance array done!")
 
-	argsortdists = np.argsort(distarray, kind='mergesort')
-	nn_rankings = precompute.nnRankings(distarray, classes.Dataset.num_examples)
-	print("NN rankings done!")
+    argsortdists = np.argsort(distarray, kind='mergesort')
+    nn_rankings = precompute.nnRankings(distarray, classes.Dataset.num_examples)
+    print("NN rankings done!")
 
-	start_time = time.time()
-	mst_genotype = precompute.createMST(distarray)
-	end_time = time.time()
-	print("MST done! (Took",end_time-start_time,"seconds)")
+    start_time = time.time()
+    mst_genotype = precompute.createMST(distarray)
+    end_time = time.time()
+    print("MST done! (Took",end_time-start_time,"seconds)")
 
-	degree_int = precompute.degreeInterest(mst_genotype, L, nn_rankings, distarray)
-	int_links_indices = precompute.interestLinksIndices(degree_int)
-	print("DI done!")
-	print("Precomputation done!\n")
+    degree_int = precompute.degreeInterest(mst_genotype, L, nn_rankings, distarray)
+    int_links_indices = precompute.interestLinksIndices(degree_int)
+    print("DI done!")
+    print("Precomputation done!\n")
 
-	HV_ref = None
+    HV_ref = None
 
-	for index_d, delta in enumerate(delta_vals):
-		print("\nTesting delta =",delta)
+    # Generate SR5 HV ref point to avoid issues
+    # _,_, HV_ref ,_,_,_ = main_base.main(data, data_dict, 100-((100*5*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples), HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce)
 
-		# Create tuple of arguments
-		args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
+    print(100-((100*5*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples))
 
-		if HV_ref == None:
-			first_run = True
+    for index_d, delta in enumerate(delta_vals):
+        print("\nTesting delta =",delta, "(sr"+str(sr_vals[index_d])+")")
 
-		else:
-			first_run = False
+        # Create tuple of arguments
+        args = data, data_dict, delta, HV_ref, argsortdists, nn_rankings, mst_genotype, int_links_indices, L, num_indivs, num_gens, delta_reduce
 
-		##### What numbers do I want and where???? #####
+        if HV_ref == None:
+            first_run = True
 
-		for func in funcs:
-			# Create arrays to save results for the given function
-			fitness_array = np.empty((num_indivs*num_runs, len(fitness_cols)))
-			hv_array = np.empty((num_gens, num_runs))
-			ari_array = np.empty((num_indivs, num_runs))
-			numclusts_array = np.empty((num_indivs, num_runs))
-			time_array = np.empty(num_runs)
-			delta_triggers = []
+        else:
+            first_run = False
 
-			strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0]
+        for func in funcs:
+            strat_name = func.__globals__["__file__"].split("/")[-1].split(".")[0].split("_")[-1]
+            
+            # # Don't do sr5 for any of the artif scripts
+            if strat_name != "base" and sr_vals[index_d]==5:
+                # print("\n",strat_name, sr_vals[index_d], delta,"\n")
+                continue
 
-			for run in range(num_runs):
-				random.seed(seeds[run])
-				print("\nSeed number:",seeds[run])
-				print("HV ref:", HV_ref)
+            # # # Don't do sr1 for base MOCK
+            # # if strat_name == "main_base" and sr_vals[index_d]==1:
+            # # 	continue
 
-				print("Run",run,"with", strat_name)
-				start_time = time.time()
-				pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
-				end_time = time.time()
-				print("Run "+str(run)+" for d="+str(delta)+" complete (Took",end_time-start_time,"seconds)")
+            # Create arrays to save results for the given function
+            fitness_array = np.empty((num_indivs*num_runs, len(fitness_cols)))
+            hv_array = np.empty((num_gens, num_runs))
+            ari_array = np.empty((num_indivs, num_runs))
+            numclusts_array = np.empty((num_indivs, num_runs))
+            time_array = np.empty(num_runs)
+            delta_triggers = []
 
-				if first_run:
-					HV_ref = HV_ref_temp
+            print("\nStrategy:",strat_name, "Delta: sr",sr_vals[index_d])
 
-				# Add fitness values
-				ind = num_indivs*run
-				fitness_array[ind:ind+num_indivs,0:3] = [indiv.fitness.values+(run+1,) for indiv in pop]
+            for run in range(num_runs):
+                random.seed(seeds[run])
+                print("\nSeed number:",seeds[run])
+                print("HV ref:", HV_ref)
 
-				# Calculate number of clusters and the ARI for each individual in the final pop
-				numclusts, aris = evaluation.finalPopMetrics(pop, mst_genotype, int_links_indices_spec, relev_links_len)
+                print("Run",run,"with", strat_name)
+                start_time = time.time()
+                pop, HV, HV_ref_temp, int_links_indices_spec, relev_links_len, adapt_gens = func(*args)
+                end_time = time.time()
+                print("Run "+str(run)+" for d="+str(delta)+" (sr"+str(sr_vals[index_d])+") complete (Took",end_time-start_time,"seconds)")
 
-				# Assign these values
-				numclusts_array[:,run] = numclusts
-				ari_array[:,run] = aris
+                if first_run:
+                    HV_ref = HV_ref_temp
 
-				# Assign the HV
-				hv_array[:,run] = HV
+                # Add fitness values
+                ind = num_indivs*run
+                fitness_array[ind:ind+num_indivs,0:3] = [indiv.fitness.values+(run+1,) for indiv in pop]
 
-				# Assign the time taken
-				time_array[run] = end_time - start_time
+                # Calculate number of clusters and the ARI for each individual in the final pop
+                numclusts, aris = evaluation.finalPopMetrics(pop, mst_genotype, int_links_indices_spec, relev_links_len)
 
-				delta_triggers.append(adapt_gens)
+                # Assign these values
+                numclusts_array[:,run] = numclusts
+                ari_array[:,run] = aris
 
-			###### Create a folder for graphs, and save the graphs we make into that
-			###### Best to do that here and just have the graph func return a graph
-				# Easier to aggregate here
-				# Easier to save graphs for individual runs from within the main func, or aggregate over a single run with multiple funcs here
+                # Assign the HV
+                hv_array[:,run] = HV
 
-				# print(func.__globals__["__file__"].split("/")[-1].split(".")[0])
+                # Assign the time taken
+                time_array[run] = end_time - start_time
 
-			# Save the arrays here
-			# np.savetxt(fname,array,delimiter=',')
-			filename = "-".join([results_folder_data+classes.Dataset.data_name,strat_name])
+                delta_triggers.append(adapt_gens)
 
-			if save_results:
-				# Save array data
-				np.savetxt(filename+"-fitness-"+str(delta)+".csv", fitness_array, delimiter=",")
-				np.savetxt(filename+"-hv-"+str(delta)+".csv", hv_array, delimiter=",")
-				np.savetxt(filename+"-ari-"+str(delta)+".csv", ari_array, delimiter=",")
-				np.savetxt(filename+"-numclusts-"+str(delta)+".csv", numclusts_array, delimiter=",")
-				np.savetxt(filename+"-time-"+str(delta)+".csv", time_array, delimiter=",")
+            # Save the arrays here
+            # np.savetxt(fname,array,delimiter=',')
+            filename = "-".join([results_folder_data+classes.Dataset.data_name,strat_name])
 
-				# Pickle delta triggers
-				# No triggers for normal delta-MOCK
-				if strat_name != "main_base":
-					with open(filename+"-triggers-"+str(delta)+".pkl","wb") as f:
-						pickle.dump(delta_triggers, f)
+            if save_results:
+                # Save array data
+                np.savetxt(filename+"-fitness-sr"+str(sr_vals[index_d])+"-hv.csv", fitness_array, delimiter=",")
+                np.savetxt(filename+"-hv-sr"+str(sr_vals[index_d])+"-hv.csv", hv_array, delimiter=",")
+                np.savetxt(filename+"-ari-sr"+str(sr_vals[index_d])+"-hv.csv", ari_array, delimiter=",")
+                np.savetxt(filename+"-numclusts-sr"+str(sr_vals[index_d])+"-hv.csv", numclusts_array, delimiter=",")
+                np.savetxt(filename+"-time-sr"+str(sr_vals[index_d])+"-hv.csv", time_array, delimiter=",")
 
-		# Modify the below for specific dataset folder
-		# np.savetxt(results_path+classes.Dataset.data_name[:-15]+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")
+                # Pickle delta triggers
+                # No triggers for normal delta-MOCK
+                if strat_name != "base":
+                    with open(filename+"-triggers-sr"+str(sr_vals[index_d])+"-hv.csv","w") as f:
+                    # 	pickle.dump(delta_triggers, f)
+                        writer=csv.writer(f)
+                        writer.writerows(delta_triggers)
 
-	print(classes.Dataset.data_name + " complete! Took",time.time()-file_time,"seconds \n")
+        # Modify the below for specific dataset folder
+        # np.savetxt(results_path+classes.Dataset.data_name[:-15]+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")
+
+    print(classes.Dataset.data_name + " complete! Took",time.time()-file_time,"seconds \n")
 
 
 ### Graph/Analysis after all the data is done

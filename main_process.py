@@ -10,8 +10,8 @@ from itertools import count
 import random
 
 # For multiprocessing
-from os import cpu_count
-import multiprocessing
+# from os import cpu_count
+# import multiprocessing
 
 from deap import base, creator, tools
 from deap.benchmarks.tools import hypervolume
@@ -35,7 +35,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
     # Could abstract some of this out so that for big experiments it is only run once per dataset
 
     base_genotype, base_clusters = initialisation.baseGenotype(mst_genotype, int_links_indices, relev_links_len)
-    part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
+    # part_clust, cnn_pairs = classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
+    classes.partialClustering(base_clusters, data, data_dict, argsortdists, L)
     conn_array, max_conn = classes.PartialClust.conn_array, classes.PartialClust.max_conn
     reduced_clust_nums = [data_dict[i].base_cluster_num for i in int_links_indices[:relev_links_len]]
 
@@ -44,7 +45,7 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
     toolbox.register("initDelta", initialisation.initDeltaMOCK, classes.Dataset.k_user, num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L)
     toolbox.register("population", tools.initIterate, list, toolbox.initDelta)
-    toolbox.register("evaluate", objectives.evalMOCK, part_clust = part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
+    toolbox.register("evaluate", objectives.evalMOCK, part_clust = classes.PartialClust.part_clust, reduced_clust_nums = reduced_clust_nums, conn_array = conn_array, max_conn = max_conn, num_examples = classes.Dataset.num_examples, data_dict=data_dict, cnn_pairs=classes.PartialClust.cnn_pairs, base_members=classes.PartialClust.base_members, base_centres=classes.PartialClust.base_centres)
     # In the new paper they put the crossover probability as 1
     toolbox.register("mate", operators.uniformCrossover, cxpb = 1.0)
     # We just use the MUTPB = 1 in the (1/num-examples) term, as per the Garza/Handl code
@@ -80,11 +81,19 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
     # Evaluate the initial population
     VAR_init = []
     CNN_init = []
-    fitnesses = toolbox.map(toolbox.evaluate, pop)
+    # fitnesses = toolbox.map(toolbox.evaluate, pop)
+    fitnesses = [toolbox.evaluate(indiv) for indiv in pop]
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit	
         VAR_init.append(fit[0])
         CNN_init.append(fit[1])
+
+    
+
+    # for i in range(num_indivs):
+    #     p = multiprocessing.Process(target=toolbox.evaluate, args=(pop[i],))
+    #     p.start()
+    #     p.join()
 
     if HV_ref == None:
         # max_conn varies a lot with delta, so start with lowest delta
@@ -138,8 +147,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
         random.shuffle(pop)
 
         offspring = tools.selTournamentDCD(pop, len(pop))
-        # offspring = [toolbox.clone(ind) for ind in offspring]
-        offspring = toolbox.map(toolbox.clone,offspring) # Map version of above, should be same
+        offspring = [toolbox.clone(ind) for ind in offspring]
+        # offspring = toolbox.map(toolbox.clone,offspring) # Map version of above, should be same
 
         # If done properly, using comprehensions/map should speed this up
         for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
@@ -157,7 +166,8 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
 
         assert len(invalid_ind) == num_indivs, "Some individuals are unchanged?"
 
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        # fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        fitnesses = [toolbox.evaluate(indiv) for indiv in invalid_ind]
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
@@ -181,8 +191,6 @@ def main(data, data_dict, delta_val, HV_ref, argsortdists, nn_rankings, mst_geno
     # print(len(tools.sortNondominated(pop, len(pop))[0])) # if ==len(pop) then only one front
 
     # Close pools just in case (shouldn't be needed)
-    pool.close()
-    pool.join()
 
     # Reset the cluster ID value if we're running multiple values
     # Alternate solution is to reload the module
