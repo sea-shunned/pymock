@@ -5,7 +5,7 @@ import numpy as np
 import precompute, evaluation
 
 # import main_base
-import main_new
+import delta_mock
 import main_carryon
 import main_hypermutspec
 import main_hypermutall
@@ -178,8 +178,8 @@ def run_newMOCK(file_path, func, strat_names, results_folder):
         else:
             print(f"{strat_name} validated!\n")        
 
-def validateResults(
-    results_folder, strat_name, ari_array, hv_array, fit_array, delta_triggers):
+def validateResult(
+    results_folder, strat_name, ari_array, hv_array, fit_array, delta_triggers, run_num):
     # Take the hypervolume and/or ARI results generated and compare them to a saved version of the results for each strategy to ensure it's the same
     # ari_path, fit_path, hv_path = sorted(glob.glob(results_folder+"*60*"+base*"))
 
@@ -188,18 +188,22 @@ def validateResults(
     except ValueError:
         ari_path, fit_path, hv_path, trigger_path = sorted(glob.glob(results_folder+"*60*"+strat_name+"*"))
 
-    ari_orig = np.loadtxt(ari_path, delimiter=",")[:, 0]
+    ari_orig = np.loadtxt(ari_path, delimiter=",")[:, run_num]
     if not np.array_equal(ari_array, ari_orig):
         print(ari_array)
         print(ari_orig)
         raise ValueError("ARI not equal")
 
-    fit_orig = np.loadtxt(fit_path, delimiter=",")[:100, :]
+    ind = 100 * run_num
+
+    fit_orig = np.loadtxt(fit_path, delimiter=",")[ind:ind+100, :]
     if not np.array_equal(fit_array, fit_orig):
+        print(fit_array)
+        print(fit_orig)
         raise ValueError("Fitness values not equal")
 
     # Only useful if we have fixed the same HV ref point as the orig experiments (which we have)
-    hv_orig = np.loadtxt(hv_path, delimiter=",")[:, 0]
+    hv_orig = np.loadtxt(hv_path, delimiter=",")[:, run_num]
     if not np.array_equal(hv_array, hv_orig):
         print(hv_array)
         print(hv_orig)
@@ -214,13 +218,41 @@ def validateResults(
 
     return True
 
+def validateResults(
+    results_folder, strat_name, ari_array, hv_array, fit_array, delta_triggers, num_runs):
+
+    try:
+        ari_path, fit_path, hv_path = sorted(glob.glob(results_folder+"*60*"+strat_name+"*"))
+    except ValueError:
+        ari_path, fit_path, hv_path, trigger_path = sorted(glob.glob(results_folder+"*60*"+strat_name+"*"))
+
+    ari_orig = np.loadtxt(ari_path, delimiter=",")[:, :num_runs]
+    if not np.array_equal(ari_array, ari_orig):
+        print(ari_array)
+        print(ari_orig)
+        raise ValueError("ARI not equal")
+    
+    fit_orig = np.loadtxt(fit_path, delimiter=",")[:num_runs*100, :]
+    if not np.array_equal(fit_array, fit_orig):
+        print(fit_array)
+        print(fit_orig)
+        raise ValueError("Fitness values not equal")
+
+    hv_orig = np.loadtxt(hv_path, delimiter=",")[:, :num_runs]
+    if not np.array_equal(hv_array, hv_orig):
+        print(hv_array)
+        print(hv_orig)
+        raise ValueError("HV values not equal")        
+
+    return True 
+
 def main():
     data_files, results_folder = loadData()
 
     # validateResults(results_folder, 'carryon', None, None, None)
 
     # funcs = [main_base.main]
-    funcs = [main_new.runMOCK]
+    funcs = [delta_mock.runMOCK]
     # funcs.extend(loadMains())
 
     # base yes

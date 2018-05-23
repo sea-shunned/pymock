@@ -150,70 +150,72 @@ class Dataset(object):
         self.base_cluster_num = None	
         # self.true_label = None # See discussion above
 
-def createDataset(data_path, labels):
-    # Auto identify delimiters and create array from data
-    import csv
-    with open(data_path) as file:
-        dialect = csv.Sniffer().sniff(file.read())
-        file.seek(0)
-        # print(dialect.delimiter)
-        data = np.genfromtxt(data_path, delimiter = dialect.delimiter, skip_header=0)
-    
-    # Assign name to dataset
-    # Assuming file path split by / and filename only has one . character
-    Dataset.data_name = data_path.split("/")[-1].split(".")[0]
-    print("Data Name:",Dataset.data_name)
+    @staticmethod
+    def createDataset(data_path, labels):
+        # Auto identify delimiters and create array from data
+        import csv
+        with open(data_path) as file:
+            dialect = csv.Sniffer().sniff(file.read())
+            file.seek(0)
+            # print(dialect.delimiter)
+            data = np.genfromtxt(data_path, delimiter = dialect.delimiter, skip_header=0)
+        
+        # Assign name to dataset
+        # Assuming file path split by / and filename only has one . character
+        Dataset.data_name = data_path.split("/")[-1].split(".")[0]
+        print("Data Name:",Dataset.data_name)
 
-    # If we have labels, split array
-    if labels:
-        Dataset.labels = True
+        # If we have labels, split array
+        if labels:
+            Dataset.labels = True
 
-        # Assuming labels are the final column
-        label_vals = data[:,-1]
-        Dataset.label_vals = label_vals
+            # Assuming labels are the final column
+            label_vals = data[:,-1]
+            Dataset.label_vals = label_vals
 
-        # We've stored the labels elsewhere so let's delete them from the data
-        # Also avoids distance matrix issues!
-        data = np.delete(data, -1, 1)
+            # We've stored the labels elsewhere so let's delete them from the data
+            # Also avoids distance matrix issues!
+            data = np.delete(data, -1, 1)
 
-    # Create dictionary to store data points
-    data_dict = {}
+        # Create dictionary to store data points
+        data_dict = {}
 
-    # Loop over the dataset
-    for id_value, row in enumerate(data):
+        # Loop over the dataset
+        for id_value, row in enumerate(data):
 
-        # Create current datapoint object
-        curr_datapoint = Dataset(id_value, row)
+            # Create current datapoint object
+            curr_datapoint = Dataset(id_value, row)
 
-        # Assign label if present
-        # if labels:
-        # 	curr_datapoint.true_label = int(label_vals[id_value])
+            # Assign label if present
+            # if labels:
+            # 	curr_datapoint.true_label = int(label_vals[id_value])
 
-        # Store object in dictionary
-        data_dict[curr_datapoint.id] = curr_datapoint
+            # Store object in dictionary
+            data_dict[curr_datapoint.id] = curr_datapoint
 
-    [Dataset.num_examples, Dataset.num_features] = data.shape
-    return data, data_dict
+        [Dataset.num_examples, Dataset.num_features] = data.shape
+        return data, data_dict
 
-def createDatasetGarza(data):
-    if Dataset.labels == True:
-        Dataset.label_vals = data[:, -1]
+    @staticmethod
+    def createDatasetGarza(data):
+        if Dataset.labels == True:
+            Dataset.label_vals = data[:, -1]
 
-        data = np.delete(data, -1, 1)
+            data = np.delete(data, -1, 1)
 
-    # Create dictionary to store data points
-    data_dict = {}
+        # Create dictionary to store data points
+        data_dict = {}
 
-    # Loop over the dataset
-    for id_value, row in enumerate(data):
+        # Loop over the dataset
+        for id_value, row in enumerate(data):
 
-        # Create current datapoint object
-        curr_datapoint = Dataset(id_value, row)
+            # Create current datapoint object
+            curr_datapoint = Dataset(id_value, row)
 
-        # Store object in dictionary
-        data_dict[curr_datapoint.id] = curr_datapoint
+            # Store object in dictionary
+            data_dict[curr_datapoint.id] = curr_datapoint
 
-    return data, data_dict
+        return data, data_dict
 
 # Possibly useful class to implement some way down the line
 # Currently doesn't feel worth the effort as everything works reasonably well

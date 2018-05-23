@@ -17,6 +17,10 @@ creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
 creator.create("Individual", list, fitness=creator.Fitness, fairmut=None)
 
 def delta_precomp(data, data_dict, argsortdists, L, delta_val, mst_genotype, int_links_indices):
+    """
+    Do the precomputation specific to the delta value for that dataset
+    """
+
     relev_links_len = initialisation.relevantLinks(
         delta_val, classes.Dataset.num_examples)
     print("Genotype length:", relev_links_len)
@@ -36,6 +40,9 @@ def delta_precomp(data, data_dict, argsortdists, L, delta_val, mst_genotype, int
 
 # Consider trying to integrate the use of **kwargs here
 def create_base_toolbox(num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums):
+    """
+    Create the toolbox object used by the DEAP package, and register our relevant functions
+    """
     toolbox = base.Toolbox()
 
     # Register the initialisation function
@@ -101,6 +108,10 @@ def create_base_toolbox(num_indivs, mst_genotype, int_links_indices, relev_links
     return toolbox
 
 def initial_setup(toolbox, HV, HV_ref):
+    """
+    Do MOCK's initialisation and evaluate this initial population
+    """
+
     pop = toolbox.population()
 
 	# Convert each individual of class list to class deap.creator.Individual
@@ -123,11 +134,16 @@ def initial_setup(toolbox, HV, HV_ref):
     # This is just to assign the crowding distance to the individuals, no actual selection is done
     pop = toolbox.select(pop, len(pop))
 
+    # Add the hypervolume for the first generation to the list
     HV.append(hypervolume(pop, HV_ref))
 
     return pop, HV, VAR_init, CNN_init
 
 def generation(pop, toolbox, HV, HV_ref, num_indivs):
+    """
+    Perform a single generation of MOCK
+    """
+
     # Shuffle the population
     random.shuffle(pop)
 
@@ -152,11 +168,17 @@ def generation(pop, toolbox, HV, HV_ref, num_indivs):
     # Select from the current population and new offspring
     pop = toolbox.select(pop + offspring, num_indivs)
 
+    # Add the hypervolume for this generation to the list
     HV.append(hypervolume(pop, HV_ref))
 
     return pop, HV
 
 def generation_reinit(pop, toolbox, HV, HV_ref, num_indivs):
+    """
+    Perform a generation of MOCK for the reinitialisation strategy when triggered
+    """
+
+    # Shuffle the population
     random.shuffle(pop)
 
     # Generate the offspring from the initialisation routine
@@ -173,38 +195,38 @@ def generation_reinit(pop, toolbox, HV, HV_ref, num_indivs):
     # Select from the current population and new offspring
     pop = toolbox.select(pop + offspring, num_indivs)
 
-    HV.append(hypervolume(pop, HV_ref))   
+    # Add the hypervolume for this generation to the list
+    HV.append(hypervolume(pop, HV_ref))
 
-    return pop, HV
+    return pop, HV 
 
-# def generation_hypermut(pop, toolbox, HV, HV_ref, num_indivs, adapt_gens, gen):
-#     pass    
-
-def calc_HV_ref(VAR_init):
+def calc_hv_ref(VAR_init):
     return [np.ceil(np.max(VAR_init)*1.5), np.ceil(classes.PartialClust.max_conn+1)]
 
 def check_trigger(delta_val, gen, adapt_gens, max_adapts, block_trigger_gens, HV, window_size, ref_grad):
-    if delta_val != 0:
+    # Only trigger if delta is above zero
+    if delta_val > 0:
+        # Only trigger if we haven't reached our maximum limit
         if len(adapt_gens) < max_adapts:
+            # Only trigger if we're outside an exploration period
             if gen >= (adapt_gens[-1] + block_trigger_gens):
+                # Calculate a new reference gradient at the end of exploration
                 if gen == (adapt_gens[-1] + block_trigger_gens):
                     ref_grad = (HV[-1] - HV[adapt_gens[-1]]) / len(HV)
                     print("Reference gradient:", ref_grad, "at gen", gen)
                     return False, ref_grad
 
+                # Calculate the current moving average gradient
                 curr_grad = (HV[-1] - HV[-(window_size+1)]) / window_size
 
-                # Debugging, to remove
-                if ref_grad is None:
-                    raise ValueError("ref_grad is None")
-
+                # If our gradient is much less than the reference, the search has slowed
+                # So trigger a change in delta
                 if curr_grad <= 0.1 * ref_grad:
                     return True, ref_grad
 
     return False, ref_grad
 
 def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduce, relev_links_len, mst_genotype, int_links_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data):
-
     # Need to re-register the functions with new arguments
     toolbox.unregister("evaluate")
     toolbox.unregister("mutate")
@@ -224,6 +246,10 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
         delta_val -= delta_reduce
     else:
         delta_val -= (100*delta_reduce*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples
+
+    # Ensure delta doesn't go below zero
+    if delta_val < 0:
+        delta_val = 0
 
     print(f"Adaptive delta engaged at gen {gen}! Going down to delta = {delta_val}")
 
@@ -320,53 +346,6 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
     return pop, toolbox, delta_val, relev_links_len, reduced_clust_nums
 
 
-def runMOCK(
-    data, data_dict, delta_val, HV_ref, argsortdists, 
-    nn_rankings, mst_genotype, int_links_indices, L, 
-    num_indivs, num_gens, delta_reduce, strat_name, adapt_delta
-    ):
-    HV = []
-    adapt_gens = None
-
-    if adapt_delta:
-        window_size = 3 # Moving average of HV gradients to look at
-        block_trigger_gens = 10 # Number of gens to wait between triggers
-        adapt_gens = [0]
-        max_adapts = 5 # Maximum number of adaptations allowed
-        delta_reduce = 1 # Amount to reduce delta by
-        ref_grad = None
-
-    relev_links_len, reduced_clust_nums = delta_precomp(
-        data, data_dict, argsortdists, L, delta_val, mst_genotype, int_links_indices)
-
-    toolbox = create_base_toolbox(
-        num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums)
-
-    pop, HV, VAR_init, CNN_init = initial_setup(toolbox, HV, HV_ref)
-
-    if HV_ref == None:
-        HV_ref = calc_HV_ref(pop)
-
-    # Check that the HV_ref reference point is valid
-    if classes.PartialClust.max_conn >= HV_ref[1]:
-        raise ValueError(f"Max CNN value ({classes.PartialClust.max_conn}) has exceeded that set for HV reference point ({HV_ref[1]}); HV values may be unreliable")
-
-    for gen in range(1, num_gens):
-        pop, HV, toolbox = select_generation_strategy(pop, toolbox, HV, HV_ref, num_indivs, gen, adapt_delta, adapt_gens, strat_name, relev_links_len, argsortdists, L, int_links_indices, nn_rankings)
-
-        if adapt_delta:
-            trigger_bool, ref_grad = check_trigger(delta_val, gen, adapt_gens, max_adapts, block_trigger_gens, HV, window_size, ref_grad)
-            
-            if trigger_bool:
-                adapt_gens.append(gen)
-
-                pop, toolbox, delta_val, relev_links_len, reduced_clust_nums = adaptive_delta_trigger(
-                    pop, gen, strat_name, delta_val, toolbox, delta_reduce, relev_links_len, mst_genotype, int_links_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data)
-
-    classes.PartialClust.id_value = count()
-
-    return pop, HV, HV_ref, int_links_indices, relev_links_len, adapt_gens
-
 def select_generation_strategy(
     pop, toolbox, HV, HV_ref, num_indivs, gen, 
     adapt_delta, adapt_gens, strat_name, relev_links_len, 
@@ -398,6 +377,90 @@ def select_generation_strategy(
         pop, HV = generation(pop, toolbox, HV, HV_ref, num_indivs)
 
     return pop, HV, toolbox
+
+
+def runMOCK(
+    data, data_dict, delta_val, hv_ref, argsortdists, 
+    nn_rankings, mst_genotype, int_links_indices, L, 
+    num_indivs, num_gens, delta_reduce, strat_name, adapt_delta
+    ):
+    """
+    Run MOCK with specified inputs
+    
+    Arguments:
+        data {np.array} -- array of the data
+        data_dict {dict} -- dictionary of objects for each data point
+        delta_val {int/float} -- MOCK delta value
+        hv_ref {list} -- reference point for hypervolume calculation
+        argsortdists {np.array} -- distance array of data argsorted
+        nn_rankings {np.array} -- Neareast neighbour rankings for each data point
+        mst_genotype {list} -- The genotype of the MST
+        int_links_indices {list} -- Indices for the interesting links
+        L {int} -- MOCK neighbourhood parameter
+        num_indivs {int} -- Number of individuals in population
+        num_gens {int} -- Number of generations
+        delta_reduce {int} -- Amount to reduce delta by for adaptation
+        strat_name {str} -- Name of strategy being run
+        adapt_delta {bool} -- If delta should be adapted
+    
+    Returns:
+        [type] -- [description]
+    
+    Returns:
+        relev_links_len -- Length of the reduced/relevant genotype
+        reduced_clust_nums -- Number of base clusters
+    """
+
+    # Initialise local varibles
+    hv = []
+    adapt_gens = None
+    if adapt_delta:
+        window_size = 3 # Moving average of hv gradients to look at
+        block_trigger_gens = 10 # Number of gens to wait between triggers
+        adapt_gens = [0]
+        max_adapts = 5 # Maximum number of adaptations allowed
+        delta_reduce = 1 # Amount to reduce delta by
+        ref_grad = None
+
+    # Perform the precomputation for this delta value
+    relev_links_len, reduced_clust_nums = delta_precomp(
+        data, data_dict, argsortdists, L, delta_val, mst_genotype, int_links_indices)
+
+    # Create the DEAP toolbox
+    toolbox = create_base_toolbox(
+        num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums)
+
+    # Create the initial population
+    pop, hv, VAR_init, CNN_init = initial_setup(toolbox, hv, hv_ref)
+
+    # Calculate a suitable ref point if not provided
+    if hv_ref == None:
+        hv_ref = calc_hv_ref(pop)
+
+    # Check that the hv_ref reference point is valid
+    if classes.PartialClust.max_conn >= hv_ref[1]:
+        raise ValueError(f"Max CNN value ({classes.PartialClust.max_conn}) has exceeded that set for hv reference point ({hv_ref[1]}); hv values may be unreliable")
+
+    # Go through each generation
+    for gen in range(1, num_gens):
+        # Select the right type of generation for this strategy and generation
+        pop, hv, toolbox = select_generation_strategy(pop, toolbox, hv, hv_ref, num_indivs, gen, adapt_delta, adapt_gens, strat_name, relev_links_len, argsortdists, L, int_links_indices, nn_rankings)
+
+        # Check if delta should be changed
+        if adapt_delta:
+            trigger_bool, ref_grad = check_trigger(delta_val, gen, adapt_gens, max_adapts, block_trigger_gens, hv, window_size, ref_grad)
+            
+            # Execute changes if triggered
+            if trigger_bool:
+                adapt_gens.append(gen)
+
+                pop, toolbox, delta_val, relev_links_len, reduced_clust_nums = adaptive_delta_trigger(
+                    pop, gen, strat_name, delta_val, toolbox, delta_reduce, relev_links_len, mst_genotype, int_links_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data)
+
+    # Reset the ID count for the base clusters
+    classes.PartialClust.id_value = count()
+
+    return pop, hv, hv_ref, int_links_indices, relev_links_len, adapt_gens
 
 # add a main func here if we just want to run this thing once
 # a main func is used within a script only, a main should not be imported
