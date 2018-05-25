@@ -10,6 +10,7 @@ class PartialClust(object):
     
     conn_array = None
     max_conn = None
+    max_var = None
     part_clust = None
     cnn_pairs = None
 
@@ -125,11 +126,11 @@ def partialClustering(base_clusters, data, data_dict, argsortdists, L):
     # Once all objectives have been created, calculate max_conn score for partial clustering
     PartialClust.conn_array, PartialClust.max_conn, PartialClust.cnn_pairs = PartialClust.partClustCNN(base_clusters, data_dict, argsortdists, L)
 
-    PartialClust.base_members = np.asarray([obj.num_members for obj in PartialClust.part_clust.values()])[:,None]
+    PartialClust.base_members = np.asarray([obj.num_members for obj in PartialClust.part_clust.values()])[:, None]
     PartialClust.base_centres = np.asarray([obj.centroid for obj in PartialClust.part_clust.values()]).squeeze()
 
-    print("No. base clusters:",len(PartialClust.part_clust))
-    print("Length cnn pair list:",len(PartialClust.cnn_pairs))
+    print("No. base clusters:", len(PartialClust.part_clust))
+    print("Length cnn pair list:", len(PartialClust.cnn_pairs))
 
     # return part_clust, cnn_pairs
 

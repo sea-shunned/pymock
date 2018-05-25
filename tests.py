@@ -6,10 +6,6 @@ import precompute, evaluation
 
 # import main_base
 import delta_mock
-import main_carryon
-import main_hypermutspec
-import main_hypermutall
-import main_reinit
 
 def loadData():
     basepath = os.getcwd()
@@ -23,30 +19,7 @@ def loadData():
     # add assert here for data_name? Need to make sure we're using a particular dataset
 
     return data_files, results_folder
-
-def loadArtifs():
-    import artif_carryon
-    import artif_hypermutspec
-    import artif_hypermutall
-    import artif_reinit
-    # import artif_fairmut
-
-    funcs = [
-        artif_carryon.main, artif_hypermutspec.main, 
-        artif_hypermutall.main, artif_reinit.main]
-    return funcs
-
-def loadMains():
-    import main_carryon
-    import main_hypermutspec
-    import main_hypermutall
-    import main_reinit
-    # import main_fairmut # inconsistent between runs with same seed
-
-    funcs = [
-        main_carryon.main, main_hypermutspec.main, 
-        main_hypermutall.main, main_reinit.main]
-    return funcs
+    
 
 def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_reduce=1):
     import classes
