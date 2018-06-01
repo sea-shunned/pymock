@@ -413,8 +413,8 @@ def runMOCK(
         delta_reduce {int} -- Amount to reduce delta by for adaptation
         strat_name {str} -- Name of strategy being run
         adapt_delta {bool} -- If delta should be adapted
-        relev_links_len {list} --
-        reduced_clust_nums {} -- 
+        relev_links_len {int} -- Length/number of relevant links (i.e. length of reduced genotype)
+        reduced_clust_nums {list} -- List of the cluster id numbers for the base clusters/components that are available in the search
     
     Returns:
         [type] -- [description]
@@ -435,7 +435,7 @@ def runMOCK(
         adapt_gens = [0]
         max_adapts = 5 # Maximum number of adaptations allowed
         delta_reduce = 1 # Amount to reduce delta by
-        ref_grad = None
+        ref_grad = None # Reference gradient for hv trigger
 
     # Perform the precomputation for this delta value
     # relev_links_len, reduced_clust_nums = delta_precomp(
@@ -473,6 +473,7 @@ def runMOCK(
             if trigger_bool:
                 adapt_gens.append(gen)
 
+                # Perform the trigger as specified by strat_name
                 pop, toolbox, delta_val, relev_links_len, reduced_clust_nums = adaptive_delta_trigger(
                     pop, gen, strat_name, delta_val, toolbox, delta_reduce, relev_links_len, mst_genotype, int_links_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data)
 

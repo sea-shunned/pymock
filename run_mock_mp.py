@@ -71,7 +71,6 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
     mst_genotype = precompute.createMST(distarray)
     degree_int = precompute.degreeInterest(mst_genotype, L, nn_rankings, distarray)
     int_links_indices = precompute.interestLinksIndices(degree_int)
-    print("Precomputation done!\n")
 
     # Bundle all of the arguments together in a dict to pass to the function
     # This is in order of runMOCK so that we can easily turn it into a partial func for multiprocessing
@@ -98,7 +97,7 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
     return kwargs
 
 
-def create_seeds(NUM_RUNS, seed_file=None):
+def create_seeds(NUM_RUNS, seed_file=None, save_new_seeds=True):
     if seed_file is not None:
         params = load_config(seed_file)
         seed_list = params['seed_list']
@@ -106,6 +105,14 @@ def create_seeds(NUM_RUNS, seed_file=None):
         # Randomly generate seeds
         seed_list = [random.uniform(0, 1000) for i in range(NUM_RUNS)]
 
+        # Save a new set of seeds for this set of experiments
+        # (to ensure same start for each strategy)
+        if save_new_seeds:
+            import datetime
+            seed_fname = "seed_list_"+str(datetime.date.today())+".json"
+            with open(seed_fname, 'w') as out_file:
+                json.dump(seed_list, out_file, indent=4)
+                
     # Ensure we have enough seeds
     if len(seed_list) < NUM_RUNS:
         raise ValueError("Not enough seeds for number of runs")
@@ -184,7 +191,7 @@ def calc_hv_ref(kwargs, sr_vals):
     return hv_ref
 
 # Maybe this should be main
-def run_mock(validate=False):
+def run_mock(validate=True):
     # Load the data file paths
     data_file_paths, results_folder = load_data(
         synth_data_subset="tevc_20_60_9*")
@@ -205,6 +212,21 @@ def run_mock(validate=False):
         seed_list = create_seeds(params['NUM_RUNS'], seed_file="seed_list.json")
     else:
         seed_list = create_seeds(params['NUM_RUNS'])
+
+    # Restrict seed_list to the actual number of runs that we need
+    # Truncating like this allows us to know that the run numbers and order of seeds correspond
+    seed_list = seed_list[:params['NUM_RUNS']]
+    seed_list = [(i,) for i in seed_list]
+
+    # Print the number of runs to get an idea of runtime (sort of)
+    print("---------------------------")
+    print("Number of MOCK Runs:")
+    print(f"{params['NUM_RUNS']} runs")
+    print(f"{len(params['strategies'])} strategies")
+    print(f"{len(sr_vals)} delta values")
+    print(f"{len(data_file_paths)} datasets")
+    print(f"= {params['NUM_RUNS']*len(params['strategies'])*len(sr_vals)*len(data_file_paths)} runs")
+    print("---------------------------")
 
     # Loop through the data to test
     for file_path in data_file_paths:
@@ -230,8 +252,8 @@ def run_mock(validate=False):
             kwargs["relev_links_len"] = relev_links_len
             kwargs["reduced_clust_nums"] = reduced_clust_nums
 
-            print(relev_links_len)
-            print(reduced_clust_nums)
+            # print(relev_links_len)
+            # print(reduced_clust_nums)
 
             # Need to calculate hv reference point here, by calculating VAR for the MST
             # This can be done outside of the sr_val loop
@@ -255,42 +277,39 @@ def run_mock(validate=False):
 
                 mock_func = partial(delta_mock_mp.runMOCK, *list(kwargs.values()))
 
-                seed_list = [(i,) for i in seed_list]
-
+                print(f"{strat_name} starting...")
                 with multiprocessing.Pool() as pool:
                     results = pool.starmap(mock_func, seed_list)
-
-                # for run in range(params['NUM_RUNS']):
-                #     start_time = time.time()
-                #     pop, hv, hv_ref, int_links_indices_spec, relev_links_len, adapt_gens = delta_mock.runMOCK(**kwargs)
-                #     end_time = time.time()
-
-                #     if run == 0 and hv_ref is not None:
-                #         print(f"Here at run {run} with ref {hv_ref}")
-                #         kwargs['hv_ref'] = hv_ref
-
-                #     # Add fitness values
-                #     ind = params['NUM_INDIVS']*run
-                #     fitness_array[ind:ind+params['NUM_INDIVS'], 0:3] =[indiv.fitness.values+(run+1,) for indiv in pop]
-
-                #     # Evaluate the ARI
-                #     num_clusts, aris = evaluation.finalPopMetrics(
-                #         pop, mst_genotype, int_links_indices_spec, relev_links_len)
-                    
-                #     num_clusts_array[:, run] = num_clusts
-                #     ari_array[:, run] = aris
-                #     hv_array[:, run] = hv
-                #     time_array[run] = end_time - start_time
-                #     delta_triggers.append(adapt_gens)
-
-                # a = 1/0
+                print(f"{strat_name} done - collecting results...")
 
                 for run_num, run_result in enumerate(results):
                     pop = run_result[0]
-                    print([ind.fitness.values[0] for ind in pop])
+                    # print([ind.fitness.values[0] for ind in pop])
                     hv = run_result[1]
                     # deal with hv_ref
-                    int_links_indices_spec = run_result[2]
+                    int_links_indices_spec = run_result[3]
+
+                    final_relev_links_len = run_result[4]
+
+                    adapt_gens = run_result[5]
+
+                    ind = params['NUM_INDIVS']*run_num
+                    # print(fitness_array.shape)
+                    # print(ind)
+                    # print([indiv.fitness.values+(run_num+1,) for indiv in pop])
+                    # print(fitness_array)
+                    fitness_array[ind:ind+params['NUM_INDIVS'], 0:3] = [indiv.fitness.values+(run_num+1,) for indiv in pop]
+
+                    hv_array[:, run_num] = hv
+
+                    num_clusts, aris = evaluation.finalPopMetrics(
+                        pop, kwargs['mst_genotype'], int_links_indices_spec, final_relev_links_len)
+                    num_clusts_array[:, run_num] = num_clusts
+                    ari_array[:, run_num] = aris
+
+                    delta_triggers.append(adapt_gens)
+
+                print(f"{strat_name} complete!")
 
                 if validate:
                     valid = validateResults(
