@@ -50,7 +50,6 @@ def objVAR(chains, part_clust, base_members, base_centres, superclusts):
     members = np.zeros((len(chains), 1))
     centres = np.zeros((len(chains), part_clust[0].centroid.squeeze().shape[0]))
     variances = np.sum([obj.intraclust_var for obj in part_clust.values()])
-
     wcss_vec = np.zeros((len(chains),1))
 
     # Loop over all the chains/superclusters

@@ -132,6 +132,8 @@ def initial_setup(toolbox, HV, HV_ref):
         VAR_init.append(fit[0])
         CNN_init.append(fit[1])
     
+    print("Max initial values:", max(VAR_init), max(CNN_init))
+
     # This is just to assign the crowding distance to the individuals, no actual selection is done
     pop = toolbox.select(pop, len(pop))
 
@@ -437,10 +439,6 @@ def runMOCK(
         delta_reduce = 1 # Amount to reduce delta by
         ref_grad = None # Reference gradient for hv trigger
 
-    # Perform the precomputation for this delta value
-    # relev_links_len, reduced_clust_nums = delta_precomp(
-    #     data, data_dict, argsortdists, L, delta_val, mst_genotype, int_links_indices)
-
     # Create the DEAP toolbox
     toolbox = create_base_toolbox(
         num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums)
@@ -478,7 +476,7 @@ def runMOCK(
                     pop, gen, strat_name, delta_val, toolbox, delta_reduce, relev_links_len, mst_genotype, int_links_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data)
 
     # Reset the ID count for the base clusters
-    classes.PartialClust.id_value = count()
+    # classes.PartialClust.id_value = count()
 
     return pop, hv, hv_ref, int_links_indices, relev_links_len, adapt_gens
 

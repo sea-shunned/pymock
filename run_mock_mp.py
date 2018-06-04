@@ -172,7 +172,8 @@ def calc_hv_ref(kwargs, sr_vals):
     chains, superclusts = objectives.clusterChains(
         mst_reduced_genotype, kwargs['data_dict'], classes.PartialClust.part_clust, reduced_clust_nums
     )
-    print(superclusts)
+    # print(superclusts)
+    # print(classes.PartialClust.base_members)
     
     classes.PartialClust.max_var = objectives.objVAR(
         chains, classes.PartialClust.part_clust, classes.PartialClust.base_members,
@@ -191,7 +192,7 @@ def calc_hv_ref(kwargs, sr_vals):
     return hv_ref
 
 # Maybe this should be main
-def run_mock(validate=True):
+def run_mock(validate=False):
     # Load the data file paths
     data_file_paths, results_folder = load_data(
         synth_data_subset="tevc_20_60_9*")
@@ -237,14 +238,22 @@ def run_mock(validate=True):
         if validate:
             kwargs['hv_ref'] = [3.0, 1469.0]
 
-        # print(calc_hv_ref(kwargs, sr_vals))
+        calc_hv_ref(kwargs, sr_vals)
 
-        # Loop through the sr values to test
+        # Loop through the sr (square root) values
         for sr_val in sr_vals:
             kwargs['delta_val'] = 100-(
                 (100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples
                 )
 
+            if kwargs['delta_val'] > 100:
+                raise ValueError("Delta value is too high (over 100)")
+            elif kwargs['delta_val'] < 0:
+                print("Delta value is below 0, setting to 0...")
+                kwargs['delta_val'] = 0
+            
+            print(f"Delta: {kwargs['delta_val']}")
+            classes.PartialClust.id_value = count()
             relev_links_len, reduced_clust_nums = delta_precomp(
                 kwargs['data'], kwargs["data_dict"], kwargs["argsortdists"], kwargs["L"], kwargs['delta_val'], 
                 kwargs["mst_genotype"], kwargs["int_links_indices"]
@@ -252,15 +261,12 @@ def run_mock(validate=True):
             kwargs["relev_links_len"] = relev_links_len
             kwargs["reduced_clust_nums"] = reduced_clust_nums
 
-            # print(relev_links_len)
-            # print(reduced_clust_nums)
-
             # Need to calculate hv reference point here, by calculating VAR for the MST
             # This can be done outside of the sr_val loop
             # May be worth just doing a one-off calc of the min delta value
             # And then calculating the HV_ref from there, which is then fixed for that dataset
 
-            # Loop through the strategies to test
+            # Loop through the strategies
             for strat_name in params['strategies']:
                 kwargs['strat_name'] = strat_name
                 if strat_name == "base":
@@ -278,13 +284,19 @@ def run_mock(validate=True):
                 mock_func = partial(delta_mock_mp.runMOCK, *list(kwargs.values()))
 
                 print(f"{strat_name} starting...")
+                start_time = time.time()
                 with multiprocessing.Pool() as pool:
                     results = pool.starmap(mock_func, seed_list)
-                print(f"{strat_name} done - collecting results...")
+                end_time = time.time()
+                print(f"{strat_name} done (took {end_time-start_time:.3f}) - collecting results...")
 
                 for run_num, run_result in enumerate(results):
                     pop = run_result[0]
-                    # print([ind.fitness.values[0] for ind in pop])
+                    # print([ind.fitness.values for ind in pop])
+                    temp_res = sorted([ind.fitness.values for ind in pop], key=lambda var:var[1])
+                    print(temp_res[:2])
+                    print(temp_res[-2:])
+
                     hv = run_result[1]
                     # deal with hv_ref
                     int_links_indices_spec = run_result[3]
@@ -294,10 +306,6 @@ def run_mock(validate=True):
                     adapt_gens = run_result[5]
 
                     ind = params['NUM_INDIVS']*run_num
-                    # print(fitness_array.shape)
-                    # print(ind)
-                    # print([indiv.fitness.values+(run_num+1,) for indiv in pop])
-                    # print(fitness_array)
                     fitness_array[ind:ind+params['NUM_INDIVS'], 0:3] = [indiv.fitness.values+(run_num+1,) for indiv in pop]
 
                     hv_array[:, run_num] = hv

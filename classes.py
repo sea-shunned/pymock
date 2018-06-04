@@ -38,6 +38,9 @@ class PartialClust(object):
 
         max_conn = 0
 
+        # print(len(base_clusters))
+        # print(conn_array.shape)
+
         # Easier (one less nested loop, though same number of items) 
             # than looping through base clusters - though it's equivalent
         for point in data_dict.values():
@@ -94,6 +97,7 @@ class PartialClust(object):
             dists = cdist(data[self.members],centroid,'sqeuclidean') #'euclidean'
             # u_v = data[self.members].squeeze() - centroid.squeeze()
             # dists2 = np.dot(u_v,np.transpose(u_v))
+            # print(dists)
 
         else:
             # Sklearn metrics.pairwise.euclidean_distance
@@ -115,6 +119,7 @@ def partialClustering(base_clusters, data, data_dict, argsortdists, L):
         
         # Calculate centroid and intracluster variance for cluster object
         curr_cluster.centroid, curr_cluster.intraclust_var = PartialClust.partClustVAR(curr_cluster, data)
+        # print(curr_cluster.intraclust_var,"\n")
         
         # Add objective to dictionary, where key is the cluster ID number
         PartialClust.part_clust[curr_cluster.id] = curr_cluster
