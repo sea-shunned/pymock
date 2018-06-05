@@ -8,7 +8,7 @@ import igraph
 def clusterChains(genotype, data_dict, part_clust, reduced_clust_nums):
     # Identify what base clusters the points in the new genotype are in
     new_clust_nums = [data_dict[i].base_cluster_num for i in genotype]
-
+    print(new_clust_nums, "new_clust_nums")
     # Create a graph
     g = igraph.Graph()
     

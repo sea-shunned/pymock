@@ -1,7 +1,8 @@
 import numpy as np
 import random
-import precompute
+import precompute # To delete
 
+# To delete
 def baseGenotype(mst_genotype, int_links_indices, relev_links_len):
     base_genotype = mst_genotype.copy() # should use [:] for consistency
     # Remove the most interesting links to create the base components
@@ -10,10 +11,12 @@ def baseGenotype(mst_genotype, int_links_indices, relev_links_len):
     base_clusters = precompute.decodingLAR(base_genotype)
     return base_genotype, base_clusters
 
+# To delete
 def relevantLinks(delta_val, num_examples):
     # Length of the relevant links (symbol: capital gamma)
     return int(np.ceil(((100-delta_val)/100)*num_examples))
 
+# To delete
 def replaceLink(argsortdists, i, j, L):
     # Link can be replaced with L+1 options
     # L nearest neighbours and self-connecting link

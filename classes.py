@@ -1,5 +1,6 @@
 import itertools
 import numpy as np
+import igraph
 # import objectives
 # from collections import OrderedDict
 
@@ -225,26 +226,124 @@ class Dataset(object):
 
 # Possibly useful class to implement some way down the line
 # Currently doesn't feel worth the effort as everything works reasonably well
-class Genotype(list):
+class MOCKGenotype(list):
     mst_genotype = None # the MST genotype
-    unfixed_indices = None # To replace int_links_indices
+    # unfixed_indices = None # To replace int_links_indices
 
-    def __init__(self, index, value):
-        self.index = index # Gene value in genotype ## Is this necessary?
-        self.value = value # Either have as tuple or just use the value (and then rename)
-        self.fixed = False # Identify if the gene is fixed or not
-        self.newly_unfixed = False # For adaptive delta
+    degree_int = None # Degree of interestingness of the MST
+    interest_indices = None # Indices of the most to least interesting links in the MST (formerly int_links_indices)
 
+    # Delta value
+    # In the future, can set this as the start
+    # And we redefine individual deltas as attributes if we have varying levels
+    delta_val = None
+
+    # Length of the reduced genotype
+    reduced_length = None
+
+    # Use these indices to slice from the genotype
+    # Bulk update is easier with arrays, but could cause issues with DEAP
+    # and forces us to rewrite nearly all of the other code...
+    reduced_genotype_indices = None
+
+    base_genotype = None
+
+    def __init__(self):
+        # Set full genotype as None - don't store a potentially long list unless we need to (we always have the base as a class variable and can reconstruct)
+        self.full_genotype = None
+        
+        # The (reduced) genotype
+        self.genotype = None
+    
+    @classmethod
+    def setup_genotype_vars(cls):
+        cls.calc_red_length()
+        cls.interest_links_indices()
+        cls.calc_base_genotype()
+        cls.calc_base_clusters()
+
+    def reduce_genotype(self):
+        if self.full_genotype is None:
+            self.full_genotype = MOCKGenotype.mst_genotype[:]
+        
+        self.genotype = [self.full_genotype[i] for i in MOCKGenotype.reduced_genotype_indices]
+
+        # Remove the full genotype again to save memory
+        # Consider just using a local variable
+        self.full_genotype = None
+
+    def expand_genotype(self):
+        self.full_genotype = MOCKGenotype.mst_genotype[:]
+        
+        for i, val in enumerate(self.genotype):
+            self.full_genotype[
+                MOCKGenotype.reduced_genotype_indices[i]] = val
+    
+    def decode_genotype(self):
+        self.expand_genotype()
+
+        g = igraph.Graph()
+        g.add_vertices(len(self.full_genotype))
+        g.add_edges(zip(
+            range(len(self.full_genotype)),
+            self.full_genotype
+        ))
+
+        return list(g.components(mode="WEAK"))
+    
+    @classmethod
+    def interest_links_indices(cls):
+        MOCKGenotype.interest_indices = np.argsort(
+            -(np.asarray(MOCKGenotype.degree_int)), 
+            kind='mergesort').tolist()
+
+    @classmethod
+    def calc_delta(cls, sr_val):
+        MOCKGenotype.delta_val = 100-(
+            (100*sr_val*np.sqrt(Dataset.num_examples))
+            /Dataset.num_examples
+        )
+
+        if cls.delta_val is None:
+            raise ValueError("Delta value has not been set")
+        elif cls.delta_val < 0:
+            print("Delta value is below 0, setting to 0...")
+        elif cls.delta_val > 100:
+            raise ValueError("Delta value is over 100")
+
+    @classmethod
+    def calc_red_length(cls):
+        cls.reduced_length = int(np.ceil(((100-MOCKGenotype.delta_val)/100)*Dataset.num_examples))
+
+    @classmethod
+    def calc_base_genotype(cls):
+        cls.base_genotype = cls.mst_genotype[:]
+
+        for index in cls.reduced_genotype_indices:
+            cls.base_genotype[index] = index
+    
+    @classmethod
+    def calc_base_clusters(cls):
+        g = igraph.Graph()
+        g.add_vertices(len(MOCKGenotype.base_genotype))
+        g.add_edges(zip(
+            range(len(MOCKGenotype.base_genotype)),
+            MOCKGenotype.base_genotype))
+        cls.base_clusters = list(g.components(mode="WEAK"))
+
+    # This needs to replace initialisation.replaceLink
     @staticmethod
-    def calcDI():
-        pass
-
-    @staticmethod
-    def baseGenotype():
-        pass
-
-    def replaceLink():
-        pass
+    def replace_link(argsortdists, i, j, L):
+        # Link can be replaced with L+1 options
+        # L nearest neighbours and self-connecting link
+        # Must exclude replacing with original link
+        while True:
+            # L+1 accounts for self-connecting link and L nearest neighbours
+            new_j = random.choice(argsortdists[i][0:L+1])
+            # Only break if we have made a new connection, otherwise try again
+            if new_j != j:
+                break
+    return new_j
         # We could actually use self here right? As we are replacing a gene
 
     ## This needs some redesign

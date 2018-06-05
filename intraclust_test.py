@@ -38,7 +38,7 @@ nn_rankings = precompute.nnRankings(distarray, classes.Dataset.num_examples)
 mst_genotype = precompute.createMST(distarray)
 degree_int = precompute.degreeInterest(mst_genotype, L, nn_rankings, distarray)
 int_links_indices = precompute.interestLinksIndices(degree_int)
-
+print(degree_int)
 kwargs = {
     "data": data,
     "data_dict": data_dict,
@@ -85,18 +85,22 @@ for sr_val in sr_vals:
     kwargs["relev_links_len"] = relev_links_len
     kwargs["reduced_clust_nums"] = reduced_clust_nums
     print(reduced_clust_nums, "red_clust_nums")
+    print(kwargs["int_links_indices"], "int_links_indices")
 
     mst_reduced_genotype = [kwargs['mst_genotype'][i] for i in kwargs['int_links_indices'][:relev_links_len]]
     print(kwargs['int_links_indices'][:relev_links_len], "relevant link indices")
-    print(mst_reduced_genotype)
+    print(mst_reduced_genotype, "reduced mst genotype")
+    print(kwargs['mst_genotype'], "original mst genotype")
     chains, superclusts = objectives.clusterChains(
-        kwargs['mst_genotype'], kwargs['data_dict'], classes.PartialClust.part_clust, reduced_clust_nums)
+        mst_reduced_genotype, kwargs['data_dict'], classes.PartialClust.part_clust, reduced_clust_nums)
+    print(superclusts, "superclusts")
     classes.PartialClust.max_var = objectives.objVAR(
         chains, classes.PartialClust.part_clust, classes.PartialClust.base_members,
         classes.PartialClust.base_centres, superclusts
     )
     print("Max VAR:",classes.PartialClust.max_var)
 
+    raise
     pop, hv, hv_ref, int_links_indices, relev_links_len, adapt_gens= delta_mock_mp.runMOCK(*list(kwargs.values()), 1)
 
     temp_res = sorted([ind.fitness.values for ind in pop], key=lambda var:var[1])

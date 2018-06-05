@@ -68,9 +68,12 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
     distarray = precompute.normaliseDistArray(distarray)
     argsortdists = np.argsort(distarray, kind='mergesort')
     nn_rankings = precompute.nnRankings(distarray, classes.Dataset.num_examples)
-    mst_genotype = precompute.createMST(distarray)
-    degree_int = precompute.degreeInterest(mst_genotype, L, nn_rankings, distarray)
-    int_links_indices = precompute.interestLinksIndices(degree_int)
+    classes.MOCKGenotype.mst_genotype = precompute.createMST(distarray)
+    classes.MOCKGenotype.degree_int = precompute.degreeInterest(
+        classes.MOCKGenotype.mst_genotype, L, nn_rankings, distarray)
+
+    # Finds the indices of the most to least interesting links
+    classes.MOCKGenotype.interest_links_indices()
 
     # Bundle all of the arguments together in a dict to pass to the function
     # This is in order of runMOCK so that we can easily turn it into a partial func for multiprocessing
@@ -81,8 +84,8 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
         "hv_ref": None,
         "argsortdists": argsortdists,
         "nn_rankings": nn_rankings,
-        "mst_genotype": mst_genotype,
-        "int_links_indices": int_links_indices,
+        # "mst_genotype": mst_genotype,
+        # "int_links_indices": int_links_indices,
         "L": L,
         "num_indivs": num_indivs,
         "num_gens": num_gens,
