@@ -449,6 +449,8 @@ def runMOCK(
     # Check that the initial population is within the hv reference point
     # check_hv_violation(pop, hv_ref)
 
+    raise
+
     # Calculate a suitable ref point if not provided
     if hv_ref == None:
         hv_ref = calc_hv_ref(pop)

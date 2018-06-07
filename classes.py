@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 import igraph
+from sklearn.cluster import KMeans
 # import objectives
 # from collections import OrderedDict
 
@@ -107,6 +108,48 @@ class PartialClust(object):
             centroid = np.mean(data[self.members],axis=0)[np.newaxis,:]
             dists = euclidean_distances(data[self.members],centroid,squared = True)
         return centroid, np.sum(dists) #np.einsum('ij->',dists)
+    
+    @classmethod
+    def partial_clusts(cls, data, data_dict, argsortdists, L):
+        cls.part_clust = {}
+        # print("\n")
+        for cluster in MOCKGenotype.base_clusters:
+            # print(cluster)
+            curr_cluster = cls(cluster)
+
+            curr_cluster.centroid, curr_cluster.intraclust_var = cls.partClustVAR(curr_cluster, data)
+
+            # The two methods below give the same results
+            # print(curr_cluster.intraclust_var)
+            # temp_data = data[cluster]
+            # print(KMeans(n_clusters=1).fit(temp_data).inertia_)
+
+            cls.part_clust[curr_cluster.id] = curr_cluster
+
+            for point in cluster:
+                data_dict[point].base_cluster_num = curr_cluster.id
+        
+        # print([data_dict[i].base_cluster_num for i in data_dict])
+
+        cls.conn_array, cls.max_conn, cls.cnn_pairs = 
+        cls.partClustCNN(
+            MOCKGenotype.base_clusters, data_dict, argsortdists, L
+            )
+        
+        # Look into how this is used
+        cls.base_members = np.asarray(
+            [obj.num_members for obj in cls.part_clust.values()]
+            )[:, None]
+        cls.base_centres = np.asarray(
+            [obj.centroid for obj in cls.part_clust.values()]
+            ).squeeze()
+
+        # Next step here is probably to create an individual (reduced, unchanged so it is still the MST) and then go through the objective functions to make sure we get the right result
+        # Then try this with a full genotype
+        # The ntry this with a changed genotype
+        # Then try with a dataset and compare fitness values
+        # We expect VAR to be different (correct) and CNN to be the same
+
 
 # Not sure if this can even be put as a method (static method?) and if it even should be
 # @profile
@@ -222,6 +265,7 @@ class Dataset(object):
             # Store object in dictionary
             data_dict[curr_datapoint.id] = curr_datapoint
 
+        # Returning data is redundant ############~FIX~############
         return data, data_dict
 
 # Possibly useful class to implement some way down the line
@@ -244,9 +288,13 @@ class MOCKGenotype(list):
     # Use these indices to slice from the genotype
     # Bulk update is easier with arrays, but could cause issues with DEAP
     # and forces us to rewrite nearly all of the other code...
+    # Essentially equal to old int_links_indices[:relev_links_len]
     reduced_genotype_indices = None
 
+    reduced_cluster_nums = None
+
     base_genotype = None
+    base_clusters = None
 
     def __init__(self):
         # Set full genotype as None - don't store a potentially long list unless we need to (we always have the base as a class variable and can reconstruct)
@@ -257,9 +305,16 @@ class MOCKGenotype(list):
     
     @classmethod
     def setup_genotype_vars(cls):
+        # Calculate the length of the reduced genotype
         cls.calc_red_length()
+        # Find the indices of the most to least interesting links
         cls.interest_links_indices()
+        # Store the indices that we need for our reduced genotype
+        MOCKGenotype.reduced_genotype_indices = MOCKGenotype.interest_indices[:MOCKGenotype.reduced_length]
+        # Identify the base components
+        # i.e. set the most interesting links as specified by delta to be self-connecting so we create the base clusters
         cls.calc_base_genotype()
+        # Identify these base clusters as the connected components of the defined base genotype
         cls.calc_base_clusters()
 
     def reduce_genotype(self):
@@ -331,6 +386,12 @@ class MOCKGenotype(list):
             MOCKGenotype.base_genotype))
         cls.base_clusters = list(g.components(mode="WEAK"))
 
+    @classmethod
+    def calc_reduced_clusts(cls, data_dict):
+        cls.reduced_cluster_nums = [
+            data_dict[i].base_cluster_num for i in MOCKGenotype.reduced_genotype_indices
+        ]
+
     # This needs to replace initialisation.replaceLink
     @staticmethod
     def replace_link(argsortdists, i, j, L):
@@ -343,7 +404,7 @@ class MOCKGenotype(list):
             # Only break if we have made a new connection, otherwise try again
             if new_j != j:
                 break
-    return new_j
+        return new_j
         # We could actually use self here right? As we are replacing a gene
 
     ## This needs some redesign

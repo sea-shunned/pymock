@@ -17,7 +17,7 @@ np.random.seed(42)
 
 params = run_mock_mp.load_config(config_path="mock_config.json")
 
-classes.Dataset.num_examples = 20
+classes.Dataset.num_examples = 16
 classes.Dataset.num_features = 10
 classes.Dataset.k_user = 3
 L = 10
@@ -25,11 +25,11 @@ delta_reduce = 1
 num_indivs = 100
 num_gens = 100
 
-data, labels = make_blobs(n_samples=20, centers=3, n_features=10)
+data, labels = make_blobs(n_samples=classes.Dataset.num_examples, centers=3, n_features=10)
 classes.Dataset.labels = False
 classes.Dataset.label_vals = labels
 
-data, data_dict = classes.Dataset.createDatasetGarza(data)
+_, data_dict = classes.Dataset.createDatasetGarza(data)
 
 # Go through the precomputation specific to the dataset
 distarray = precompute.compDists(data, data)
@@ -64,32 +64,42 @@ kwargs = {
 }
 
 seed_list = [(1,)]
-sr_vals = [50, 5, 1]
+sr_vals = [1]
 
-run_mock_mp.calc_hv_ref(kwargs, sr_vals)
-# print(classes.PartialClust.max_var)
-print(KMeans(n_clusters=1).fit(data).inertia_)
+print("Scikit-learn 1 cluster inertia:")
+print(KMeans(n_clusters=1).fit(data).inertia_, "\n")
 
 for sr_val in sr_vals:
-    kwargs['delta_val'] = 100-(
-        (100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples
-        )
+    # kwargs['delta_val'] = 100-(
+    #     (100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples
+    #     )
+    
+    classes.MOCKGenotype.calc_delta(sr_val)
 
-    if kwargs['delta_val'] > 100:
-        raise ValueError("Delta value is too high (over 100)")
-    elif kwargs['delta_val'] < 0:
-        print("Delta value is below 0, setting to 0...")
-        kwargs['delta_val'] = 0
+    classes.MOCKGenotype.setup_genotype_vars()
 
     classes.PartialClust.id_value = count()
-    relev_links_len, reduced_clust_nums = run_mock_mp.delta_precomp(
-        kwargs['data'], kwargs["data_dict"], kwargs["argsortdists"], kwargs["L"], kwargs['delta_val'], 
-        kwargs["mst_genotype"], kwargs["int_links_indices"]
-        )
-    kwargs["relev_links_len"] = relev_links_len
-    kwargs["reduced_clust_nums"] = reduced_clust_nums
-    print(reduced_clust_nums, "red_clust_nums")
-    print(kwargs["int_links_indices"], "int_links_indices")
+    # relev_links_len, reduced_clust_nums = run_mock_mp.delta_precomp(
+    #     kwargs['data'], kwargs["data_dict"], kwargs["argsortdists"], kwargs["L"], kwargs['delta_val'], 
+    #     kwargs["mst_genotype"], kwargs["int_links_indices"]
+    #     )
+    # kwargs["relev_links_len"] = relev_links_len
+    # kwargs["reduced_clust_nums"] = reduced_clust_nums
+    # print(reduced_clust_nums, "red_clust_nums")
+    # print(kwargs["int_links_indices"], "int_links_indices")
+
+    print(classes.MOCKGenotype.degree_int)
+    print(classes.MOCKGenotype.base_genotype)
+    print(classes.MOCKGenotype.base_clusters)
+    print(classes.MOCKGenotype.reduced_genotype_indices)
+    print(classes.MOCKGenotype.mst_genotype)
+
+    classes.PartialClust.partial_clusts(data, data_dict, argsortdists, L)
+    
+    classes.MOCKGenotype.calc_reduced_clusts(data_dict)
+    print(classes.MOCKGenotype.reduced_cluster_nums)
+
+    raise
 
     mst_reduced_genotype = [kwargs['mst_genotype'][i] for i in kwargs['int_links_indices'][:relev_links_len]]
     print(kwargs['int_links_indices'][:relev_links_len], "relevant link indices")
@@ -102,9 +112,10 @@ for sr_val in sr_vals:
         chains, classes.PartialClust.part_clust, classes.PartialClust.base_members,
         classes.PartialClust.base_centres, superclusts
     )
-    print("Max VAR:",classes.PartialClust.max_var)
+    print("Max VAR:", classes.PartialClust.max_var)
 
-    raise
+    # raise
+
     pop, hv, hv_ref, int_links_indices, relev_links_len, adapt_gens= delta_mock_mp.runMOCK(*list(kwargs.values()), 1)
 
     temp_res = sorted([ind.fitness.values for ind in pop], key=lambda var:var[1])
