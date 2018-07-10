@@ -2,6 +2,8 @@ import itertools
 import numpy as np
 import igraph
 from sklearn.cluster import KMeans
+from itertools import count
+import random
 # import objectives
 # from collections import OrderedDict
 
@@ -31,9 +33,11 @@ class PartialClust(object):
         self.centroid = None # Call the function here?
         self.intraclust_var = None # Same as above
 
+    @staticmethod
     def partClustCNN(base_clusters, data_dict, argsortdists, L):
         conn_array = np.zeros((len(base_clusters),len(base_clusters)))
         # pairs = np.zeros((int(len(base_clusters)*(len(base_clusters)/2)),),dtype=(int,2))
+        print(conn_array.shape)
 
         # cnn_pair = 0
         cnn_pair_list = []
@@ -46,7 +50,7 @@ class PartialClust(object):
         # Easier (one less nested loop, though same number of items) 
             # than looping through base clusters - though it's equivalent
         for point in data_dict.values():
-
+            # print(point.id, point.base_cluster_num)
             # Get the L nearest neighbours
             # this matches the C++ code, where they consider the nearest neighbour to be the point itself
             # I've ignored this point, and just looked at the remaining L-1 points
@@ -57,6 +61,7 @@ class PartialClust(object):
 
             # Get the base cluster numbers of the L nearest neighbours
             nn_clust_nums = [data_dict[i].base_cluster_num for i in l_nns]
+            # print(nn_clust_nums)
 
             # Loop over these and check if they're in different clusters
             for index, clust_num in enumerate(nn_clust_nums):
@@ -113,6 +118,7 @@ class PartialClust(object):
     def partial_clusts(cls, data, data_dict, argsortdists, L):
         cls.part_clust = {}
         # print("\n")
+        # print(MOCKGenotype.base_clusters, len(MOCKGenotype.base_clusters))
         for cluster in MOCKGenotype.base_clusters:
             # print(cluster)
             curr_cluster = cls(cluster)
@@ -125,16 +131,14 @@ class PartialClust(object):
             # print(KMeans(n_clusters=1).fit(temp_data).inertia_)
 
             cls.part_clust[curr_cluster.id] = curr_cluster
+            # print(cluster, curr_cluster.id)
 
             for point in cluster:
                 data_dict[point].base_cluster_num = curr_cluster.id
-        
-        # print([data_dict[i].base_cluster_num for i in data_dict])
 
-        cls.conn_array, cls.max_conn, cls.cnn_pairs = 
-        cls.partClustCNN(
+        cls.conn_array, cls.max_conn, cls.cnn_pairs = cls.partClustCNN(
             MOCKGenotype.base_clusters, data_dict, argsortdists, L
-            )
+        )
         
         # Look into how this is used
         cls.base_members = np.asarray(
@@ -144,9 +148,11 @@ class PartialClust(object):
             [obj.centroid for obj in cls.part_clust.values()]
             ).squeeze()
 
+        cls.id_value = count()            
+
         # Next step here is probably to create an individual (reduced, unchanged so it is still the MST) and then go through the objective functions to make sure we get the right result
         # Then try this with a full genotype
-        # The ntry this with a changed genotype
+        # Then try this with a changed genotype
         # Then try with a dataset and compare fitness values
         # We expect VAR to be different (correct) and CNN to be the same
 
@@ -272,7 +278,6 @@ class Dataset(object):
 # Currently doesn't feel worth the effort as everything works reasonably well
 class MOCKGenotype(list):
     mst_genotype = None # the MST genotype
-    # unfixed_indices = None # To replace int_links_indices
 
     degree_int = None # Degree of interestingness of the MST
     interest_indices = None # Indices of the most to least interesting links in the MST (formerly int_links_indices)
@@ -310,12 +315,13 @@ class MOCKGenotype(list):
         # Find the indices of the most to least interesting links
         cls.interest_links_indices()
         # Store the indices that we need for our reduced genotype
-        MOCKGenotype.reduced_genotype_indices = MOCKGenotype.interest_indices[:MOCKGenotype.reduced_length]
+        cls.reduced_genotype_indices = cls.interest_indices[:cls.reduced_length]
+        # print(cls.reduced_genotype_indices)
         # Identify the base components
         # i.e. set the most interesting links as specified by delta to be self-connecting so we create the base clusters
         cls.calc_base_genotype()
         # Identify these base clusters as the connected components of the defined base genotype
-        cls.calc_base_clusters()
+        cls.calc_base_clusters()      
 
     def reduce_genotype(self):
         if self.full_genotype is None:
@@ -354,7 +360,7 @@ class MOCKGenotype(list):
 
     @classmethod
     def calc_delta(cls, sr_val):
-        MOCKGenotype.delta_val = 100-(
+        cls.delta_val = 100-(
             (100*sr_val*np.sqrt(Dataset.num_examples))
             /Dataset.num_examples
         )
@@ -363,6 +369,7 @@ class MOCKGenotype(list):
             raise ValueError("Delta value has not been set")
         elif cls.delta_val < 0:
             print("Delta value is below 0, setting to 0...")
+            cls.delta_val = 0
         elif cls.delta_val > 100:
             raise ValueError("Delta value is over 100")
 
@@ -404,18 +411,13 @@ class MOCKGenotype(list):
             # Only break if we have made a new connection, otherwise try again
             if new_j != j:
                 break
+        # print("exit")
         return new_j
         # We could actually use self here right? As we are replacing a gene
+        # Use the i&j to modify the genotype directly rather than return
+        # Of little importance
 
-    ## This needs some redesign
-    # What do we actually want to use this for? If it is for keeping track of fixed/unfixed links, and newly unfixed for fair mutation
-    # Then the class is more the MST
-    # Consider it like a dictionary with nested keys
-    # The first key each time is the root node for the link, or the index of the gene in the genotype
-    # Then we have some static, unique values here:
-        # The MST
-        # The base genotype, where some links in the MST change to self-connecting links
-    # We do not need to store 
+
     # It may be useful for our solutions to have additional attributes, like C++ MOCK does
         # Such as the number of clusters in the solution
         # But this is different to the MST thing above, in a way

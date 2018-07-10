@@ -68,12 +68,35 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
     distarray = precompute.normaliseDistArray(distarray)
     argsortdists = np.argsort(distarray, kind='mergesort')
     nn_rankings = precompute.nnRankings(distarray, classes.Dataset.num_examples)
-    mst_genotype = precompute.createMST(distarray)
-    degree_int = precompute.degreeInterest(mst_genotype, L, nn_rankings, distarray)
-    int_links_indices = precompute.interestLinksIndices(degree_int)
+    # mst_genotype = precompute.createMST(distarray)
+    classes.MOCKGenotype.mst_genotype = precompute.createMST(distarray)
+    # degree_int = precompute.degreeInterest(mst_genotype, L, nn_rankings, distarray)
+    classes.MOCKGenotype.degree_int = precompute.degreeInterest(classes.MOCKGenotype.mst_genotype, L, nn_rankings, distarray)
+    # int_links_indices = precompute.interestLinksIndices(degree_int)
+    classes.MOCKGenotype.interest_links_indices()
 
     # Bundle all of the arguments together in a dict to pass to the function
     # This is in order of runMOCK so that we can easily turn it into a partial func for multiprocessing
+    # kwargs = {
+    #     "data": data,
+    #     "data_dict": data_dict,
+    #     "delta_val": None,
+    #     "hv_ref": None,
+    #     "argsortdists": argsortdists,
+    #     "nn_rankings": nn_rankings,
+    #     "mst_genotype": mst_genotype,
+    #     "int_links_indices": int_links_indices,
+    #     "L": L,
+    #     "num_indivs": num_indivs,
+    #     "num_gens": num_gens,
+    #     "delta_reduce": delta_reduce,
+    #     "strat_name": None,
+    #     "adapt_delta": None,
+    #     "relev_links_len": None,
+    #     "reduced_clust_nums": None
+    #     # "seed_num": None
+    # }
+
     kwargs = {
         "data": data,
         "data_dict": data_dict,
@@ -81,8 +104,8 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
         "hv_ref": None,
         "argsortdists": argsortdists,
         "nn_rankings": nn_rankings,
-        "mst_genotype": mst_genotype,
-        "int_links_indices": int_links_indices,
+        "mst_genotype": classes.MOCKGenotype.mst_genotype,
+        "int_links_indices": classes.MOCKGenotype.interest_indices,
         "L": L,
         "num_indivs": num_indivs,
         "num_gens": num_gens,
@@ -137,12 +160,11 @@ def delta_precomp(data, data_dict, argsortdists, L, delta_val, mst_genotype, int
 
     relev_links_len = initialisation.relevantLinks(
         delta_val, classes.Dataset.num_examples)
-    print("Genotype length:", relev_links_len)
+    # print("Genotype length:", relev_links_len)
 
     _, base_clusters = initialisation.baseGenotype(
         mst_genotype, int_links_indices, relev_links_len)
-
-    print(base_clusters, "base_clusters")
+    # print(base_clusters, "base_clusters")
 
     classes.partialClustering(
         base_clusters, data, data_dict, argsortdists, L)
@@ -154,7 +176,63 @@ def delta_precomp(data, data_dict, argsortdists, L, delta_val, mst_genotype, int
 
     return relev_links_len, reduced_clust_nums
 
+
+# def delta_precomp(data, data_dict, argsortdists, L):
+#     classes.MOCKGenotype.setup_genotype_vars()
+#     classes.PartialClust.partial_clusts(data, data_dict, argsortdists, L)
+#     classes.MOCKGenotype.calc_reduced_clusts(data_dict)
+
 def calc_hv_ref(kwargs, sr_vals):
+    """
+    Calculates a correct hv reference point
+    """
+
+    # Determine the minimum delta encountered
+    # sr_vals always highest first, but maybe should use max(sr_vals)
+    # min_delta = 100-(
+    #     (100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples
+    # )
+
+    # relev_links_len, reduced_clust_nums = delta_precomp(
+    #     kwargs['data'], kwargs["data_dict"], kwargs["argsortdists"],
+    #     kwargs["L"], min_delta, kwargs["mst_genotype"], 
+    #     kwargs["int_links_indices"]
+    # )
+
+    # delta_precomp(
+    #     kwargs['data'], kwargs['data_dict'], 
+    #     kwargs['argsortdists'], kwargs['L'])
+
+    # mst_reduced_genotype = [kwargs['mst_genotype'][i] for i in kwargs['int_links_indices'][:relev_links_len]]
+    # mst_reduced_genotype = [classes.MOCKGenotype.mst_genotype[i] for i in kwargs['int_links_indices'][:relev_links_len]]
+    mst_reduced_genotype = [classes.MOCKGenotype.mst_genotype[i] for i in classes.MOCKGenotype.reduced_genotype_indices]
+
+    # Calculate 
+    chains, superclusts = objectives.clusterChains(
+        mst_reduced_genotype, kwargs['data_dict'], classes.PartialClust.part_clust, classes.MOCKGenotype.reduced_cluster_nums
+    )
+    
+    classes.PartialClust.max_var = objectives.objVAR(
+        chains, classes.PartialClust.part_clust, classes.PartialClust.base_members,
+        classes.PartialClust.base_centres, superclusts
+    )
+
+    # Need to divide by N as this is done in evalMOCK() not objVAR()
+    classes.PartialClust.max_var= classes.PartialClust.max_var/classes.Dataset.num_examples
+
+    # Set reference point just outside max values to ensure no overlap
+    hv_ref = [
+        classes.PartialClust.max_var*1.01,
+        classes.PartialClust.max_conn*1.01
+    ]
+
+    print("Max var:", classes.PartialClust.max_var)
+
+    classes.PartialClust.id_value = count()
+
+    return hv_ref
+
+def calc_hv_ref2(kwargs, sr_vals):
     """
     Calculates a correct hv reference point
     """
@@ -169,13 +247,14 @@ def calc_hv_ref(kwargs, sr_vals):
         kwargs["int_links_indices"]
     )
 
-    mst_reduced_genotype = [kwargs['mst_genotype'][i] for i in kwargs['int_links_indices'][:relev_links_len]]
+    # mst_reduced_genotype = [kwargs['mst_genotype'][i] for i in kwargs['int_links_indices'][:relev_links_len]]
+    # print(classes.MOCKGenotype.mst_genotype)
+    # print(classes.MOCKGenotype.reduced_genotype_indices)
+    mst_reduced_genotype = [classes.MOCKGenotype.mst_genotype[i] for i in kwargs['int_links_indices'][:relev_links_len]]
 
     chains, superclusts = objectives.clusterChains(
         mst_reduced_genotype, kwargs['data_dict'], classes.PartialClust.part_clust, reduced_clust_nums
     )
-    # print(superclusts)
-    # print(classes.PartialClust.base_members)
     
     classes.PartialClust.max_var = objectives.objVAR(
         chains, classes.PartialClust.part_clust, classes.PartialClust.base_members,
@@ -187,7 +266,7 @@ def calc_hv_ref(kwargs, sr_vals):
         classes.PartialClust.max_conn*1.05
     ]
 
-    print(classes.PartialClust.max_var)
+    print("Max var:", classes.PartialClust.max_var)
 
     classes.PartialClust.id_value = count()
 
@@ -204,7 +283,7 @@ def run_mock(validate=False):
 
     # A longer genotype means a higher possible maximum for the CNN objective
     # By running the highest sr value first, we ensure that the HV_ref
-    # is the same for all runs
+    # is the same and appropriate for all runs
     sr_vals = sorted(params['sr_vals'], reverse=True)
 
     # Column names for fitness array, formatted for EAF R plot package
@@ -225,7 +304,7 @@ def run_mock(validate=False):
     print("---------------------------")
     print("Number of MOCK Runs:")
     print(f"{params['NUM_RUNS']} runs")
-    print(f"{len(params['strategies'])} strategies")
+    print(f"{len(params['strategies'])} strategy/-ies")
     print(f"{len(sr_vals)} delta values")
     print(f"{len(data_file_paths)} datasets")
     print(f"= {params['NUM_RUNS']*len(params['strategies'])*len(sr_vals)*len(data_file_paths)} runs")
@@ -237,36 +316,38 @@ def run_mock(validate=False):
         kwargs = prepare_data(file_path, params['L'], params['NUM_INDIVS'], params['NUM_GENS'])
         print("Precomputation complete")
 
-        if validate:
-            kwargs['hv_ref'] = [3.0, 1469.0]
-
-        calc_hv_ref(kwargs, sr_vals)
 
         # Loop through the sr (square root) values
         for sr_val in sr_vals:
-            kwargs['delta_val'] = 100-(
-                (100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples
-                )
-
-            if kwargs['delta_val'] > 100:
-                raise ValueError("Delta value is too high (over 100)")
-            elif kwargs['delta_val'] < 0:
-                print("Delta value is below 0, setting to 0...")
-                kwargs['delta_val'] = 0
+            # Calculate the delta value from the sr
+            classes.MOCKGenotype.calc_delta(sr_val)
+            kwargs['delta_val'] = classes.MOCKGenotype.delta_val
             
             print(f"Delta: {kwargs['delta_val']}")
-            classes.PartialClust.id_value = count()
-            relev_links_len, reduced_clust_nums = delta_precomp(
-                kwargs['data'], kwargs["data_dict"], kwargs["argsortdists"], kwargs["L"], kwargs['delta_val'], 
-                kwargs["mst_genotype"], kwargs["int_links_indices"]
-                )
-            kwargs["relev_links_len"] = relev_links_len
-            kwargs["reduced_clust_nums"] = reduced_clust_nums
+            # classes.PartialClust.id_value = count() # Where to put this?
+            # relev_links_len, reduced_clust_nums = delta_precomp(
+            #     kwargs['data'], kwargs["data_dict"], kwargs["argsortdists"], kwargs["L"], kwargs['delta_val'], 
+            #     kwargs["mst_genotype"], kwargs["int_links_indices"]
+            #     )
+            # kwargs["relev_links_len"] = relev_links_len
+            # kwargs["reduced_clust_nums"] = reduced_clust_nums
 
-            # Need to calculate hv reference point here, by calculating VAR for the MST
-            # This can be done outside of the sr_val loop
-            # May be worth just doing a one-off calc of the min delta value
-            # And then calculating the HV_ref from there, which is then fixed for that dataset
+            # Setup some of the variables for the genotype
+            classes.MOCKGenotype.setup_genotype_vars()
+
+            # Set the nadir point if first run
+            if kwargs['hv_ref'] is None:
+                # To ensure compatible results
+                if validate:
+                    kwargs['hv_ref'] = [3.0, 1469.0]
+                else:
+                    kwargs['hv_ref'] = calc_hv_ref(kwargs, sr_vals)
+
+            # Then need to check if we need to register anything new with kwargs
+            # If we just add the class stuff to kwargs we don't have to make many other changes
+            
+            classes.PartialClust.partial_clusts(kwargs["data"], kwargs["data_dict"], kwargs["argsortdists"], kwargs["L"])
+            classes.MOCKGenotype.calc_reduced_clusts(kwargs["data_dict"])
 
             # Loop through the strategies
             for strat_name in params['strategies']:
@@ -290,20 +371,25 @@ def run_mock(validate=False):
                 with multiprocessing.Pool() as pool:
                     results = pool.starmap(mock_func, seed_list)
                 end_time = time.time()
-                print(f"{strat_name} done (took {end_time-start_time:.3f}) - collecting results...")
+                print(f"{strat_name} done (took {end_time-start_time:.3f} secs) - collecting results...")
 
                 for run_num, run_result in enumerate(results):
                     pop = run_result[0]
+                    # print(pop)
                     # print([ind.fitness.values for ind in pop])
                     temp_res = sorted([ind.fitness.values for ind in pop], key=lambda var:var[1])
-                    print(temp_res[:2])
-                    print(temp_res[-2:])
+                    # print(temp_res[:2])
+                    # print(temp_res[-2:])
 
                     hv = run_result[1]
                     # deal with hv_ref
                     int_links_indices_spec = run_result[3]
+                    # print(int_links_indices_spec)
 
                     final_relev_links_len = run_result[4]
+                    final_relev_links_len = classes.MOCKGenotype.reduced_length
+                    # print(final_relev_links_len)
+                    # print(classes.MOCKGenotype.reduced_length)
 
                     adapt_gens = run_result[5]
 
@@ -322,6 +408,8 @@ def run_mock(validate=False):
                 print(f"{strat_name} complete!")
 
                 if validate:
+                    print("---------------------------")
+                    print("Validating results...")
                     valid = validateResults(
                         os.path.join(os.getcwd(), "test_data", ""),
                         strat_name,
@@ -340,4 +428,4 @@ def run_mock(validate=False):
 
 
 if __name__ == '__main__':
-    run_mock()
+    run_mock(validate=True)

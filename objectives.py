@@ -8,7 +8,8 @@ import igraph
 def clusterChains(genotype, data_dict, part_clust, reduced_clust_nums):
     # Identify what base clusters the points in the new genotype are in
     new_clust_nums = [data_dict[i].base_cluster_num for i in genotype]
-    print(new_clust_nums, "new_clust_nums")
+    # print(reduced_clust_nums, "reduced")
+    # print(new_clust_nums, "new_clust_nums")
     # Create a graph
     g = igraph.Graph()
     
@@ -66,10 +67,19 @@ def objVAR(chains, part_clust, base_members, base_centres, superclusts):
     centres = np.divide(centres, members)
 
     wcss = np.sum([part_clust[index].num_members * np.dot(part_clust[index].centroid.squeeze() - centres[value], part_clust[index].centroid.squeeze() - centres[value]) for index, value in enumerate(superclusts)])
-
-    # print(wcss, np.sum(wcss_vec), wcss_vec)
-
+    
+    # print(wcss, variances)
     return wcss + variances
+
+def objVAR_slow(chains, part_clust, base_members, base_centres, superclusts, data):
+    from scipy.spatial.distance import cdist
+
+    for chain in chains:
+        centroid = np.mean(data[chain],axis=0)[np.newaxis,:]
+        dists = cdist(data[chain],centroid,'sqeuclidean')
+
+    return np.sum(dists)
+
 
 # @profile
 # def objVAR3(chains, part_clust, base_members, base_centres, superclusts):
@@ -104,12 +114,22 @@ def evalMOCK(genotype, part_clust, reduced_clust_nums, conn_array, max_conn, num
 
     chains, superclusts = clusterChains(genotype, data_dict, part_clust, reduced_clust_nums)
 
+    # print("Num clusters:",len(chains))
+    # print(superclusts, "superclusts")
+    # print(chains)
+
+    # print(base_members)
+    # print(base_centres)
     # if len(chains) == 1:
         # CNN2 = 0
         # VAR3 = # create func for single cluster?
 
     CNN = objCNN(chains, superclusts, cnn_pairs, conn_array, max_conn)
     VAR = objVAR(chains, part_clust, base_members, base_centres, superclusts)
+
+    # print(VAR, VAR/num_examples)
+
+    # print(objVAR_slow(chains, part_clust, base_members, base_centres, superclusts,data))
     
     # VAR2 = objVAR3(chains, part_clust, base_members, base_centres, superclusts)
     # print(np.isclose(VAR,VAR2), VAR, VAR2)

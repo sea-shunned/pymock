@@ -40,7 +40,7 @@ def delta_precomp(data, data_dict, argsortdists, L, delta_val, mst_genotype, int
     return relev_links_len, reduced_clust_nums
 
 # Consider trying to integrate the use of **kwargs here
-def create_base_toolbox(num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums):
+def create_base_toolbox(num_indivs, argsortdists, L, data_dict, nn_rankings):
     """
     Create the toolbox object used by the DEAP package, and register our relevant functions
     """
@@ -52,9 +52,9 @@ def create_base_toolbox(num_indivs, mst_genotype, int_links_indices, relev_links
         initialisation.initDeltaMOCK, 
         k_user = classes.Dataset.k_user, 
         num_indivs = num_indivs, 
-        mst_genotype = mst_genotype, 
-        int_links_indices = int_links_indices, 
-        relev_links_len = relev_links_len, 
+        # mst_genotype = classes.MOCKGenotype.mst_genotype, 
+        # int_links_indices = classes.MOCKGenotype.interest_indices, 
+        # relev_links_len = relev_links_len, 
         argsortdists = argsortdists, 
         L = L
         )
@@ -71,8 +71,8 @@ def create_base_toolbox(num_indivs, mst_genotype, int_links_indices, relev_links
     toolbox.register(
         "evaluate", 
         objectives.evalMOCK, 
-        part_clust = classes.PartialClust.part_clust, 
-        reduced_clust_nums = reduced_clust_nums, 
+        part_clust = classes.PartialClust.part_clust,
+        reduced_clust_nums = classes.MOCKGenotype.reduced_cluster_nums, 
         conn_array = classes.PartialClust.conn_array, 
         max_conn = classes.PartialClust.max_conn, 
         num_examples = classes.Dataset.num_examples, 
@@ -93,10 +93,10 @@ def create_base_toolbox(num_indivs, mst_genotype, int_links_indices, relev_links
     toolbox.register(
         "mutate", operators.neighbourMutation, 
         MUTPB = 1.0, 
-        gen_length = relev_links_len, 
+        gen_length = classes.MOCKGenotype.reduced_length, 
         argsortdists = argsortdists, 
         L = L, 
-        int_links_indices = int_links_indices, 
+        int_links_indices = classes.MOCKGenotype.interest_indices, 
         nn_rankings = nn_rankings
         )
     
@@ -244,15 +244,11 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
     toolbox.unregister("evaluate")
     toolbox.unregister("mutate")
 
-    if strat_name == "reinit":
-        toolbox.unregister("initDelta")
-        toolbox.unregister("population")
-
     # Reset the partial clust counter to ceate new base clusters
     classes.PartialClust.id_value = count()
 
     # Save old genotype length
-    relev_links_len_old = relev_links_len
+    reduced_len_old = classes.MOCKGenotype.reduced_length
 
     # Reduce delta by flat value or multiple of the square root if using that
     if isinstance(delta_val, int):
@@ -266,13 +262,15 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
 
     print(f"Adaptive delta engaged at gen {gen}! Going down to delta = {delta_val}")
 
-    # Re-do the relevant precomputation
-    relev_links_len, reduced_clust_nums = delta_precomp(data, data_dict, argsortdists, L, delta_val, mst_genotype, int_links_indices)
-    newly_unfixed_indices = int_links_indices[relev_links_len_old:relev_links_len]
+    # Re-do the relevant precomputation # Need to do in new MOCKGenotype
+    relev_links_len, reduced_clust_nums = delta_precomp(data, data_dict, argsortdists, L, delta_val, mst_genotype, int_links_indices) # FIX
+    
+    # newly_unfixed_indices = int_links_indices[reduced_len_old:relev_links_len]
+    newly_unfixed_indices = classes.MOCKGenotype.interest_indices[reduced_len_old:classes.MOCKGenotype.reduced_length]
 
     # Extend the individuals to the new genotype length
     for indiv in pop:
-        indiv.extend([mst_genotype[i] for i in newly_unfixed_indices])
+        indiv.extend([classes.MOCKGenotype.mst_genotype[i] for i in newly_unfixed_indices])
 
     # The evaluation function is the same for all (in current config)
     toolbox.register(
@@ -295,7 +293,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
             "mutate", 
             operators.neighbourHyperMutation_all, 
             MUTPB = 1.0, 
-            gen_length = relev_links_len, 
+            gen_length = classes.MOCKGenotype.reduced_length, 
             argsortdists = argsortdists, 
             L = L, 
             int_links_indices = int_links_indices, 
@@ -308,7 +306,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
             "mutate", 
             operators.neighbourHyperMutation_spec, 
             MUTPB = 1.0, 
-            gen_length = relev_links_len, 
+            gen_length = classes.MOCKGenotype.reduced_length, 
             argsortdists = argsortdists, 
             L = L, 
             int_links_indices = int_links_indices, 
@@ -322,7 +320,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
             "mutateFair", 
             operators.neighbourFairMutation, 
             MUTPB = 1.0, 
-            gen_length = relev_links_len, 
+            gen_length = classes.MOCKGenotype.reduced_length, 
             argsortdists = argsortdists, 
             L = L, 
             int_links_indices = int_links_indices, 
@@ -331,6 +329,10 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
             )
     
     elif strat_name == "reinit":
+        # Unregister population functions first
+        toolbox.unregister("initDelta")
+        toolbox.unregister("population")
+
         toolbox.register("initDelta", initialisation.initDeltaMOCKadapt, classes.Dataset.k_user, num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L)
         
         toolbox.register("population", tools.initIterate, list, toolbox.initDelta)
@@ -338,7 +340,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
         toolbox.register(
             "mutate", operators.neighbourMutation, 
             MUTPB = 1.0, 
-            gen_length = relev_links_len, 
+            gen_length = classes.MOCKGenotype.reduced_length, 
             argsortdists = argsortdists, 
             L = L, 
             int_links_indices = int_links_indices, 
@@ -349,13 +351,14 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
         toolbox.register(
             "mutate", operators.neighbourMutation, 
             MUTPB = 1.0, 
-            gen_length = relev_links_len, 
+            gen_length = classes.MOCKGenotype.reduced_length, 
             argsortdists = argsortdists, 
             L = L, 
             int_links_indices = int_links_indices, 
             nn_rankings = nn_rankings
             )
 
+    # Fix relev_links_len here (need to look where returned)
     return pop, toolbox, delta_val, relev_links_len, reduced_clust_nums
 
 
@@ -441,7 +444,7 @@ def runMOCK(
 
     # Create the DEAP toolbox
     toolbox = create_base_toolbox(
-        num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums)
+        num_indivs, argsortdists, L, data_dict, nn_rankings)
 
     # Create the initial population
     pop, hv, VAR_init, CNN_init = initial_setup(toolbox, hv, hv_ref)
@@ -449,19 +452,21 @@ def runMOCK(
     # Check that the initial population is within the hv reference point
     # check_hv_violation(pop, hv_ref)
 
-    raise
+    # raise
 
-    # Calculate a suitable ref point if not provided
-    if hv_ref == None:
-        hv_ref = calc_hv_ref(pop)
-        # raise ValueError("No hv reference point supplied")
+    #### Abstract hv_ref outside here
+    # # Calculate a suitable ref point if not provided
+    # if hv_ref == None:
+    #     hv_ref = calc_hv_ref(pop)
+    #     # raise ValueError("No hv reference point supplied")
 
-    # Check that the hv_ref reference point is valid
-    if classes.PartialClust.max_conn >= hv_ref[1]:
-        raise ValueError(f"Max CNN value ({classes.PartialClust.max_conn}) has exceeded that set for hv reference point ({hv_ref[1]}); hv values may be unreliable")
+    # # Check that the hv_ref reference point is valid
+    # if classes.PartialClust.max_conn >= hv_ref[1]:
+    #     raise ValueError(f"Max CNN value ({classes.PartialClust.max_conn}) has exceeded that set for hv reference point ({hv_ref[1]}); hv values may be unreliable")
 
     # Go through each generation
     for gen in range(1, num_gens):
+        print(f"Generation: {gen}")
         # Select the right type of generation for this strategy and generation
         pop, hv, toolbox = select_generation_strategy(pop, toolbox, hv, hv_ref, num_indivs, gen, adapt_delta, adapt_gens, strat_name, relev_links_len, argsortdists, L, int_links_indices, nn_rankings)
 

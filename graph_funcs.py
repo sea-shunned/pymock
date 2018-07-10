@@ -1560,8 +1560,8 @@ if __name__ == '__main__':
 	# Remaps strategy names with mathtext formatting
 	# Will need to add ones for base-MOCK at SR5 and SR1
 	strat_name_dict = {
-	"base-sr1" : r'$\Delta{-}MOCK$' '\n' r'(sr1)', 
-	"base-sr5" : r'$\Delta{-}MOCK$' '\n' r'(sr5)',
+	"base-sr1" : r'$\Delta{-}MOCK$' '\n' r'($\delta_{High}$)', 
+	"base-sr5" : r'$\Delta{-}MOCK$' '\n' r'($\delta_{Low}$)',
 	"carryon" : r'$\mathit{CO}$',
 	"fairmut" : r'$\mathit{FM}$',
 	"hypermutall" : r'$\mathit{TH}_{all}$',
@@ -1577,11 +1577,12 @@ if __name__ == '__main__':
 
 	# plotArtif_allDS_multifig(artif_folder, strat_name_dict, methods)
 
-	# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method="interval", save=False)
-	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method="interval", save=False)
+	plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method="interval", save=False)
+	# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method="interval", save=False)
 
 	# for method in methods:
 		# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*UKC*", method=method, save=False)
+		# plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9", method=method, save=False)
 		# plotArtifClusts_all(artif_folder, graph_path, strat_name_dict,method=method, dataname="*UKC*", save=True)
 
 	# plotDeltaAssump_all(assumption_folder, graph_path)

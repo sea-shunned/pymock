@@ -1,7 +1,8 @@
 import random
 import numpy as np
 from deap import base
-from initialisation import replaceLink
+# from initialisation import replaceLink
+from classes import MOCKGenotype
 # from numba import jit
 
 # @profile
@@ -50,7 +51,7 @@ def neighbourMutation(parent, MUTPB, gen_length, argsortdists, L, int_links_indi
     # As we're using assignment, can't really do this part in a comprehension!
     for index, mutprob in enumerate(mutprobs):
         if random.random() < mutprob:
-            parent[index] = replaceLink(argsortdists, int_links_indices[index], parent[index], L)
+            parent[index] = MOCKGenotype.replace_link(argsortdists, int_links_indices[index], parent[index], L)
 
     return parent
 
@@ -66,7 +67,7 @@ def neighbourHyperMutation_all(parent, MUTPB, gen_length, argsortdists, L, int_l
     # As we're using assignment, can't really do this part in a comprehension!
     for index, mutprob in enumerate(mutprobs):
         if random.random() < mutprob:
-            parent[index] = replaceLink(argsortdists, int_links_indices[index], parent[index], L)
+            parent[index] = MOCKGenotype.replace_link(argsortdists, int_links_indices[index], parent[index], L)
 
     return parent
 
@@ -84,7 +85,7 @@ def neighbourHyperMutation_spec(parent, MUTPB, gen_length, argsortdists, L, int_
     # As we're using assignment, can't really do this part in a comprehension!
     for index, mutprob in enumerate(mutprobs):
         if random.random() < mutprob:
-            parent[index] = replaceLink(argsortdists, int_links_indices[index], parent[index], L)
+            parent[index] = MOCKGenotype.replace_link(argsortdists, int_links_indices[index], parent[index], L)
 
     return parent
 
@@ -98,6 +99,6 @@ def neighbourFairMutation(parent, MUTPB, gen_length, argsortdists, L, int_links_
     # As we're using assignment, can't really do this part in a comprehension!
     for index, mutprob in enumerate(mutprobs):
         if random.random() < mutprob:
-            parent[index] = replaceLink(argsortdists, int_links_indices[index], parent[index], L)
+            parent[index] = MOCKGenotype.replace_link(argsortdists, int_links_indices[index], parent[index], L)
 
     return parent

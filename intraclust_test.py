@@ -42,6 +42,7 @@ classes.MOCKGenotype.degree_int = precompute.degreeInterest(
 
 # Finds the indices of the most to least interesting links
 classes.MOCKGenotype.interest_links_indices()
+# classes.MOCKGenotype.setup_genotype_vars()
 
 kwargs = {
     "data": data,
@@ -50,8 +51,8 @@ kwargs = {
     "hv_ref": None,
     "argsortdists": argsortdists,
     "nn_rankings": nn_rankings,
-    # "mst_genotype": mst_genotype,
-    # "int_links_indices": int_links_indices,
+    "mst_genotype": classes.MOCKGenotype.mst_genotype,
+    "int_links_indices": classes.MOCKGenotype.interest_indices,
     "L": L,
     "num_indivs": num_indivs,
     "num_gens": num_gens,
@@ -64,45 +65,107 @@ kwargs = {
 }
 
 seed_list = [(1,)]
-sr_vals = [50, 5, 1]
+# sr_vals = [50, 5, 1]
+sr_vals = [3, 2, 1, 0.5, 50]
 
-run_mock_mp.calc_hv_ref(kwargs, sr_vals)
-# print(classes.PartialClust.max_var)
-print(KMeans(n_clusters=1).fit(data).inertia_)
+hv_ref = run_mock_mp.calc_hv_ref(kwargs, sr_vals)
+print("HV ref:",hv_ref)
+print("SKLearn:", KMeans(n_clusters=1).fit(data).inertia_)
 
 for sr_val in sr_vals:
-    kwargs['delta_val'] = 100-(
-        (100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples
-        )
+    classes.MOCKGenotype.calc_delta(sr_val)
+    print("Delta:", classes.MOCKGenotype.delta_val)
+    classes.MOCKGenotype.setup_genotype_vars()
+    classes.PartialClust.partial_clusts(data, data_dict, argsortdists, L)
 
-    if kwargs['delta_val'] > 100:
-        raise ValueError("Delta value is too high (over 100)")
-    elif kwargs['delta_val'] < 0:
-        print("Delta value is below 0, setting to 0...")
-        kwargs['delta_val'] = 0
+    classes.MOCKGenotype.calc_reduced_clusts(data_dict)
+    print(classes.MOCKGenotype.reduced_genotype_indices)
+    print(classes.MOCKGenotype.reduced_cluster_nums, len(classes.MOCKGenotype.reduced_cluster_nums))
+    print(classes.MOCKGenotype.mst_genotype, len(classes.MOCKGenotype.mst_genotype), "mst")
 
-    classes.PartialClust.id_value = count()
-    relev_links_len, reduced_clust_nums = run_mock_mp.delta_precomp(
-        kwargs['data'], kwargs["data_dict"], kwargs["argsortdists"], kwargs["L"], kwargs['delta_val'], 
-        kwargs["mst_genotype"], kwargs["int_links_indices"]
-        )
-    kwargs["relev_links_len"] = relev_links_len
-    kwargs["reduced_clust_nums"] = reduced_clust_nums
-    print(reduced_clust_nums, "red_clust_nums")
-    print(kwargs["int_links_indices"], "int_links_indices")
+    indiv = classes.MOCKGenotype()
+    indiv.full_genotype = classes.MOCKGenotype.mst_genotype
 
-    mst_reduced_genotype = [kwargs['mst_genotype'][i] for i in kwargs['int_links_indices'][:relev_links_len]]
-    print(kwargs['int_links_indices'][:relev_links_len], "relevant link indices")
-    print(mst_reduced_genotype, "reduced mst genotype")
-    print(kwargs['mst_genotype'], "original mst genotype")
-    chains, superclusts = objectives.clusterChains(
-        mst_reduced_genotype, kwargs['data_dict'], classes.PartialClust.part_clust, reduced_clust_nums)
-    print(superclusts, "superclusts")
-    classes.PartialClust.max_var = objectives.objVAR(
-        chains, classes.PartialClust.part_clust, classes.PartialClust.base_members,
-        classes.PartialClust.base_centres, superclusts
+    print("Full:", indiv.full_genotype)
+    
+    indiv.reduce_genotype()
+    print(indiv.genotype)
+
+    print(classes.MOCKGenotype.reduced_cluster_nums)
+
+    VAR_res, CNN_res = objectives.evalMOCK(
+        indiv.genotype, 
+        classes.PartialClust.part_clust,
+        classes.MOCKGenotype.reduced_cluster_nums,
+        classes.PartialClust.conn_array,
+        classes.PartialClust.max_conn,
+        classes.Dataset.num_examples,
+        data_dict, 
+        classes.PartialClust.cnn_pairs,
+        classes.PartialClust.base_members,
+        classes.PartialClust.base_centres,
+        data
     )
-    print("Max VAR:",classes.PartialClust.max_var)
+    print("VAR:", VAR_res)
+    print("CNN:", CNN_res)
+    print("\n")
+
+    indiv_minvar = classes.MOCKGenotype()
+    indiv_minvar.full_genotype = list(range(len(classes.MOCKGenotype.mst_genotype)))
+
+    print(indiv_minvar.full_genotype)
+    indiv_minvar.reduce_genotype()
+    print(indiv_minvar.genotype)
+    indiv_minvar.expand_genotype()
+    print(indiv_minvar.full_genotype)
+    print(classes.MOCKGenotype.mst_genotype)
+    print("next")
+
+    VAR_res, CNN_res = objectives.evalMOCK(
+        indiv_minvar.genotype, 
+        classes.PartialClust.part_clust,
+        classes.MOCKGenotype.reduced_cluster_nums,
+        classes.PartialClust.conn_array,
+        classes.PartialClust.max_conn,
+        classes.Dataset.num_examples,
+        data_dict, 
+        classes.PartialClust.cnn_pairs,
+        classes.PartialClust.base_members,
+        classes.PartialClust.base_centres,
+        data
+    )
+
+    print("VAR:", VAR_res)
+    print("CNN:", CNN_res)
+    print("\n\n")
+    continue
+
+    # Discrepancy here
+    # Need to step through this and the method in the HV ref point function
+    # Then see where we are getting the different
+
+    # classes.PartialClust.id_value = count()
+    # relev_links_len, reduced_clust_nums = run_mock_mp.delta_precomp(
+    #     kwargs['data'], kwargs["data_dict"], kwargs["argsortdists"], kwargs["L"], kwargs['delta_val'], 
+    #     kwargs["mst_genotype"], kwargs["int_links_indices"]
+    #     )
+    # kwargs["relev_links_len"] = relev_links_len
+    # kwargs["reduced_clust_nums"] = reduced_clust_nums
+    # print(reduced_clust_nums, "red_clust_nums")
+    # print(kwargs["int_links_indices"], "int_links_indices")
+
+    # mst_reduced_genotype = [kwargs['mst_genotype'][i] for i in kwargs['int_links_indices'][:relev_links_len]]
+    # print(kwargs['int_links_indices'][:relev_links_len], "relevant link indices")
+    # print(mst_reduced_genotype, "reduced mst genotype")
+    # print(kwargs['mst_genotype'], "original mst genotype")
+    # chains, superclusts = objectives.clusterChains(
+    #     mst_reduced_genotype, kwargs['data_dict'], classes.PartialClust.part_clust, reduced_clust_nums)
+    # print(superclusts, "superclusts")
+    # classes.PartialClust.max_var = objectives.objVAR(
+    #     chains, classes.PartialClust.part_clust, classes.PartialClust.base_members,
+    #     classes.PartialClust.base_centres, superclusts
+    # )
+    # print("Max VAR:",classes.PartialClust.max_var)
 
     raise
     pop, hv, hv_ref, int_links_indices, relev_links_len, adapt_gens= delta_mock_mp.runMOCK(*list(kwargs.values()), 1)

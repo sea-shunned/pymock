@@ -5,9 +5,7 @@
     "L": 10,
     "DELTA_REDUCE": 1,
     "sr_vals": [
-        1,
-	5,
-	50
+        1
     ],
     "strategies": [
         "base"

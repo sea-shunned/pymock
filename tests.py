@@ -204,18 +204,21 @@ def validateResults(
         print(ari_array)
         print(ari_orig)
         raise ValueError("ARI not equal")
+    print("ARI correct!")
     
     fit_orig = np.loadtxt(fit_path, delimiter=",")[:num_runs*100, :]
     if not np.array_equal(fit_array, fit_orig):
         print(fit_array)
         print(fit_orig)
         raise ValueError("Fitness values not equal")
+    print("Fitness correct!")        
 
     hv_orig = np.loadtxt(hv_path, delimiter=",")[:, :num_runs]
     if not np.array_equal(hv_array, hv_orig):
         print(hv_array)
         print(hv_orig)
         raise ValueError("HV values not equal")        
+    print("Hypervolume correct!")
 
     return True 
 
