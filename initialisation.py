@@ -1,109 +1,28 @@
-import numpy as np
 import random
-import precompute # To delete
-import classes
-
-# # To delete
-# def baseGenotype(mst_genotype, int_links_indices, relev_links_len):
-#     base_genotype = mst_genotype.copy() # should use [:] for consistency
-#     # Remove the most interesting links to create the base components
-#     for index in int_links_indices[:relev_links_len]:
-#         base_genotype[index] = index
-#     base_clusters = precompute.decodingLAR(base_genotype)
-#     return base_genotype, base_clusters
-
-# # To delete
-# def relevantLinks(delta_val, num_examples):
-#     # Length of the relevant links (symbol: capital gamma)
-#     return int(np.ceil(((100-delta_val)/100)*num_examples))
-
-# # To delete
-# def replaceLink(argsortdists, i, j, L):
-#     # Link can be replaced with L+1 options
-#     # L nearest neighbours and self-connecting link
-#     # Must exclude replacing with original link
-#     while True:
-#         # L+1 accounts for self-connecting link and L nearest neighbours
-#         new_j = random.choice(argsortdists[i][0:L+1])
-#         # Only break if we have made a new connection, otherwise try again
-#         if new_j != j:
-#             break
-#     return new_j
-
-# def initCreateSol(n, mst_genotype, int_links_indices, relev_links_len, argsortdists, L):
-#     indiv = mst_genotype[:]
-#     # print("Outside while loop! indiv has been reset")
-#     while True:
-#         # Need to only choose :n (k-1) from the unfixed set
-#         for index in int_links_indices[:relev_links_len][:n]:
-#             # print(n, len(int_links_indices[:relev_links_len][:n]))
-#             j = indiv[index]
-#             indiv[index] = replaceLink(argsortdists, index, j, L)
-#             # print("orig:",j,"new:",indiv[index])
-#         yield indiv
+import numpy as np
+from classes import MOCKGenotype
 
 def initCreateSol(n, argsortdists, L):
     # Start with the MST
-    indiv = classes.MOCKGenotype.mst_genotype[:]
+    indiv = MOCKGenotype.mst_genotype[:]
     while True:
         # Need to only choose :n (k-1) from the unfixed set
-        for index in classes.MOCKGenotype.reduced_genotype_indices[:n]:
+        for index in MOCKGenotype.reduced_genotype_indices[:n]:
             # Get value at the gene
             j = indiv[index]
             # Replace the link
-            indiv[index] = classes.MOCKGenotype.replace_link(argsortdists, index, j, L)
+            indiv[index] = MOCKGenotype.replace_link(argsortdists, index, j, L)
         yield indiv
 
-# def initDeltaMOCK(k_user, num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L):
-#     pop = []
-
-#     # Add MST to population
-#     indiv = mst_genotype[:]
-#     pop.append([indiv[i] for i in int_links_indices[:relev_links_len]]) # Add the MST solution
-
-#     # int_links_indices should be the list of indices/nodes where we have unfixed links
-#     k_max = k_user*2
-
-#     # Generate set of k values to use
-#     k_all = list(range(2,k_max+1))
-
-#     # Shuffle this set
-#     k_set = k_all[:]
-#     random.shuffle(k_set)
-#     k_values = []
-
-#     # If we don't have enough k values we need to resample
-#     if len(k_all) < num_indivs-1:
-#         while len(k_values) < num_indivs-1:
-#             try:
-#                 k_values.append(k_set.pop())
-
-#             except IndexError:
-#                 k_set = k_all[:]
-#                 random.shuffle(k_set)
-
-#     # Otherwise just take the number of k values we need from the shuffled set
-#     else:
-#         k_values = k_set[:num_indivs-1] # Minus one due to use of MST genotype
-
-#     assert len(k_values) == num_indivs-1, "Different number of k values to P (pop size)"
-
-#     for k in k_values:
-#         # n = k-1, with n being used in the Garza/Handl paper
-#         indiv = next(initCreateSol(k-1, mst_genotype, int_links_indices, relev_links_len, argsortdists, L))
-#         red_genotype = [indiv[i] for i in int_links_indices[:relev_links_len]]
-#         pop.append(red_genotype)
-#     return pop
-
 def initDeltaMOCK(k_user, num_indivs, argsortdists, L):
+    # Create empty list for population
     pop = []
 
     # Add MST to population
-    indiv = classes.MOCKGenotype.mst_genotype[:]
-    pop.append([indiv[i] for i in classes.MOCKGenotype.reduced_genotype_indices])
-    # pop.append([indiv[i] for i in int_links_indices[:relev_links_len]]) # Add the MST solution
+    indiv = MOCKGenotype.mst_genotype[:]
+    pop.append([indiv[i] for i in MOCKGenotype.reduced_genotype_indices])
 
-    # int_links_indices should be the list of indices/nodes where we have unfixed links
+    # Set k_max to be 2* the k_user
     k_max = k_user*2
 
     # Generate set of k values to use
@@ -112,6 +31,8 @@ def initDeltaMOCK(k_user, num_indivs, argsortdists, L):
     # Shuffle this set
     k_set = k_all[:]
     random.shuffle(k_set)
+
+    # Empty list to hold selected k values
     k_values = []
 
     # If we don't have enough k values we need to resample
@@ -133,16 +54,27 @@ def initDeltaMOCK(k_user, num_indivs, argsortdists, L):
     for k in k_values:
         # n = k-1, with n being used in the Garza/Handl paper
         indiv = next(initCreateSol(k-1, argsortdists, L))
-        red_genotype = [indiv[i] for i in classes.MOCKGenotype.reduced_genotype_indices]
+        red_genotype = [indiv[i] for i in MOCKGenotype.reduced_genotype_indices]
         pop.append(red_genotype)
     return pop
 
-# TO UPDATE AS ABOVE
-# This function is used in the reinitialisation strategies, as we don't want to add the MST back in
-def initDeltaMOCKadapt(k_user, num_indivs, mst_genotype, int_links_indices, relev_links_len, argsortdists, L):
+def initDeltaMOCKadapt(k_user, num_indivs, argsortdists, L):
+    """[summary]
+    
+    Arguments:
+        k_user {[type]} -- [description]
+        num_indivs {[type]} -- [description]
+        argsortdists {[type]} -- [description]
+        L {[type]} -- [description]
+    
+    Returns:
+        [type] -- [description]
+    """
+
+    # Create empty list for population
     pop = []
 
-    # int_links_indices should be the list of indices/nodes where we have unfixed links
+    # Set k_max to be 2* the k_user
     k_max = k_user*2
 
     # Generate set of k values to use
@@ -151,6 +83,8 @@ def initDeltaMOCKadapt(k_user, num_indivs, mst_genotype, int_links_indices, rele
     # Shuffle this set
     k_set = k_all[:]
     random.shuffle(k_set)
+
+    # Empty list to hold selected k values
     k_values = []
 
     # If we don't have enough k values we need to resample
@@ -170,8 +104,8 @@ def initDeltaMOCKadapt(k_user, num_indivs, mst_genotype, int_links_indices, rele
     assert len(k_values) == num_indivs, "Different number of k values to P (pop size)"
 
     for k in k_values:
-        # n = k-1
-        indiv = next(initCreateSol(k-1, mst_genotype, int_links_indices, relev_links_len, argsortdists, L))
-        red_genotype = [indiv[i] for i in int_links_indices[:relev_links_len]]
+        # n = k-1, with n being used in the Garza/Handl paper
+        indiv = next(initCreateSol(k-1, argsortdists, L))
+        red_genotype = [indiv[i] for i in MOCKGenotype.reduced_genotype_indices]
         pop.append(red_genotype)
     return pop

@@ -37,20 +37,14 @@ class PartialClust(object):
     def partClustCNN(base_clusters, data_dict, argsortdists, L):
         conn_array = np.zeros((len(base_clusters),len(base_clusters)))
         # pairs = np.zeros((int(len(base_clusters)*(len(base_clusters)/2)),),dtype=(int,2))
-        print(conn_array.shape)
 
-        # cnn_pair = 0
+        # Initialise variables
         cnn_pair_list = []
-
         max_conn = 0
-
-        # print(len(base_clusters))
-        # print(conn_array.shape)
 
         # Easier (one less nested loop, though same number of items) 
             # than looping through base clusters - though it's equivalent
         for point in data_dict.values():
-            # print(point.id, point.base_cluster_num)
             # Get the L nearest neighbours
             # this matches the C++ code, where they consider the nearest neighbour to be the point itself
             # I've ignored this point, and just looked at the remaining L-1 points
@@ -61,7 +55,6 @@ class PartialClust(object):
 
             # Get the base cluster numbers of the L nearest neighbours
             nn_clust_nums = [data_dict[i].base_cluster_num for i in l_nns]
-            # print(nn_clust_nums)
 
             # Loop over these and check if they're in different clusters
             for index, clust_num in enumerate(nn_clust_nums):
@@ -78,6 +71,7 @@ class PartialClust(object):
                     # we need to add 2 to the denominator to get the same as the C++
                     penalty = 1.0/(index+2.0)
                     
+                    # add the penalty
                     max_conn += penalty
 
                     # Add contribution to relevant place in array
@@ -88,23 +82,19 @@ class PartialClust(object):
                     conn_array[clust_num,curr_number] = conn_array[curr_number,clust_num]
 
         # print(np.sum(conn_array), max_conn)
-        print("Max conn:",max_conn)
+        # print("Max conn:",max_conn)
         return conn_array, max_conn, cnn_pair_list
 
     # @profile
     def partClustVAR(self, data):
-        # Makes the else irrelevant, but may be useful for memory issues
+        # Makes the else irrelevant, but may be useful for memory issues if we tackle that later
         dist_meth = 'scipy'
         
         if dist_meth == 'scipy':
             # Scipy cdist, more precise, speed sometimes worse
             from scipy.spatial.distance import cdist
             centroid = np.mean(data[self.members],axis=0)[np.newaxis,:]
-
-            dists = cdist(data[self.members],centroid,'sqeuclidean') #'euclidean'
-            # u_v = data[self.members].squeeze() - centroid.squeeze()
-            # dists2 = np.dot(u_v,np.transpose(u_v))
-            # print(dists)
+            dists = cdist(data[self.members],centroid,'sqeuclidean')
 
         else:
             # Sklearn metrics.pairwise.euclidean_distance
@@ -117,30 +107,28 @@ class PartialClust(object):
     @classmethod
     def partial_clusts(cls, data, data_dict, argsortdists, L):
         cls.part_clust = {}
-        # print("\n")
-        # print(MOCKGenotype.base_clusters, len(MOCKGenotype.base_clusters))
+
+        # Loop over our components as defined by delta
         for cluster in MOCKGenotype.base_clusters:
-            # print(cluster)
+            # Create instance
             curr_cluster = cls(cluster)
-
+            
+            # Calculate centroid and VAR of component
             curr_cluster.centroid, curr_cluster.intraclust_var = cls.partClustVAR(curr_cluster, data)
-
-            # The two methods below give the same results
-            # print(curr_cluster.intraclust_var)
-            # temp_data = data[cluster]
-            # print(KMeans(n_clusters=1).fit(temp_data).inertia_)
-
+            
+            # Assign id
             cls.part_clust[curr_cluster.id] = curr_cluster
-            # print(cluster, curr_cluster.id)
 
+            # Label each point in this component in the data_dict
             for point in cluster:
                 data_dict[point].base_cluster_num = curr_cluster.id
 
+        # Calculate precomp for CNN objective
         cls.conn_array, cls.max_conn, cls.cnn_pairs = cls.partClustCNN(
             MOCKGenotype.base_clusters, data_dict, argsortdists, L
         )
         
-        # Look into how this is used
+        # Used for speedy VAR calculation
         cls.base_members = np.asarray(
             [obj.num_members for obj in cls.part_clust.values()]
             )[:, None]
@@ -148,46 +136,7 @@ class PartialClust(object):
             [obj.centroid for obj in cls.part_clust.values()]
             ).squeeze()
 
-        cls.id_value = count()            
-
-        # Next step here is probably to create an individual (reduced, unchanged so it is still the MST) and then go through the objective functions to make sure we get the right result
-        # Then try this with a full genotype
-        # Then try this with a changed genotype
-        # Then try with a dataset and compare fitness values
-        # We expect VAR to be different (correct) and CNN to be the same
-
-
-# Not sure if this can even be put as a method (static method?) and if it even should be
-# @profile
-def partialClustering(base_clusters, data, data_dict, argsortdists, L):
-    # partial_clustering = OrderedDict() # Don't think it's needed
-    PartialClust.part_clust = {}
-
-    for cluster in base_clusters:
-        # Create cluster object
-        curr_cluster = PartialClust(cluster)
-        
-        # Calculate centroid and intracluster variance for cluster object
-        curr_cluster.centroid, curr_cluster.intraclust_var = PartialClust.partClustVAR(curr_cluster, data)
-        # print(curr_cluster.intraclust_var,"\n")
-        
-        # Add objective to dictionary, where key is the cluster ID number
-        PartialClust.part_clust[curr_cluster.id] = curr_cluster
-
-        # Assign base cluster number to relevant datapoint object
-        for point in cluster:
-            data_dict[point].base_cluster_num = curr_cluster.id
-
-    # Once all objectives have been created, calculate max_conn score for partial clustering
-    PartialClust.conn_array, PartialClust.max_conn, PartialClust.cnn_pairs = PartialClust.partClustCNN(base_clusters, data_dict, argsortdists, L)
-
-    PartialClust.base_members = np.asarray([obj.num_members for obj in PartialClust.part_clust.values()])[:, None]
-    PartialClust.base_centres = np.asarray([obj.centroid for obj in PartialClust.part_clust.values()]).squeeze()
-
-    print("No. base clusters:", len(PartialClust.part_clust))
-    print("Length cnn pair list:", len(PartialClust.cnn_pairs))
-
-    # return part_clust, cnn_pairs
+        cls.id_value = count()
 
 class Dataset(object):
     # We only ever handle one instance at a time
@@ -283,8 +232,8 @@ class MOCKGenotype(list):
     interest_indices = None # Indices of the most to least interesting links in the MST (formerly int_links_indices)
 
     # Delta value
-    # In the future, can set this as the start
-    # And we redefine individual deltas as attributes if we have varying levels
+    #### In the future, can set this as the start
+    #### And we redefine individual deltas as attributes if we have varying levels
     delta_val = None
 
     # Length of the reduced genotype
@@ -296,8 +245,10 @@ class MOCKGenotype(list):
     # Essentially equal to old int_links_indices[:relev_links_len]
     reduced_genotype_indices = None
 
+    # For easier function evaluation
     reduced_cluster_nums = None
 
+    # Base components
     base_genotype = None
     base_clusters = None
 
@@ -312,14 +263,17 @@ class MOCKGenotype(list):
     def setup_genotype_vars(cls):
         # Calculate the length of the reduced genotype
         cls.calc_red_length()
+
         # Find the indices of the most to least interesting links
         cls.interest_links_indices()
+
         # Store the indices that we need for our reduced genotype
         cls.reduced_genotype_indices = cls.interest_indices[:cls.reduced_length]
-        # print(cls.reduced_genotype_indices)
+
         # Identify the base components
         # i.e. set the most interesting links as specified by delta to be self-connecting so we create the base clusters
         cls.calc_base_genotype()
+
         # Identify these base clusters as the connected components of the defined base genotype
         cls.calc_base_clusters()      
 
@@ -354,6 +308,7 @@ class MOCKGenotype(list):
     
     @classmethod
     def interest_links_indices(cls):
+        # Sort DI values to get the indices of most to least interesting links
         MOCKGenotype.interest_indices = np.argsort(
             -(np.asarray(MOCKGenotype.degree_int)), 
             kind='mergesort').tolist()

@@ -41,8 +41,6 @@ def createMST(distarray):
     # We have one more vertex than edges, so +1
     gen_ig = np.full(len(mst_ig)+1, np.inf)
 
-    # The below is MOSTLY equivalent to a Python version of Mario's code
-    # Differences seem minor
     # The general idea is to loop over every edge in the MST
         # and then fill in our genotype
         # if an edge has already been seen (not np.inf) then we fill in the reverse

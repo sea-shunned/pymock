@@ -5,7 +5,7 @@ import numpy as np
 import precompute, evaluation
 
 # import main_base
-import delta_mock
+# import delta_mock
 
 def loadData():
     basepath = os.getcwd()
@@ -44,7 +44,7 @@ def prepareArgs(file_path, L=10, num_indivs=100, num_gens=100, sr_val=1, delta_r
         classes.Dataset.labels = False
 
     # Remove labels if present and create data_dict
-    data, data_dict = classes.createDatasetGarza(data)
+    data, data_dict = classes.Dataset.createDatasetGarza(data)
 
     # Add square root delta values
     delta = 100-((100*sr_val*np.sqrt(classes.Dataset.num_examples))/classes.Dataset.num_examples)
@@ -211,25 +211,28 @@ def validateResults(
         print(fit_array)
         print(fit_orig)
         raise ValueError("Fitness values not equal")
-    print("Fitness correct!")        
+    print("Fitness correct!")
 
     hv_orig = np.loadtxt(hv_path, delimiter=",")[:, :num_runs]
     if not np.array_equal(hv_array, hv_orig):
         print(hv_array)
         print(hv_orig)
-        raise ValueError("HV values not equal")        
+        raise ValueError("HV values not equal")
     print("Hypervolume correct!")
 
+    if strat_name != "base":
+        trigger_orig = [list(map(int, line.split(","))) for line in open(trigger_path)][:num_runs]
+        if trigger_orig != delta_triggers:
+            print(trigger_orig)
+            print(delta_triggers)
+            raise ValueError("Trigger generations not equal")
+    print("Trigger gens correct!")
     return True 
 
 def main():
     data_files, results_folder = loadData()
 
     # validateResults(results_folder, 'carryon', None, None, None)
-
-    # funcs = [main_base.main]
-    funcs = [delta_mock.runMOCK]
-    # funcs.extend(loadMains())
 
     # base yes
     # carryon yes
@@ -238,8 +241,8 @@ def main():
     # hypermutspec yes
     # reinit yes
 
-    # strat_names = ["base", "carryon"]
-    strat_names = ["reinit"]
+    strat_names = ["base", "carryon"]
+    # strat_names = ["reinit"]
 
     for file_path in data_files:
         # run_all(file_path, [main_carryon.main], results_folder)
@@ -256,7 +259,6 @@ def main():
 
 ############# To Do #############
 # Possible to delete MST/graph stuff once we get the MST genotype? Free some memory?
-# Have a single script that I can use to run MOCK a couple of times with different configs and compare results to ensure that the results I get are the same
 
 if __name__ == '__main__':
     main()

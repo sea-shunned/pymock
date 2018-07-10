@@ -8,6 +8,10 @@
         1
     ],
     "strategies": [
-        "base"
+	"base",
+	"carryon",
+	"reinit",
+	"hypermutall",
+	"hypermutspec"
     ]
 }  
