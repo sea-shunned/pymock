@@ -3,6 +3,14 @@ import numpy as np
 from classes import MOCKGenotype
 
 def initCreateSol(n, argsortdists, L):
+    """Creates a single solution
+    
+    Arguments:
+        n {int} -- Number of top-ranking links to remove
+        argsortdists {np.array} -- Argsorted distance array
+        L {int} -- Neighbourhood hyperparameter
+    """
+
     # Start with the MST
     indiv = MOCKGenotype.mst_genotype[:]
     while True:
@@ -15,6 +23,18 @@ def initCreateSol(n, argsortdists, L):
         yield indiv
 
 def initDeltaMOCK(k_user, num_indivs, argsortdists, L):
+    """Initialisation routine for Delta-MOCK
+    
+    Arguments:
+        k_user {int} -- Rough estimate of the number of clusters
+        num_indivs {int} -- Number of individuals in population
+        argsortdists {np.array} -- Argsorted distance array
+        L {int} -- Neighbourhood hyperparameter
+    
+    Returns:
+        pop {list} -- Initial population
+    """
+
     # Create empty list for population
     pop = []
 
@@ -59,18 +79,6 @@ def initDeltaMOCK(k_user, num_indivs, argsortdists, L):
     return pop
 
 def initDeltaMOCKadapt(k_user, num_indivs, argsortdists, L):
-    """[summary]
-    
-    Arguments:
-        k_user {[type]} -- [description]
-        num_indivs {[type]} -- [description]
-        argsortdists {[type]} -- [description]
-        L {[type]} -- [description]
-    
-    Returns:
-        [type] -- [description]
-    """
-
     # Create empty list for population
     pop = []
 

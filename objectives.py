@@ -4,7 +4,6 @@ from scipy.spatial.distance import cdist
 import igraph
 # from numba import jit
 
-
 def clusterChains(genotype, data_dict, part_clust, reduced_clust_nums):
     # Identify what base clusters the points in the new genotype are in
     new_clust_nums = [data_dict[i].base_cluster_num for i in genotype]

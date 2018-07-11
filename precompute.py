@@ -4,7 +4,6 @@ import scipy.spatial as spt
 from scipy.stats import rankdata
 
 import igraph
-
 # Add a try except for igraph?
 # Shouldn't need this if the setup.py is done properly
 
@@ -56,6 +55,7 @@ def createMST(distarray):
     if np.isinf(gen_ig).any():
         index = np.where(np.isinf(gen_ig))[0][0]
         gen_ig[index] = np.where(gen_ig == index)[0][0]
+        # gen_ig[index] = index
         
     # Cast types to integers
     gen_ig = gen_ig.astype(int)
@@ -71,18 +71,18 @@ def createMST(distarray):
     return gen_ig.tolist()
 
 def normaliseDistArray(distarray):
+    # Doing before hand saves one np.min() call
     max_val = np.max(distarray)
     min_val = np.min(distarray)
     denom = max_val - min_val
 
-    # Inefficient, should vectorise
-    for row, val in enumerate(distarray):
-        distarray[row] = (val - min_val)/denom
+    distarray -= min_val
+    distarray /= denom
     return distarray
 
-def degreeInterest(mst_genotype, L, nn_rankings, distarray):
+def degreeInterest(mst_genotype, nn_rankings, distarray):
     # Calculate the degree of interest for each edge in the MST
-    # This reads pretty much exactly as the formula
+    # This reads pretty much exactly as the formula (distances have been scaled)
     return [min(nn_rankings[i][j],nn_rankings[j][i])+distarray[i][j] for i,j in enumerate(mst_genotype)]
 
 def interestLinksIndices(degree_int):
@@ -117,16 +117,17 @@ def LARfromMST(edgelist, mst):
         indiv_array[edge[0]] = edge[1]
     return indiv_array.tolist()
 
-def decodingLAR(indiv):
-    # This function identifies the connected components of an individual
-    # It is used to identify our starting base clusters or components
-    g = igraph.Graph()
-    g.add_vertices(len(indiv))
-    g.add_edges(zip(range(len(indiv)),indiv))
-    return list(g.components(mode="WEAK"))
-
 def nnRankings(distarray, num_examples):
-    # This function calculates the nearest neighbour ranking between all examples
+    """This function calculates the nearest neighbour ranking between all examples
+    
+    Arguments:
+        distarray {np.array} -- Distance array of data
+        num_examples {int} -- Number of data points
+    
+    Returns:
+        [np.array] -- Nearest neighbour rankings for every data point
+    """
+
     nn_rankings = np.zeros((num_examples,num_examples),dtype=int)
     for i, row in enumerate(distarray):
         nn_rankings[i] = rankdata(row, method='ordinal')-1 # minus 1 so that 0 rank is itself
