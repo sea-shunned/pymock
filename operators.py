@@ -135,7 +135,7 @@ def neighbourFairMutation(parent, MUTPB, gen_length, argsortdists, L, interest_i
 def centres_comp_Mutation(parent, MUTPB, gen_length, argsortdists_cen, L, interest_indices, nn_rankings_cen, data_dict):
     # nutation probs
     first_term = (MUTPB / gen_length)
-    mutprobs = [first_term + ((nn_rankings_cen[interest_indices[index]][value] / gen_length) ** 2) for index,value in enumerate(parent)]
+    mutprobs = [first_term + ((nn_rankings_cen[data_dict[index].base_cluster_num][data_dict[value].base_cluster_num] / gen_length) ** 2) for index,value in enumerate(parent)]
 
     # Now just loop over the probabilities
     # As we're using assignment, can't really do this part in a comprehension!

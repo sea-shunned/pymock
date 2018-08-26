@@ -5,13 +5,9 @@
     "L": 10,
     "DELTA_REDUCE": 1,
     "sr_vals": [
-        1
+        5
     ],
     "strategies": [
-	"base",
-	"carryon",
-	"reinit",
-	"hypermutall",
-	"hypermutspec"
+	"base"
     ]
 }  
