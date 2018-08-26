@@ -1,3 +1,4 @@
+ 
 # Standard libraries
 import os
 import glob
@@ -18,7 +19,7 @@ import objectives
 import delta_mock
 from tests import validateResults
 
-def load_data(use_real_data=False, synth_data_subset="*", real_data_subset="*", exp_name=""):
+def load_data(use_real_data=False, synth_data_subset="*", real_data_subset="*", exp_name="t1"):
     """Get the file paths for all the data we're using
     
     Keyword Arguments:
@@ -89,6 +90,10 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
     Dataset.num_examples = head[0] # Num examples
     Dataset.num_features = head[1] # Num features/dimensions
     Dataset.k_user = head[3] # Num real clusters
+    
+    print("Dataset num examples:", Dataset.num_examples)
+    print("Dataset num features/dimensions:", Dataset.num_features)
+    print("Dataset real clusters", Dataset.k_user)
 
     # Do we have labels?
     if head[2] == 1:
@@ -97,13 +102,14 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
         Dataset.labels = False
 
     # Remove labels if present and create data_dict
-    data, data_dict = Dataset.createDatasetGarza(data)    
+    data, data_dict = Dataset.createDatasetGarza(data)   
 
     # Go through the precomputation specific to the dataset
     # Calculate distance array
     distarray = precompute.compDists(data, data)
     distarray = precompute.normaliseDistArray(distarray)
     argsortdists = np.argsort(distarray, kind='mergesort')
+
     
     # Calculate nearest neighbour rankings
     nn_rankings = precompute.nnRankings(distarray, Dataset.num_examples)
@@ -138,6 +144,11 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
         "reduced_clust_nums": None
         # "seed_num": None
     }
+    #kwargs['L'] = Dataset.num_examples
+    kwargs['L'] = 5
+    #kwargs['L']=int(np.sqrt(Dataset.num_examples))
+    #kwargs['L']=int(Dataset.num_examples/2)
+    
     return kwargs
 
 
@@ -223,11 +234,12 @@ def calc_hv_ref(kwargs):
     PartialClust.max_var= PartialClust.max_var/Dataset.num_examples
 
     # Set reference point just outside max values to ensure no overlap
-    hv_ref = [
+    hv_ref_cal = [
         PartialClust.max_var*1.01,
         PartialClust.max_conn*1.01
     ]
-
+    hv_ref=[5,60000]
+    print("HV ref calculated:", hv_ref_cal)
     print("HV ref:", hv_ref)
 
     return hv_ref
@@ -235,7 +247,7 @@ def calc_hv_ref(kwargs):
 def run_mock(validate=False, save_results=False):
     # Load the data file paths
     data_file_paths, results_folder = load_data(
-        synth_data_subset="tevc_20_60_9*")
+        synth_data_subset="tevc_20_10_9*", exp_name='t1')
 
     # Load general MOCK parameyers
     params = load_config(config_path="mock_config.json")
@@ -272,8 +284,12 @@ def run_mock(validate=False, save_results=False):
     # Loop through the data to test
     for file_path in data_file_paths:
         print(f"Beginning precomputation for {file_path.split(os.sep)[-1]}")
+        
         kwargs = prepare_data(file_path, params['L'], params['NUM_INDIVS'], params['NUM_GENS'])
         print("Precomputation complete")
+        
+        print('L=', kwargs['L'])
+        #kwargs['L'] = Dataset.num_examples
 
         # Loop through the sr (square root) values
         for sr_val in sr_vals:
@@ -314,6 +330,32 @@ def run_mock(validate=False, save_results=False):
                 time_array = np.empty(params['NUM_RUNS'])
                 delta_triggers = []
 
+                print('====================')
+                #get the distance between the components
+                distarray_cen = precompute.compDists(PartialClust.base_centres, PartialClust.base_centres)
+                print('distarray_cen')
+                print(distarray_cen)
+                print('====================')
+                #get the id of sorted components
+                argsortdists_cen = np.argsort(distarray_cen, kind='mergesort')
+                print('sort id')
+                print(argsortdists_cen)
+                print('===================')
+                
+                nn_rankings_cen= precompute.nnRankings_cen(distarray_cen, len(PartialClust.part_clust))
+                print('nn_rankings of components')
+                print(nn_rankings_cen)
+                print('=========================')
+                
+                # data = np.genfromtxt(file_path, delimiter="\t", skip_header=4)
+                # data, data_dict = Dataset.createDatasetGarza(data)
+                print('length of data_dict')
+                print(len(kwargs['data_dict']))
+                print('==========================')
+                
+                kwargs['argsortdists_cen'] = argsortdists_cen
+                kwargs['nn_rankings_cen'] = nn_rankings_cen
+                
                 mock_func = partial(delta_mock.runMOCK, *list(kwargs.values()))
 
                 print(f"{strat_name} starting...")
@@ -352,6 +394,13 @@ def run_mock(validate=False, save_results=False):
 
                 print(f"{strat_name} complete!")
 
+                
+                
+                
+                
+                
+                
+                
                 if validate:
                     print("---------------------------")
                     print("Validating results...")
@@ -373,7 +422,7 @@ def run_mock(validate=False, save_results=False):
 
                 if save_results:
                     fname_prefix = "-".join(
-                        [results_folder+classes.Dataset.data_name, strat_name])
+                        [results_folder+Dataset.data_name, strat_name])
                     print(fname_prefix)
                     
                     if kwargs['adapt_delta']:
@@ -411,4 +460,4 @@ def run_mock(validate=False, save_results=False):
                             writer.writerows(delta_triggers)
 
 if __name__ == '__main__':
-    run_mock(validate=True)
+    run_mock(validate=False, save_results=True)

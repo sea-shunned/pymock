@@ -18,7 +18,8 @@ creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
 creator.create("Individual", list, fitness=creator.Fitness, fairmut=None)
 
 # Consider trying to integrate the use of **kwargs here
-def create_base_toolbox(num_indivs, argsortdists, L, data_dict, nn_rankings):
+def create_base_toolbox(num_indivs, argsortdists, L, data_dict, nn_rankings,
+        argsortdists_cen, nn_rankings_cen):
     """
     Create the toolbox object used by the DEAP package, and register our relevant functions
     """
@@ -66,13 +67,14 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict, nn_rankings):
 
     # Register the mutation function
     toolbox.register(
-        "mutate", operators.neighbourMutation, 
+        "mutate", operators.centres_comp_Mutation, 
         MUTPB = 1.0, 
         gen_length = MOCKGenotype.reduced_length, 
-        argsortdists = argsortdists, 
+        argsortdists_cen = argsortdists_cen, 
         L = L, 
         interest_indices = MOCKGenotype.interest_indices, 
-        nn_rankings = nn_rankings
+        nn_rankings_cen = nn_rankings_cen,
+        data_dict = data_dict
         )
     
     # Register the selection function (built-in with DEAP for NSGA2)
@@ -388,7 +390,7 @@ def select_generation_strategy(
 def runMOCK(
     data, data_dict, delta_val, hv_ref, argsortdists, 
     nn_rankings, mst_genotype, interest_indices, L, 
-    num_indivs, num_gens, delta_reduce, strat_name, adapt_delta, reduced_length, reduced_clust_nums, seed_num
+    num_indivs, num_gens, delta_reduce, strat_name, adapt_delta, reduced_length, reduced_clust_nums, argsortdists_cen, nn_rankings_cen, seed_num
     ):
     """
     Run MOCK with specified inputs
@@ -436,7 +438,9 @@ def runMOCK(
 
     # Create the DEAP toolbox
     toolbox = create_base_toolbox(
-        num_indivs, argsortdists, L, data_dict, nn_rankings)
+        num_indivs, argsortdists, L, data_dict, nn_rankings, argsortdists_cen, nn_rankings_cen)
+
+    print(MOCKGenotype.mst_genotype)
 
     # Create the initial population
     pop, hv, VAR_init, CNN_init = initial_setup(toolbox, hv, hv_ref)

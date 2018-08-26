@@ -80,7 +80,7 @@ def neighbourMutation(parent, MUTPB, gen_length, argsortdists, L, interest_indic
     for index, mutprob in enumerate(mutprobs):
         if random.random() < mutprob:
             parent[index] = MOCKGenotype.replace_link(argsortdists, interest_indices[index], parent[index], L)
-
+            
     return parent
 
 def neighbourHyperMutation_all(parent, MUTPB, gen_length, argsortdists, L, interest_indices, nn_rankings, hyper_mut):
@@ -129,4 +129,18 @@ def neighbourFairMutation(parent, MUTPB, gen_length, argsortdists, L, interest_i
         if random.random() < mutprob:
             parent[index] = MOCKGenotype.replace_link(argsortdists, interest_indices[index], parent[index], L)
 
+    return parent
+
+'''new mutations'''
+def centres_comp_Mutation(parent, MUTPB, gen_length, argsortdists_cen, L, interest_indices, nn_rankings_cen, data_dict):
+    # nutation probs
+    first_term = (MUTPB / gen_length)
+    mutprobs = [first_term + ((nn_rankings_cen[interest_indices[index]][value] / gen_length) ** 2) for index,value in enumerate(parent)]
+
+    # Now just loop over the probabilities
+    # As we're using assignment, can't really do this part in a comprehension!
+    for index, mutprob in enumerate(mutprobs):
+        if random.random() < mutprob:
+            parent[index] = MOCKGenotype.new_replace_link(argsortdists_cen, interest_indices[index], parent[index], L, data_dict)
+            
     return parent

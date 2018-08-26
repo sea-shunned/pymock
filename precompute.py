@@ -3,6 +3,7 @@ import numpy as np
 import scipy.spatial as spt
 from scipy.stats import rankdata
 
+
 import igraph
 # Add a try except for igraph?
 # Shouldn't need this if the setup.py is done properly
@@ -132,3 +133,9 @@ def nnRankings(distarray, num_examples):
     for i, row in enumerate(distarray):
         nn_rankings[i] = rankdata(row, method='ordinal')-1 # minus 1 so that 0 rank is itself
     return nn_rankings
+
+def nnRankings_cen(distarray_cen, num_comp):
+    nn_rankings_cen = np.zeros((num_comp, num_comp), dtype = int)
+    for i, row in enumerate(distarray_cen):
+        nn_rankings_cen[i] = rankdata(row, method = 'ordinal')-1
+    return nn_rankings_cen

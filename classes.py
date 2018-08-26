@@ -4,6 +4,7 @@ import igraph
 from sklearn.cluster import KMeans
 from itertools import count
 import random
+import precompute
 # import objectives
 # from collections import OrderedDict
 
@@ -135,7 +136,27 @@ class PartialClust(object):
         cls.base_centres = np.asarray(
             [obj.centroid for obj in cls.part_clust.values()]
             ).squeeze()
-
+        #print('===================')
+        #print(cls.base_members)
+        #print(np.shape(cls.base_members))
+        #print('===================')
+        '''
+        #get the distances between components
+        cls.distarray_cen = precompute.compDists(cls.base_centres, \
+                                                     cls.base_centres)
+        print('dist array of components')
+        print(cls.distarray_cen)
+        
+        #get the ID of sorted components based on distances
+        cls.argsortdists_cen = np.argsort(cls.distarray_cen, kind='mergesort')
+        
+        print('sorted components id')
+        print(cls.argsortdists_cen)
+        
+        #print(np.shape(PartialClust.base_centres))
+        print('num of components')
+        print(len(cls.part_clust))
+        '''
         cls.id_value = count()
 
 class Dataset(object):
@@ -384,3 +405,17 @@ class MOCKGenotype(list):
     # Could we actually implement some of the functionality we want from this class into the existing dataset class?
     # Each datapoint is a node on the graph, after all, so we can just give it a value (what it points to in the MST)
     # And then we can track whether it is fixed or not - or more importantly, if it needs fair mutation
+    
+    @staticmethod
+    def new_replace_link(argsortdists_cen, i, j, L, data_dict):
+        #the component id of the datapoint
+        point_comp = data_dict[i].base_cluster_num
+        
+        while True:
+            #random choose 1 from the nearest 5 components except itself
+            k = random.choice(argsortdists_cen[point_comp][1:L+2])
+            new_j = random.choice(PartialClust.part_clust[k].members)
+            if new_j != j:
+                break
+        return new_j
+    
