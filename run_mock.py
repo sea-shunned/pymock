@@ -7,7 +7,6 @@ import random
 import time
 import csv
 from functools import partial
-from itertools import count
 import multiprocessing
 import numpy as np
 
@@ -17,9 +16,10 @@ import precompute
 import evaluation
 import objectives
 import delta_mock
+import utils
 from tests import validateResults
 
-def load_data(use_real_data=False, synth_data_subset="*", real_data_subset="*", exp_name="t1"):
+def load_data(use_real_data=False, synth_data_subset="*", real_data_subset="*", exp_name=""):
     """Get the file paths for all the data we're using
     
     Keyword Arguments:
@@ -91,9 +91,9 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
     Dataset.num_features = head[1] # Num features/dimensions
     Dataset.k_user = head[3] # Num real clusters
     
-    print("Dataset num examples:", Dataset.num_examples)
-    print("Dataset num features/dimensions:", Dataset.num_features)
-    print("Dataset real clusters", Dataset.k_user)
+    print("Num examples:", Dataset.num_examples)
+    print("Num features:", Dataset.num_features)
+    print("Num (actual) clusters:", Dataset.k_user)
 
     # Do we have labels?
     if head[2] == 1:
@@ -144,11 +144,6 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
         "reduced_clust_nums": None
         # "seed_num": None
     }
-    #kwargs['L'] = Dataset.num_examples
-    kwargs['L'] = 5
-    #kwargs['L']=int(np.sqrt(Dataset.num_examples))
-    #kwargs['L']=int(Dataset.num_examples/2)
-    
     return kwargs
 
 
@@ -234,20 +229,21 @@ def calc_hv_ref(kwargs):
     PartialClust.max_var= PartialClust.max_var/Dataset.num_examples
 
     # Set reference point just outside max values to ensure no overlap
-    hv_ref_cal = [
+    hv_ref = [
         PartialClust.max_var*1.01,
         PartialClust.max_conn*1.01
     ]
-    hv_ref=[5,60000]
-    print("HV ref calculated:", hv_ref_cal)
-    print("HV ref:", hv_ref)
-
     return hv_ref
 
-def run_mock(validate=False, save_results=False):
+def run_mock(**cl_args):
     # Load the data file paths
-    data_file_paths, results_folder = load_data(
-        synth_data_subset="tevc_20_10_9*", exp_name='t1')
+    if cl_args['validate']:
+        data_file_paths, results_folder = load_data(
+            synth_data_subset="tevc_20_60_9*")
+    else:
+        data_file_paths, results_folder = load_data(
+            synth_data_subset=cl_args['synthdata'],
+            exp_name=cl_args['exp_name'])
 
     # Load general MOCK parameyers
     params = load_config(config_path="mock_config.json")
@@ -261,8 +257,10 @@ def run_mock(validate=False, save_results=False):
     fitness_cols = ["VAR", "CNN", "Run"]
 
     # Create the seed list or load existing one
-    if validate:
+    if cl_args['validate']:
         seed_list = create_seeds(params['NUM_RUNS'], seed_file="seed_list_validate.json")
+
+        sr_vals = [1]
     else:
         seed_list = create_seeds(params['NUM_RUNS'])
 
@@ -283,13 +281,10 @@ def run_mock(validate=False, save_results=False):
 
     # Loop through the data to test
     for file_path in data_file_paths:
-        print(f"Beginning precomputation for {file_path.split(os.sep)[-1]}")
+        print(f"Beginning precomputation for {file_path.split(os.sep)[-1]}...")
         
         kwargs = prepare_data(file_path, params['L'], params['NUM_INDIVS'], params['NUM_GENS'])
-        print("Precomputation complete")
-        
-        print('L=', kwargs['L'])
-        #kwargs['L'] = Dataset.num_examples
+        print("Precomputation complete!")
 
         # Loop through the sr (square root) values
         for sr_val in sr_vals:
@@ -308,12 +303,13 @@ def run_mock(validate=False, save_results=False):
             # Set the nadir point if first run
             if kwargs['hv_ref'] is None:
                 # To ensure compatible results
-                if validate:
+                if cl_args['validate']:
                     kwargs['hv_ref'] = [3.0, 1469.0]
                 else:
                     kwargs['hv_ref'] = calc_hv_ref(kwargs)
 
-            calc_hv_ref(kwargs)
+            # calc_hv_ref(kwargs)
+            print(f"HV ref point: {kwargs['hv_ref']}")
             
             # Loop through the strategies
             for strat_name in params['strategies']:
@@ -330,31 +326,12 @@ def run_mock(validate=False, save_results=False):
                 time_array = np.empty(params['NUM_RUNS'])
                 delta_triggers = []
 
-                print('====================')
-                #get the distance between the components
+                # Abstract the below to a precompute func
+                # Can then choose which based on the mutation method
                 distarray_cen = precompute.compDists(PartialClust.base_centres, PartialClust.base_centres)
-                print('distarray_cen')
-                print(distarray_cen)
-                print('====================')
-                #get the id of sorted components
-                argsortdists_cen = np.argsort(distarray_cen, kind='mergesort')
-                print('sort id')
-                print(argsortdists_cen)
-                print('===================')
                 
-                nn_rankings_cen= precompute.nnRankings_cen(distarray_cen, len(PartialClust.part_clust))
-                print('nn_rankings of components')
-                print(nn_rankings_cen)
-                print('=========================')
-                
-                # data = np.genfromtxt(file_path, delimiter="\t", skip_header=4)
-                # data, data_dict = Dataset.createDatasetGarza(data)
-                print('length of data_dict')
-                print(len(kwargs['data_dict']))
-                print('==========================')
-                
-                kwargs['argsortdists_cen'] = argsortdists_cen
-                kwargs['nn_rankings_cen'] = nn_rankings_cen
+                kwargs['argsortdists_cen'] = np.argsort(distarray_cen, kind='mergesort')
+                kwargs['nn_rankings_cen'] = precompute.nnRankings_cen(distarray_cen, len(PartialClust.part_clust))
                 
                 mock_func = partial(delta_mock.runMOCK, *list(kwargs.values()))
 
@@ -394,14 +371,7 @@ def run_mock(validate=False, save_results=False):
 
                 print(f"{strat_name} complete!")
 
-                
-                
-                
-                
-                
-                
-                
-                if validate:
+                if cl_args['validate']:
                     print("---------------------------")
                     print("Validating results...")
                     valid = validateResults(
@@ -420,7 +390,7 @@ def run_mock(validate=False, save_results=False):
                     else:
                         print(f"{strat_name} validated!\n")
 
-                if save_results:
+                if cl_args['exp_name'] != "":
                     fname_prefix = "-".join(
                         [results_folder+Dataset.data_name, strat_name])
                     print(fname_prefix)
@@ -460,4 +430,23 @@ def run_mock(validate=False, save_results=False):
                             writer.writerows(delta_triggers)
 
 if __name__ == '__main__':
-    run_mock(validate=False, save_results=True)
+    parser = utils.build_parser()
+    cl_args = parser.parse_args()
+    cl_args = vars(cl_args)
+    print(cl_args)
+    utils.check_cl_args(cl_args)
+
+    run_mock(**cl_args)
+
+    ######## TO DO ########
+    # validate and data subsets are mutually exclusive
+    # validate and -exp_name are mutually exclusive
+        # may need to use if statements
+    # add hook for crossover
+    # add hook for mut_method
+    # try to clean up arguments generally
+    # set up centroid mutation and check it works
+    # then look at neighbour component mutation
+    # look at how results are saved and named
+    # then look at generating graphs
+    # send to servers and run
