@@ -143,8 +143,17 @@ def comp_centroid_mut(parent, MUTPB, gen_length, argsortdists_cen, L, interest_i
     # As we're using assignment, can't really do this part in a comprehension!
     for index, mutprob in enumerate(mutprobs):
         if random.random() < mutprob:
-            parent[index] = MOCKGenotype.new_replace_link(argsortdists_cen, interest_indices[index], parent[index], L, data_dict)
+            parent[index] = MOCKGenotype.centroid_replace_link(argsortdists_cen, interest_indices[index], parent[index], L, data_dict)
     return parent
 
-def neighbour_comp_mut(parent, MUTPB, gen_length, argsortdists, L, interest_indices, nn_rankings_neigh, data_dict):
-    pass
+def neighbour_comp_mut(parent, MUTPB, gen_length, L, interest_indices, nn_rankings, component_nns, data_dict):
+    first_term = (MUTPB / gen_length)
+
+    mutprobs = [first_term + ((nn_rankings[interest_indices[index]][value] / gen_length) ** 2) for index,value in enumerate(parent)]
+
+    for index, mutprob in enumerate(mutprobs):
+        if random.random() < mutprob:
+            parent[index] = MOCKGenotype.neighbour_replace_link(
+                component_nns, interest_indices[index], parent[index], L, data_dict)
+    
+    return parent

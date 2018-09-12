@@ -18,8 +18,8 @@ creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
 creator.create("Individual", list, fitness=creator.Fitness, fairmut=None)
 
 # Consider trying to integrate the use of **kwargs here
-def create_base_toolbox(num_indivs, argsortdists, L, data_dict, nn_rankings,
-        argsortdists_cen, nn_rankings_cen, nn_rankings_neigh, mut_method="original"):
+def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
+                        nn_rankings, mut_meth_params):
     """
     Create the toolbox object used by the DEAP package, and register our relevant functions
     """
@@ -66,7 +66,7 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict, nn_rankings,
     )
 
     # Register the mutation function
-    if mut_method == "original":
+    if mut_meth_params['mut_method'] == "original":
         toolbox.register(
             "mutate", operators.neighbourMutation, 
             MUTPB = 1.0, 
@@ -77,32 +77,29 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict, nn_rankings,
             nn_rankings = nn_rankings
         )
 
-    elif mut_method == "centroid":
+    elif mut_meth_params['mut_method'] == "centroid":
         toolbox.register(
             "mutate", operators.comp_centroid_mut, 
             MUTPB = 1.0, 
             gen_length = MOCKGenotype.reduced_length, 
-            argsortdists_cen = argsortdists_cen, 
+            argsortdists_cen = mut_meth_params['argsortdists_cen'], 
             L = L, 
             interest_indices = MOCKGenotype.interest_indices, 
-            nn_rankings_cen = nn_rankings_cen,
+            nn_rankings_cen = mut_meth_params['nn_rankings_cen'],
             data_dict = data_dict
         )
     
-    elif mut_method == "neighbour":
+    elif mut_meth_params['mut_method'] == "neighbour":
         toolbox.register(
             "mutate", operators.neighbour_comp_mut,
             MUTPB = 1.0, 
             gen_length = MOCKGenotype.reduced_length, 
-            argsortdists = argsortdists, 
             L = L, 
-            interest_indices = MOCKGenotype.interest_indices, 
-            nn_rankings_neigh = nn_rankings_neigh,
+            interest_indices = MOCKGenotype.interest_indices,
+            nn_rankings = nn_rankings,
+            component_nns = mut_meth_params['component_nns'],
             data_dict = data_dict
         )
-
-    else:
-        raise ValueError(f"Mutation method '{mut_method}' is not defined!")
     
     # Register the selection function (built-in with DEAP for NSGA2)
     toolbox.register(
@@ -416,7 +413,7 @@ def select_generation_strategy(
 def runMOCK(
     data, data_dict, delta_val, hv_ref, argsortdists, 
     nn_rankings, mst_genotype, interest_indices, L, 
-    num_indivs, num_gens, delta_reduce, strat_name, adapt_delta, reduced_length, reduced_clust_nums, argsortdists_cen, nn_rankings_cen, seed_num
+    num_indivs, num_gens, delta_reduce, strat_name, adapt_delta, reduced_length, reduced_clust_nums, mut_meth_params, seed_num
     ):
     """
     Run MOCK with specified inputs
@@ -462,9 +459,11 @@ def runMOCK(
         delta_reduce = 1 # Amount to reduce delta by
         ref_grad = None # Reference gradient for hv trigger
 
+    # print(mut_meth_params)
+
     # Create the DEAP toolbox
     toolbox = create_base_toolbox(
-        num_indivs, argsortdists, L, data_dict, nn_rankings, argsortdists_cen, nn_rankings_cen, None)
+        num_indivs, argsortdists, L, data_dict, nn_rankings, mut_meth_params)
 
     # Create the initial population
     pop, hv, VAR_init, CNN_init = initial_setup(toolbox, hv, hv_ref)

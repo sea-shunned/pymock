@@ -50,7 +50,8 @@ def build_parser():
         '-m', '--mut_method',
         help='specify which mutation method to use',
         type=str,
-        default="original"
+        default="original",
+        choices=["original", "centroid", "neighbour"]
     )
     return parser
 
@@ -58,5 +59,7 @@ def check_cl_args(cl_args):
     if cl_args['validate'] and cl_args['exp_name']:
         raise ValueError("Cannot set validate and an experiment name")
 
+    # This fails if user specifically gives default value
+    # It's fine
     if cl_args['validate'] and cl_args['synthdata'] != "*":
         raise ValueError("Validate uses only 1 dataset to check consistency")

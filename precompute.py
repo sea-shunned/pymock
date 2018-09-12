@@ -133,41 +133,29 @@ def nnRankings(distarray, num_examples):
         nn_rankings[i] = rankdata(row, method='ordinal')-1 # minus 1 so that 0 rank is itself
     return nn_rankings
 
-def nnRankings_cen(distarray_cen, num_comp):
-    nn_rankings_cen = np.zeros((num_comp, num_comp), dtype = int)
-    for i, row in enumerate(distarray_cen):
-        nn_rankings_cen[i] = rankdata(row, method = 'ordinal')-1
-    return nn_rankings_cen
-
-
-def nn_comps(argsortdists, data_dict, L):
-    component_nns = np.zeros((len(PartialClust.part_clust), L+1), dtype=int)
+def nn_comps(num_examples, argsortdists, data_dict, L):
+    component_nns = np.zeros((num_examples, L+1), dtype=int)
 
     for i, row_vals in enumerate(argsortdists):
         # Get the component ID of the row that we're in, so we know what to ignore
         start_comp_id = data_dict[i].base_cluster_num
-        
-        # Trck what components have been seen
+        # Track what components have been seen
         comps_seen = set()
         comps_seen.add(start_comp_id)
-
         # Start with the point itself for self-connecting link
         nearest_l_ids = [i]
-
         # Loop over values in the row
         for j, val in enumerate(row_vals):
             # Make local ref to the comp ID of current value
             curr_comp = data_dict[val].base_cluster_num
-
             # Check if component is both different and one we haven't seen
             if curr_comp != start_comp_id and curr_comp not in comps_seen:
                 comps_seen.add(curr_comp)
-                nearest_l_ids.append(val)
-            
+                nearest_l_ids.append(val)          
             # Break the loop when we have enough values
             if len(nearest_l_ids) == L+1:
                 break
-
         # Add values to the array
+        # print(i)
         component_nns[i,:] = nearest_l_ids
     return component_nns

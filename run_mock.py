@@ -141,8 +141,8 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
         "strat_name": None,
         "adapt_delta": None,
         "reduced_length": None,
-        "reduced_clust_nums": None
-        # "seed_num": None
+        "reduced_clust_nums": None,
+        "mut_meth_params": None
     }
     return kwargs
 
@@ -308,6 +308,27 @@ def run_mock(**cl_args):
                 else:
                     kwargs['hv_ref'] = calc_hv_ref(kwargs)
 
+            if cl_args['mut_method'] == "centroid":
+                distarray_cen = precompute.compDists(
+                    PartialClust.base_centres, PartialClust.base_centres)
+                kwargs['mut_meth_params'] = {
+                    'mut_method': "centroid",
+                    'argsortdists_cen': np.argsort(
+                        distarray_cen, kind='mergesort'),
+                    'nn_rankings_cen': precompute.nnRankings(
+                        distarray_cen, len(PartialClust.part_clust))
+                }                
+            elif cl_args['mut_method'] == "neighbour":
+                kwargs['mut_meth_params'] = {
+                    'mut_method': "neighbour",
+                    'component_nns': precompute.nn_comps(
+                        Dataset.num_examples, kwargs['argsortdists'],kwargs['data_dict'], kwargs['L'])
+                }
+            else:
+                kwargs['mut_meth_params'] = {
+                    'mut_method': "original"
+                }
+            # print(kwargs['mut_meth_params'])
             # calc_hv_ref(kwargs)
             print(f"HV ref point: {kwargs['hv_ref']}")
             
@@ -328,10 +349,10 @@ def run_mock(**cl_args):
 
                 # Abstract the below to a precompute func
                 # Can then choose which based on the mutation method
-                distarray_cen = precompute.compDists(PartialClust.base_centres, PartialClust.base_centres)
-                
-                kwargs['argsortdists_cen'] = np.argsort(distarray_cen, kind='mergesort')
-                kwargs['nn_rankings_cen'] = precompute.nnRankings_cen(distarray_cen, len(PartialClust.part_clust))
+                                
+
+                # kwargs['argsortdists_cen'] = np.argsort(distarray_cen, kind='mergesort')
+                # kwargs['nn_rankings_cen'] = precompute.nnRankings_cen(distarray_cen, len(PartialClust.part_clust))
                 
                 mock_func = partial(delta_mock.runMOCK, *list(kwargs.values()))
 
@@ -433,15 +454,12 @@ if __name__ == '__main__':
     parser = utils.build_parser()
     cl_args = parser.parse_args()
     cl_args = vars(cl_args)
-    print(cl_args)
     utils.check_cl_args(cl_args)
 
     run_mock(**cl_args)
 
     ######## TO DO ########
-    # validate and data subsets are mutually exclusive
-    # validate and -exp_name are mutually exclusive
-        # may need to use if statements
+    # Look at utils parser and line-up with config file
     # add hook for crossover
     # add hook for mut_method
     # try to clean up arguments generally
