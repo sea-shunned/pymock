@@ -145,7 +145,7 @@ def nn_comps(num_examples, argsortdists, data_dict, L):
         # Start with the point itself for self-connecting link
         nearest_l_ids = [i]
         # Loop over values in the row
-        for j, val in enumerate(row_vals):
+        for val in row_vals:
             # Make local ref to the comp ID of current value
             curr_comp = data_dict[val].base_cluster_num
             # Check if component is both different and one we haven't seen
@@ -156,6 +156,5 @@ def nn_comps(num_examples, argsortdists, data_dict, L):
             if len(nearest_l_ids) == L+1:
                 break
         # Add values to the array
-        # print(i)
         component_nns[i,:] = nearest_l_ids
     return component_nns

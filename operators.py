@@ -53,7 +53,7 @@ def uniformCrossover(parent1, parent2, cxpb):
     return parent1, parent2
 
 # @profile
-def neighbourMutation(parent, MUTPB, gen_length, argsortdists, L, interest_indices, nn_rankings):
+def neighbour_mut(parent, MUTPB, gen_length, argsortdists, L, interest_indices, nn_rankings):
     """Neighbourhood-biased mutation operator
     
     Arguments:
@@ -155,5 +155,4 @@ def neighbour_comp_mut(parent, MUTPB, gen_length, L, interest_indices, nn_rankin
         if random.random() < mutprob:
             parent[index] = MOCKGenotype.neighbour_replace_link(
                 component_nns, interest_indices[index], parent[index], L, data_dict)
-    
     return parent

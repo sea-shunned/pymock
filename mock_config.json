@@ -1,8 +1,4 @@
 {
-	"NUM_INDIVS": 100,
-    "NUM_GENS": 100,
-    "NUM_RUNS": 3,
-    "L": 10,
     "DELTA_REDUCE": 1,
     "sr_vals": [
         5

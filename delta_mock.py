@@ -47,10 +47,10 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
     toolbox.register(
         "evaluate", 
         objectives.evalMOCK, 
-        part_clust = PartialClust.part_clust,
+        comp_dict = PartialClust.comp_dict,
         reduced_clust_nums = MOCKGenotype.reduced_cluster_nums, 
-        conn_array = PartialClust.conn_array, 
-        max_conn = PartialClust.max_conn, 
+        cnn_array = PartialClust.cnn_array, 
+        max_cnn = PartialClust.max_cnn, 
         num_examples = Dataset.num_examples, 
         data_dict = data_dict, 
         cnn_pairs = PartialClust.cnn_pairs, 
@@ -68,7 +68,7 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
     # Register the mutation function
     if mut_meth_params['mut_method'] == "original":
         toolbox.register(
-            "mutate", operators.neighbourMutation, 
+            "mutate", operators.neighbour_mut, 
             MUTPB = 1.0, 
             gen_length = MOCKGenotype.reduced_length, 
             argsortdists = argsortdists, 
@@ -81,7 +81,7 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
         toolbox.register(
             "mutate", operators.comp_centroid_mut, 
             MUTPB = 1.0, 
-            gen_length = MOCKGenotype.reduced_length, 
+            # gen_length = MOCKGenotype.reduced_length, 
             argsortdists_cen = mut_meth_params['argsortdists_cen'], 
             L = L, 
             interest_indices = MOCKGenotype.interest_indices, 
@@ -277,10 +277,10 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
     toolbox.register(
         "evaluate", 
         objectives.evalMOCK, 
-        part_clust = PartialClust.part_clust, 
+        comp_dict = PartialClust.comp_dict, 
         reduced_clust_nums = MOCKGenotype.reduced_cluster_nums, 
-        conn_array = PartialClust.conn_array, 
-        max_conn = PartialClust.max_conn, 
+        cnn_array = PartialClust.cnn_array, 
+        max_cnn = PartialClust.max_cnn, 
         num_examples = Dataset.num_examples, 
         data_dict = data_dict, 
         cnn_pairs = PartialClust.cnn_pairs, 
@@ -346,7 +346,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
         toolbox.register("population", tools.initIterate, list, toolbox.initDelta)
         
         toolbox.register(
-            "mutate", operators.neighbourMutation, 
+            "mutate", operators.neighbour_mut, 
             MUTPB = 1.0, 
             gen_length = MOCKGenotype.reduced_length, 
             argsortdists = argsortdists, 
@@ -357,7 +357,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
 
     else:
         toolbox.register(
-            "mutate", operators.neighbourMutation, 
+            "mutate", operators.neighbour_mut, 
             MUTPB = 1.0, 
             gen_length = MOCKGenotype.reduced_length, 
             argsortdists = argsortdists, 
@@ -395,7 +395,7 @@ def select_generation_strategy(
             if adapt_gens[-1] == gen-1 and gen != 1:
                 toolbox.unregister("mutate")
                 toolbox.register(
-                    "mutate", operators.neighbourMutation, 
+                    "mutate", operators.neighbour_mut, 
                     MUTPB = 1.0, 
                     gen_length = MOCKGenotype.reduced_length, 
                     argsortdists = argsortdists, 
@@ -472,8 +472,8 @@ def runMOCK(
     # check_hv_violation(pop, hv_ref)
 
     # # Check that the hv_ref reference point is valid
-    # if PartialClust.max_conn >= hv_ref[1]:
-    #     raise ValueError(f"Max CNN value ({PartialClust.max_conn}) has exceeded that set for hv reference point ({hv_ref[1]}); hv values may be unreliable")
+    # if PartialClust.max_cnn >= hv_ref[1]:
+    #     raise ValueError(f"Max CNN value ({PartialClust.max_cnn}) has exceeded that set for hv reference point ({hv_ref[1]}); hv values may be unreliable")
 
     # Go through each generation
     for gen in range(1, num_gens):

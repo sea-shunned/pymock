@@ -17,7 +17,7 @@ import evaluation
 import objectives
 import delta_mock
 import utils
-from tests import validateResults
+from tests import validate_results
 
 def load_data(use_real_data=False, synth_data_subset="*", real_data_subset="*", exp_name=""):
     """Get the file paths for all the data we're using
@@ -165,7 +165,7 @@ def create_seeds(NUM_RUNS, seed_file=None, save_new_seeds=True):
     """
     # Load seeds if present
     if seed_file is not None:
-        params = load_config(seed_file)
+        params = utils.load_json(seed_file)
         seed_list = params['seed_list']
     else:
         # Randomly generate seeds
@@ -186,23 +186,6 @@ def create_seeds(NUM_RUNS, seed_file=None, save_new_seeds=True):
     return seed_list
 
 
-def load_config(config_path="mock_config.json"):
-    """Load config file for MOCK
-    
-    Keyword Arguments:
-        config_path {str} -- [description] (default: {"mock_config.json"})
-    
-    Returns:
-        [type] -- [description]
-    """
-    try:
-        with open(config_path) as json_file:
-            params = json.load(json_file)
-    except JSONDecodeError:
-        print("Unable to load config file")
-        raise
-    return params
-
 def calc_hv_ref(kwargs):
     """Calculates a hv reference/nadir point for use on all runs of that dataset
     
@@ -217,11 +200,11 @@ def calc_hv_ref(kwargs):
 
     # Calculate chains
     chains, superclusts = objectives.clusterChains(
-        mst_reduced_genotype, kwargs['data_dict'], PartialClust.part_clust, MOCKGenotype.reduced_cluster_nums
+        mst_reduced_genotype, kwargs['data_dict'], PartialClust.comp_dict, MOCKGenotype.reduced_cluster_nums
     )
     
     PartialClust.max_var = objectives.objVAR(
-        chains, PartialClust.part_clust, PartialClust.base_members,
+        chains, PartialClust.comp_dict, PartialClust.base_members,
         PartialClust.base_centres, superclusts
     )
 
@@ -231,7 +214,7 @@ def calc_hv_ref(kwargs):
     # Set reference point just outside max values to ensure no overlap
     hv_ref = [
         PartialClust.max_var*1.01,
-        PartialClust.max_conn*1.01
+        PartialClust.max_cnn*1.01
     ]
     return hv_ref
 
@@ -246,7 +229,7 @@ def run_mock(**cl_args):
             exp_name=cl_args['exp_name'])
 
     # Load general MOCK parameyers
-    params = load_config(config_path="mock_config.json")
+    params = utils.load_json("mock_config.json")
 
     # A longer genotype means a higher possible maximum for the CNN objective
     # By running the highest sr value first, we ensure that the HV_ref
@@ -256,34 +239,50 @@ def run_mock(**cl_args):
     # Column names for fitness array, formatted for EAF R plot package
     fitness_cols = ["VAR", "CNN", "Run"]
 
+    #####
+    # move num runs to a cl arg
+    # move num indivs to a cl arg
+    # move L to a cl_arg
+    # move num gens to a cl arg
+
+    # try:
+    #     cl_args['num_runs'] = cl_args['num_runs']
+    #     cl_args['num_runs'] = cl_args['num_runs']
+    #     cl_args['num_runs'] = cl_args['num_runs']
+    # except KeyError as e:
+    #     print(f"Argument not found: {e}")
+
     # Create the seed list or load existing one
     if cl_args['validate']:
-        seed_list = create_seeds(params['NUM_RUNS'], seed_file="seed_list_validate.json")
-
         sr_vals = [1]
+        cl_args['num_runs'] = 4
+        
+        seed_list = create_seeds(
+            cl_args['num_runs'], seed_file="seed_list_validate.json")
+
     else:
-        seed_list = create_seeds(params['NUM_RUNS'])
+        seed_list = create_seeds(cl_args['num_runs'])
 
     # Restrict seed_list to the actual number of runs that we need
     # Truncating like this allows us to know that the run numbers and order of seeds correspond
-    seed_list = seed_list[:params['NUM_RUNS']]
+    seed_list = seed_list[:cl_args['num_runs']]
     seed_list = [(i,) for i in seed_list]
 
     # Print the number of runs to get an idea of runtime (sort of)
     print("---------------------------")
     print("Number of MOCK Runs:")
-    print(f"{params['NUM_RUNS']} run(s)")
+    print(f"{cl_args['num_runs']} run(s)")
     print(f"{len(params['strategies'])} strategy/-ies")
     print(f"{len(sr_vals)} delta value(s)")
     print(f"{len(data_file_paths)} dataset(s)")
-    print(f"= {params['NUM_RUNS']*len(params['strategies'])*len(sr_vals)*len(data_file_paths)} run(s)")
+    print(f"= {cl_args['num_runs']*len(params['strategies'])*len(sr_vals)*len(data_file_paths)} run(s)")
     print("---------------------------")
 
     # Loop through the data to test
     for file_path in data_file_paths:
         print(f"Beginning precomputation for {file_path.split(os.sep)[-1]}...")
         
-        kwargs = prepare_data(file_path, params['L'], params['NUM_INDIVS'], params['NUM_GENS'])
+        kwargs = prepare_data(file_path, cl_args['L'], cl_args['num_indivs'], cl_args['num_gens'])
         print("Precomputation complete!")
 
         # Loop through the sr (square root) values
@@ -316,13 +315,13 @@ def run_mock(**cl_args):
                     'argsortdists_cen': np.argsort(
                         distarray_cen, kind='mergesort'),
                     'nn_rankings_cen': precompute.nnRankings(
-                        distarray_cen, len(PartialClust.part_clust))
+                        distarray_cen, len(PartialClust.comp_dict))
                 }                
             elif cl_args['mut_method'] == "neighbour":
                 kwargs['mut_meth_params'] = {
                     'mut_method': "neighbour",
                     'component_nns': precompute.nn_comps(
-                        Dataset.num_examples, kwargs['argsortdists'],kwargs['data_dict'], kwargs['L'])
+                        Dataset.num_examples, kwargs['argsortdists'], kwargs['data_dict'], kwargs['L'])
                 }
             else:
                 kwargs['mut_meth_params'] = {
@@ -340,11 +339,11 @@ def run_mock(**cl_args):
                 else:
                     kwargs['adapt_delta'] = True
 
-                fitness_array = np.empty((params['NUM_INDIVS']*params['NUM_RUNS'], len(fitness_cols)))
-                hv_array = np.empty((params['NUM_GENS'], params['NUM_RUNS']))
-                ari_array = np.empty((params['NUM_INDIVS'], params['NUM_RUNS']))
-                num_clusts_array = np.empty((params['NUM_INDIVS'], params['NUM_RUNS']))
-                time_array = np.empty(params['NUM_RUNS'])
+                fitness_array = np.empty((cl_args['num_indivs']*cl_args['num_runs'], len(fitness_cols)))
+                hv_array = np.empty((cl_args['num_gens'], cl_args['num_runs']))
+                ari_array = np.empty((cl_args['num_indivs'], cl_args['num_runs']))
+                num_clusts_array = np.empty((cl_args['num_indivs'], cl_args['num_runs']))
+                time_array = np.empty(cl_args['num_runs'])
                 delta_triggers = []
 
                 # Abstract the below to a precompute func
@@ -352,7 +351,7 @@ def run_mock(**cl_args):
                                 
 
                 # kwargs['argsortdists_cen'] = np.argsort(distarray_cen, kind='mergesort')
-                # kwargs['nn_rankings_cen'] = precompute.nnRankings_cen(distarray_cen, len(PartialClust.part_clust))
+                # kwargs['nn_rankings_cen'] = precompute.nnRankings_cen(distarray_cen, len(PartialClust.comp_dict))
                 
                 mock_func = partial(delta_mock.runMOCK, *list(kwargs.values()))
 
@@ -378,8 +377,8 @@ def run_mock(**cl_args):
                     adapt_gens = run_result[5]
 
                     # Assign values to arrays
-                    ind = params['NUM_INDIVS']*run_num
-                    fitness_array[ind:ind+params['NUM_INDIVS'], 0:3] = [indiv.fitness.values+(run_num+1,) for indiv in pop]
+                    ind = cl_args['num_indivs']*run_num
+                    fitness_array[ind:ind+cl_args['num_indivs'], 0:3] = [indiv.fitness.values+(run_num+1,) for indiv in pop]
 
                     hv_array[:, run_num] = hv
 
@@ -395,14 +394,14 @@ def run_mock(**cl_args):
                 if cl_args['validate']:
                     print("---------------------------")
                     print("Validating results...")
-                    valid = validateResults(
+                    valid = validate_results(
                         os.path.join(os.getcwd(), "test_data", ""),
                         strat_name,
                         ari_array,
                         hv_array,
                         fitness_array,
                         delta_triggers,
-                        params['NUM_RUNS']
+                        cl_args['num_runs']
                         )
 
                     if not valid:
@@ -459,12 +458,8 @@ if __name__ == '__main__':
     run_mock(**cl_args)
 
     ######## TO DO ########
-    # Look at utils parser and line-up with config file
     # add hook for crossover
-    # add hook for mut_method
     # try to clean up arguments generally
-    # set up centroid mutation and check it works
-    # then look at neighbour component mutation
     # look at how results are saved and named
     # then look at generating graphs
     # send to servers and run

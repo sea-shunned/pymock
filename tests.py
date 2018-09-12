@@ -191,7 +191,7 @@ def validateResult(
 
     return True
 
-def validateResults(
+def validate_results(
     results_folder, strat_name, ari_array, hv_array, fit_array, delta_triggers, num_runs):
 
     try:

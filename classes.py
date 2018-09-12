@@ -13,14 +13,11 @@ class PartialClust(object):
     # So we can ensure every object (base cluster) has a unique ID value
     id_value = itertools.count()
     
-    conn_array = None
-    max_conn = None
+    cnn_array = None
+    max_cnn = None
     max_var = None
-    part_clust = None
+    comp_dict = None
     cnn_pairs = None
-
-    # base_members = np.asarray([obj.num_members for obj in part_clust.values()])[:,None]
-    # base_centres = np.asarray([obj.centroid for obj in part_clust.values()]).squeeze()
 
     # Useful access to the info
     base_members = None
@@ -35,13 +32,13 @@ class PartialClust(object):
         self.intraclust_var = None # Same as above
 
     @staticmethod
-    def partClustCNN(base_clusters, data_dict, argsortdists, L):
-        conn_array = np.zeros((len(base_clusters),len(base_clusters)))
+    def cnn_precomp(base_clusters, data_dict, argsortdists, L):
+        cnn_array = np.zeros((len(base_clusters),len(base_clusters)))
         # pairs = np.zeros((int(len(base_clusters)*(len(base_clusters)/2)),),dtype=(int,2))
 
         # Initialise variables
         cnn_pair_list = []
-        max_conn = 0
+        max_cnn = 0
 
         # Easier (one less nested loop, though same number of items) 
             # than looping through base clusters - though it's equivalent
@@ -64,7 +61,7 @@ class PartialClust(object):
                     # Mario's code uses <0.1, don't know why, need to ask
                     # That only really works if you're def using L=10
                     # We'll just use 0 now to make sure
-                    if conn_array[curr_number, clust_num] == 0:
+                    if cnn_array[curr_number, clust_num] == 0:
                         cnn_pair_list.append((curr_number,clust_num))
 
                     # As we've skipped the first datapoint (itself)
@@ -73,21 +70,21 @@ class PartialClust(object):
                     penalty = 1.0/(index+2.0)
                     
                     # add the penalty
-                    max_conn += penalty
+                    max_cnn += penalty
 
                     # Add contribution to relevant place in array
-                    conn_array[curr_number,clust_num] += penalty
+                    cnn_array[curr_number,clust_num] += penalty
 
                     # Make array symmetrical (as in Mario's code)
                     # Helps with the if statement above
-                    conn_array[clust_num,curr_number] = conn_array[curr_number,clust_num]
+                    cnn_array[clust_num,curr_number] = cnn_array[curr_number,clust_num]
 
-        # print(np.sum(conn_array), max_conn)
-        # print("Max conn:",max_conn)
-        return conn_array, max_conn, cnn_pair_list
+        # print(np.sum(cnn_array), max_cnn)
+        # print("Max conn:",max_cnn)
+        return cnn_array, max_cnn, cnn_pair_list
 
     # @profile
-    def partClustVAR(self, data):
+    def var_precomp(self, data):
         # Makes the else irrelevant, but may be useful for memory issues if we tackle that later
         dist_meth = 'scipy'
         
@@ -96,7 +93,6 @@ class PartialClust(object):
             from scipy.spatial.distance import cdist
             centroid = np.mean(data[self.members],axis=0)[np.newaxis,:]
             dists = cdist(data[self.members],centroid,'sqeuclidean')
-
         else:
             # Sklearn metrics.pairwise.euclidean_distance
             # Fast, but not as precise (not guaranteed symmetry)
@@ -107,7 +103,7 @@ class PartialClust(object):
     
     @classmethod
     def partial_clusts(cls, data, data_dict, argsortdists, L):
-        cls.part_clust = {}
+        cls.comp_dict = {}
 
         # Loop over our components as defined by delta
         for cluster in MOCKGenotype.base_clusters:
@@ -115,48 +111,28 @@ class PartialClust(object):
             curr_cluster = cls(cluster)
             
             # Calculate centroid and VAR of component
-            curr_cluster.centroid, curr_cluster.intraclust_var = cls.partClustVAR(curr_cluster, data)
+            curr_cluster.centroid, curr_cluster.intraclust_var = cls.var_precomp(curr_cluster, data)
             
             # Assign id
-            cls.part_clust[curr_cluster.id] = curr_cluster
+            cls.comp_dict[curr_cluster.id] = curr_cluster
 
             # Label each point in this component in the data_dict
             for point in cluster:
                 data_dict[point].base_cluster_num = curr_cluster.id
 
         # Calculate precomp for CNN objective
-        cls.conn_array, cls.max_conn, cls.cnn_pairs = cls.partClustCNN(
+        cls.cnn_array, cls.max_cnn, cls.cnn_pairs = cls.cnn_precomp(
             MOCKGenotype.base_clusters, data_dict, argsortdists, L
         )
         
         # Used for speedy VAR calculation
         cls.base_members = np.asarray(
-            [obj.num_members for obj in cls.part_clust.values()]
+            [obj.num_members for obj in cls.comp_dict.values()]
             )[:, None]
         cls.base_centres = np.asarray(
-            [obj.centroid for obj in cls.part_clust.values()]
+            [obj.centroid for obj in cls.comp_dict.values()]
             ).squeeze()
-        #print('===================')
-        #print(cls.base_members)
-        #print(np.shape(cls.base_members))
-        #print('===================')
-        '''
-        #get the distances between components
-        cls.distarray_cen = precompute.compDists(cls.base_centres, \
-                                                     cls.base_centres)
-        print('dist array of components')
-        print(cls.distarray_cen)
-        
-        #get the ID of sorted components based on distances
-        cls.argsortdists_cen = np.argsort(cls.distarray_cen, kind='mergesort')
-        
-        print('sorted components id')
-        print(cls.argsortdists_cen)
-        
-        #print(np.shape(PartialClust.base_centres))
-        print('num of components')
-        print(len(cls.part_clust))
-        '''
+
         cls.id_value = count()
 
 class Dataset(object):
@@ -414,7 +390,7 @@ class MOCKGenotype(list):
         while True:
             # choose new component to mutate to
             new_comp = random.choice(argsortdists_cen[point_comp][0:L+1])
-            new_j = random.choice(PartialClust.part_clust[k].members)
+            new_j = random.choice(PartialClust.comp_dict[k].members)
             if new_j != j:
                 break
         return new_j
