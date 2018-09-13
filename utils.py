@@ -64,6 +64,12 @@ def build_parser():
         type=int,
         default=10
     )
+    parser.add_argument(
+        '--Lcomp',
+        help='specify the component neighbourhood parameter',
+        type=int,
+        default=3
+    )
     return parser
 
 def check_cl_args(cl_args):

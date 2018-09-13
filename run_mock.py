@@ -406,14 +406,12 @@ def run_mock(**cl_args):
 
                     if not valid:
                         raise ValueError(f"Results incorrect for {strat_name}")
-
                     else:
                         print(f"{strat_name} validated!\n")
 
                 if cl_args['exp_name'] != "":
                     fname_prefix = "-".join(
                         [results_folder+Dataset.data_name, strat_name])
-                    print(fname_prefix)
                     
                     if kwargs['adapt_delta']:
                         fname_suffix = "-adapt"
@@ -459,6 +457,8 @@ if __name__ == '__main__':
 
     ######## TO DO ########
     # add hook for crossover
+    # add separate L for component mutation
+        # experiment with L=1-5
     # try to clean up arguments generally
     # look at how results are saved and named
     # then look at generating graphs

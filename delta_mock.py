@@ -13,7 +13,7 @@ import operators
 from classes import Dataset, MOCKGenotype, PartialClust
 
 # Run outside of multiprocessing scope
-# Can consieer trying to move this, though we just run it once anyway so eh
+# Can consider trying to move this, though we just run it once anyway so eh
 creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0)) #(VAR, CNN)
 creator.create("Individual", list, fitness=creator.Fitness, fairmut=None)
 

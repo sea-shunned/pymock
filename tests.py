@@ -192,12 +192,12 @@ def validateResult(
     return True
 
 def validate_results(
-    results_folder, strat_name, ari_array, hv_array, fit_array, delta_triggers, num_runs):
-
+        results_folder, strat_name, ari_array, hv_array, fit_array, delta_triggers, num_runs):
     try:
         ari_path, fit_path, hv_path = sorted(glob.glob(results_folder+"*60*"+strat_name+"*"))
     except ValueError:
-        ari_path, fit_path, hv_path, trigger_path = sorted(glob.glob(results_folder+"*60*"+strat_name+"*"))
+        ari_path, fit_path, hv_path, trigger_path = sorted(
+            glob.glob(results_folder+"*60*"+strat_name+"*"))
 
     ari_orig = np.loadtxt(ari_path, delimiter=",")[:, :num_runs]
     if not np.array_equal(ari_array, ari_orig):
