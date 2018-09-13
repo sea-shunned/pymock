@@ -81,7 +81,7 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
         toolbox.register(
             "mutate", operators.comp_centroid_mut, 
             MUTPB = 1.0, 
-            # gen_length = MOCKGenotype.reduced_length, 
+            gen_length = MOCKGenotype.reduced_length,
             argsortdists_cen = mut_meth_params['argsortdists_cen'], 
             L = L, 
             interest_indices = MOCKGenotype.interest_indices, 

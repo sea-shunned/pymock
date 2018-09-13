@@ -462,4 +462,8 @@ if __name__ == '__main__':
     # try to clean up arguments generally
     # look at how results are saved and named
     # then look at generating graphs
+    # evaluation.py is a shit show
+        # try except in chains func may be inefficient (probs not)
+    # check python package/library versions and ensure consistency
+        # py3env and normal environment on local pc make no difference
     # send to servers and run

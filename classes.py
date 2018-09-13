@@ -255,6 +255,8 @@ class MOCKGenotype(list):
         
         # The (reduced) genotype
         self.genotype = None
+
+        self.num_clusts = None
     
     @classmethod
     def setup_genotype_vars(cls):
@@ -369,14 +371,12 @@ class MOCKGenotype(list):
         # Use the i&j to modify the genotype directly rather than return
         # Of little importance
 
-
     # It may be useful for our solutions to have additional attributes, like C++ MOCK does
         # Such as the number of clusters in the solution
         # But this is different to the MST thing above, in a way
         # We could have one class for this, where instances are our actual solutions that have these attributes (we create them in initial pop)
             # Shouldn't be a problem with DEAP
         # And everything else (mentioned above) is static
-
 
     # Could we actually implement some of the functionality we want from this class into the existing dataset class?
     # Each datapoint is a node on the graph, after all, so we can just give it a value (what it points to in the MST)
@@ -390,7 +390,7 @@ class MOCKGenotype(list):
         while True:
             # choose new component to mutate to
             new_comp = random.choice(argsortdists_cen[point_comp][0:L+1])
-            new_j = random.choice(PartialClust.comp_dict[k].members)
+            new_j = random.choice(PartialClust.comp_dict[new_comp].members)
             if new_j != j:
                 break
         return new_j
@@ -400,7 +400,7 @@ class MOCKGenotype(list):
     @staticmethod
     def neighbour_replace_link(component_nns, i, j, L, data_dict):
         point_comp = data_dict[i].base_cluster_num
-        
+
         while True:
             new_j = random.choice(component_nns[point_comp])
             if new_j != j:

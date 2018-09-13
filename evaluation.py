@@ -107,6 +107,17 @@ def finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len):
         # Add the ARI value
         ari_values.append(adjusted_rand_score(labels_true=classes.Dataset.label_vals, labels_pred=pred_labels))
 
+    ### Can use this attribute to get the number directly
+    # Still need components though so may not be useful
+    # There may be a better way of doing this - may not be important though
+    ###
+    # test = [indiv.num_clusts for indiv in pop]
+    # if test == sol_num_clusters:
+    #     print("Same!")
+    # else:
+    #     print(sol_num_clusters)
+    #     print(test,"\n")
+
     return sol_num_clusters, ari_values
 
 
@@ -137,5 +148,5 @@ def numClusters(pop, mst_genotype, int_links_indices, relev_links_len):
         # Get the connected components
         conn_components = g.components(mode="WEAK")
         sol_num_clusters.append(len(conn_components))
-
+    
     return np.asarray(sol_num_clusters)
