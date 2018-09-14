@@ -383,13 +383,13 @@ class MOCKGenotype(list):
     # And then we can track whether it is fixed or not - or more importantly, if it needs fair mutation
     
     @staticmethod
-    def centroid_replace_link(argsortdists_cen, i, j, L, data_dict):
+    def centroid_replace_link(argsortdists_cen, i, j, L_comp, data_dict):
         # data point component ID
         point_comp = data_dict[i].base_cluster_num
         
         while True:
             # choose new component to mutate to
-            new_comp = random.choice(argsortdists_cen[point_comp][0:L+1])
+            new_comp = random.choice(argsortdists_cen[point_comp][0:L_comp+1])
             new_j = random.choice(PartialClust.comp_dict[new_comp].members)
             if new_j != j:
                 break
@@ -398,7 +398,7 @@ class MOCKGenotype(list):
     # Below is probably not needed
     # We can just use the original method
     @staticmethod
-    def neighbour_replace_link(component_nns, i, j, L, data_dict):
+    def neighbour_replace_link(component_nns, i, j, data_dict):
         point_comp = data_dict[i].base_cluster_num
 
         while True:

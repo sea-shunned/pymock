@@ -13,19 +13,22 @@ def build_parser():
         '-e', '--exp_name',
         help='name of experiment for save location',
         type=str,
-        default=""
+        default="",
+        metavar=''
     )
     parser.add_argument(
         '-c', '--crossover',
         help='crossover probability',
         type=float,
-        default=1.0
+        default=1.0,
+        metavar=''
     )
     parser.add_argument(
         '--synthdata',
         help='string to specify what subset of synthetic data to use (* selects all)',
         type=str,
-        default="*"
+        default="*",
+        metavar=''
     )
     # parser.add_argument(
     #     '--realdata',
@@ -38,44 +41,48 @@ def build_parser():
         help='specify which mutation method to use',
         type=str,
         default="original",
-        choices=["original", "centroid", "neighbour"]
+        choices=["original", "centroid", "neighbour"],
     )
     parser.add_argument(
         '-runs', '--num_runs',
         help='specify the number of runs',
         type=int,
-        default=30
+        default=30,
+        metavar=''
     )
     parser.add_argument(
         '-gens', '--num_gens',
         help='specify the number of generations',
         type=int,
-        default=100
+        default=100,
+        metavar=''
     )
     parser.add_argument(
         '-indivs', '--num_indivs',
         help='specify the number of individuals in the population',
         type=int,
-        default=100
+        default=100,
+        metavar=''
     )
     parser.add_argument(
         '-L', '--L',
         help='specify the neighbourhood parameter',
         type=int,
-        default=10
+        default=10,
+        metavar=''
     )
     parser.add_argument(
-        '--Lcomp',
+        '--L_comp',
         help='specify the component neighbourhood parameter',
         type=int,
-        default=3
+        default=3,
+        metavar=''
     )
     return parser
 
 def check_cl_args(cl_args):
     if cl_args['validate'] and cl_args['exp_name']:
         raise ValueError("Cannot set validate and an experiment name")
-
     # This fails if user specifically gives default value
     # It's fine
     if cl_args['validate'] and cl_args['synthdata'] != "*":

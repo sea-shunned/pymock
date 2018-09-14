@@ -1,0 +1,28 @@
+/home/PhD15/shandc/.bashrc: line 34: /usr/local/etc/bash_profiles/source-profiles-bash: No such file or directory
+/home/PhD15/shandc/.bashrc: line 151: SourceMyDotFile: command not found
+---------------------------
+Number of MOCK Runs:
+4 run(s)
+1 strategy/-ies
+1 delta value(s)
+1 dataset(s)
+= 4 run(s)
+---------------------------
+Beginning precomputation for tevc_20_60_9_labels_headers.data...
+Num examples: 4603
+Num features: 20
+Num (actual) clusters: 60
+Precomputation complete!
+Delta: 98.5260609923977
+HV ref point: [3.0, 1469.0]
+base starting...
+base done (took 32.975 secs) - collecting results...
+base complete!
+---------------------------
+Validating results...
+ARI correct!
+Fitness correct!
+Hypervolume correct!
+Trigger gens correct!
+base validated!
+

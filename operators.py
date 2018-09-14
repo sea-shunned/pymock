@@ -131,7 +131,7 @@ def neighbourFairMutation(parent, MUTPB, gen_length, argsortdists, L, interest_i
 
     return parent
 
-def comp_centroid_mut(parent, MUTPB, gen_length, argsortdists_cen, L, interest_indices, nn_rankings_cen, data_dict):
+def comp_centroid_mut(parent, MUTPB, gen_length, argsortdists_cen, L_comp, interest_indices, nn_rankings_cen, data_dict):
     # nutation probs
     first_term = (MUTPB / gen_length)
 
@@ -143,10 +143,10 @@ def comp_centroid_mut(parent, MUTPB, gen_length, argsortdists_cen, L, interest_i
     # As we're using assignment, can't really do this part in a comprehension!
     for index, mutprob in enumerate(mutprobs):
         if random.random() < mutprob:
-            parent[index] = MOCKGenotype.centroid_replace_link(argsortdists_cen, interest_indices[index], parent[index], L, data_dict)
+            parent[index] = MOCKGenotype.centroid_replace_link(argsortdists_cen, interest_indices[index], parent[index], L_comp, data_dict)
     return parent
 
-def neighbour_comp_mut(parent, MUTPB, gen_length, L, interest_indices, nn_rankings, component_nns, data_dict):
+def neighbour_comp_mut(parent, MUTPB, gen_length, interest_indices, nn_rankings, component_nns, data_dict):
     first_term = (MUTPB / gen_length)
 
     mutprobs = [first_term + ((nn_rankings[interest_indices[index]][value] / gen_length) ** 2) for index,value in enumerate(parent)]
@@ -154,5 +154,5 @@ def neighbour_comp_mut(parent, MUTPB, gen_length, L, interest_indices, nn_rankin
     for index, mutprob in enumerate(mutprobs):
         if random.random() < mutprob:
             parent[index] = MOCKGenotype.neighbour_replace_link(
-                component_nns, interest_indices[index], parent[index], L, data_dict)
+                component_nns, interest_indices[index], parent[index], data_dict)
     return parent

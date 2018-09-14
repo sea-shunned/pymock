@@ -133,8 +133,8 @@ def nnRankings(distarray, num_examples):
         nn_rankings[i] = rankdata(row, method='ordinal')-1 # minus 1 so that 0 rank is itself
     return nn_rankings
 
-def nn_comps(num_examples, argsortdists, data_dict, L):
-    component_nns = np.zeros((num_examples, L+1), dtype=int)
+def nn_comps(num_examples, argsortdists, data_dict, L_comp):
+    component_nns = np.zeros((num_examples, L_comp+1), dtype=int)
 
     for i, row_vals in enumerate(argsortdists):
         # Get the component ID of the row that we're in, so we know what to ignore
@@ -151,9 +151,9 @@ def nn_comps(num_examples, argsortdists, data_dict, L):
             # Check if component is both different and one we haven't seen
             if curr_comp != start_comp_id and curr_comp not in comps_seen:
                 comps_seen.add(curr_comp)
-                nearest_l_ids.append(val)          
+                nearest_l_ids.append(val)
             # Break the loop when we have enough values
-            if len(nearest_l_ids) == L+1:
+            if len(nearest_l_ids) == L_comp+1:
                 break
         # Add values to the array
         component_nns[i,:] = nearest_l_ids

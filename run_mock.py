@@ -147,15 +147,15 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
     return kwargs
 
 
-def create_seeds(NUM_RUNS, seed_file=None, save_new_seeds=True):
+def create_seeds(num_runs, exp_name, seed_file=None):
     """Create the seed numbers
     
     Arguments:
-        NUM_RUNS {int} -- Number of runs
-    
+        num_runs {int} -- Number of runs
+        exp_name {str} -- Experiment name (for saving seeds)
+
     Keyword Arguments:
         seed_file {str} -- File location if giving previous seeds (default: {None})
-        save_new_seeds {bool} -- If we should save our new seeds to reproduce same experiment (default: {True})
     
     Raises:
         ValueError -- Error if we don't have enough seeds
@@ -169,18 +169,18 @@ def create_seeds(NUM_RUNS, seed_file=None, save_new_seeds=True):
         seed_list = params['seed_list']
     else:
         # Randomly generate seeds
-        seed_list = [random.uniform(0, 1000) for i in range(NUM_RUNS)]
+        seed_list = [random.uniform(0, 1000) for i in range(num_runs)]
 
         # Save a new set of seeds for this set of experiments
         # (to ensure same start for each strategy)
-        if save_new_seeds:
+        if exp_name != "":
             import datetime
-            seed_fname = "seed_list_"+str(datetime.date.today())+".json"
+            seed_fname = "seeds/seed_list_"+exp_name+"_"+str(datetime.date.today())+".json"
             with open(seed_fname, 'w') as out_file:
                 json.dump(seed_list, out_file, indent=4)
                 
     # Ensure we have enough seeds
-    if len(seed_list) < NUM_RUNS:
+    if len(seed_list) < num_runs:
         raise ValueError("Not enough seeds for number of runs")
 
     return seed_list
@@ -239,29 +239,17 @@ def run_mock(**cl_args):
     # Column names for fitness array, formatted for EAF R plot package
     fitness_cols = ["VAR", "CNN", "Run"]
 
-    #####
-    # move num runs to a cl arg
-    # move num indivs to a cl arg
-    # move L to a cl_arg
-    # move num gens to a cl arg
-
-    # try:
-    #     cl_args['num_runs'] = cl_args['num_runs']
-    #     cl_args['num_runs'] = cl_args['num_runs']
-    #     cl_args['num_runs'] = cl_args['num_runs']
-    # except KeyError as e:
-    #     print(f"Argument not found: {e}")
-
     # Create the seed list or load existing one
     if cl_args['validate']:
+        # override params for validation
         sr_vals = [1]
         cl_args['num_runs'] = 4
         
         seed_list = create_seeds(
-            cl_args['num_runs'], seed_file="seed_list_validate.json")
-
+            cl_args['num_runs'], cl_args['exp_name'], seed_file="seed_list_validate.json")
     else:
-        seed_list = create_seeds(cl_args['num_runs'])
+        seed_list = create_seeds(
+            cl_args['num_runs'], cl_args['exp_name'])
 
     # Restrict seed_list to the actual number of runs that we need
     # Truncating like this allows us to know that the run numbers and order of seeds correspond
@@ -315,13 +303,14 @@ def run_mock(**cl_args):
                     'argsortdists_cen': np.argsort(
                         distarray_cen, kind='mergesort'),
                     'nn_rankings_cen': precompute.nnRankings(
-                        distarray_cen, len(PartialClust.comp_dict))
+                        distarray_cen, len(PartialClust.comp_dict)),
+                    'L_comp': cl_args['L_comp']
                 }                
             elif cl_args['mut_method'] == "neighbour":
                 kwargs['mut_meth_params'] = {
                     'mut_method': "neighbour",
                     'component_nns': precompute.nn_comps(
-                        Dataset.num_examples, kwargs['argsortdists'], kwargs['data_dict'], kwargs['L'])
+                        Dataset.num_examples, kwargs['argsortdists'], kwargs['data_dict'], cl_args['L_comp'])
                 }
             else:
                 kwargs['mut_meth_params'] = {
@@ -457,10 +446,9 @@ if __name__ == '__main__':
 
     ######## TO DO ########
     # add hook for crossover
-    # add separate L for component mutation
-        # experiment with L=1-5
     # try to clean up arguments generally
     # look at how results are saved and named
+    # sort out for using consistent seeds across experiments
     # then look at generating graphs
     # evaluation.py is a shit show
         # try except in chains func may be inefficient (probs not)
