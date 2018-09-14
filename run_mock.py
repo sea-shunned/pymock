@@ -165,24 +165,29 @@ def create_seeds(num_runs, exp_name, seed_file=None):
     """
     # Load seeds if present
     if seed_file is not None:
-        params = utils.load_json(seed_file)
-        seed_list = params['seed_list']
+        seed_list = utils.load_json(seed_file)
     else:
         # Randomly generate seeds
         seed_list = [random.uniform(0, 1000) for i in range(num_runs)]
+
+        # Ensure no collision
+        assert len(seed_list) == len(set(seed_list))
+
+        ### This needs rewriting
+        # We want to check if there is a seed file that matches
+        # but it won't line up with experiment name
+        # perhaps seed_file should be a cl_args
 
         # Save a new set of seeds for this set of experiments
         # (to ensure same start for each strategy)
         if exp_name != "":
             import datetime
-            seed_fname = "seeds/seed_list_"+exp_name+"_"+str(datetime.date.today())+".json"
+            seed_fname = "seeds/seed_list_"+exp_name.split("/")[-1]+"_"+str(datetime.date.today())+".json"
             with open(seed_fname, 'w') as out_file:
                 json.dump(seed_list, out_file, indent=4)
-                
     # Ensure we have enough seeds
     if len(seed_list) < num_runs:
         raise ValueError("Not enough seeds for number of runs")
-
     return seed_list
 
 
@@ -249,7 +254,8 @@ def run_mock(**cl_args):
             cl_args['num_runs'], cl_args['exp_name'], seed_file="seed_list_validate.json")
     else:
         seed_list = create_seeds(
-            cl_args['num_runs'], cl_args['exp_name'])
+            cl_args['num_runs'], cl_args['exp_name'],
+            seed_file=cl_args['seed_file'])
 
     # Restrict seed_list to the actual number of runs that we need
     # Truncating like this allows us to know that the run numbers and order of seeds correspond
@@ -445,13 +451,12 @@ if __name__ == '__main__':
     run_mock(**cl_args)
 
     ######## TO DO ########
+    # sort out using consistent seeds across experiments
     # add hook for crossover
-    # try to clean up arguments generally
-    # look at how results are saved and named
-    # sort out for using consistent seeds across experiments
+    # try to clean up arguments generally ### ehhhhh
+    # look at how results are saved and named ## so so
+    # send to servers and run
     # then look at generating graphs
     # evaluation.py is a shit show
         # try except in chains func may be inefficient (probs not)
-    # check python package/library versions and ensure consistency
-        # py3env and normal environment on local pc make no difference
-    # send to servers and run
+    # should clean up and define the required environment at some point

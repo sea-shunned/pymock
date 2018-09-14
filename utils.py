@@ -78,6 +78,13 @@ def build_parser():
         default=3,
         metavar=''
     )
+    parser.add_argument(
+        '--seed_file',
+        help='specify the seed file for consistent experiments',
+        type=str,
+        default=None,
+        metavar=''
+    )    
     return parser
 
 def check_cl_args(cl_args):
