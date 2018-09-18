@@ -1056,8 +1056,8 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
         fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
         plt.close(fig)
 
-    else:
-        plt.show()
+    else:neighbour
+        pneighbour
 
     return ax2
 

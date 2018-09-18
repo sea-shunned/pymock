@@ -2,27 +2,52 @@
 /home/PhD15/shandc/.bashrc: line 151: SourceMyDotFile: command not found
 ---------------------------
 Number of MOCK Runs:
-4 run(s)
+30 run(s)
 1 strategy/-ies
 1 delta value(s)
-1 dataset(s)
-= 4 run(s)
+35 dataset(s)
+= 1050 run(s)
 ---------------------------
-Beginning precomputation for tevc_20_60_9_labels_headers.data...
-Num examples: 4603
-Num features: 20
+Beginning precomputation for tevc_200_120_9_labels_headers.data...NuNum examples: 9045
+Num features: 200
+Num (actual) clusters: 1PrecPrecomputation complete!
+Delta: 94.7426641843624
+HV ref point: [1.5519360076646445, 1698.631226190387]
+base starting...
+base done (took 225.696 secs) - collecting results...
+base complete!
+Beginning precomputation for tevc_50_60_9_labels_headers.data...
+Num examples: 4494
+Num features: 50
 Num (actual) clusters: 60
 Precomputation complete!
-Delta: 98.5260609923977
-HV ref point: [3.0, 1469.0]
-base starting...
-base done (took 32.975 secs) - collecting results...
+Delta: 92.54146606048315
+HV ref point: [1.3800414462110937, 1511.5876428570925]
+base starting...bbase done (took 115.224 secs) - collecting results...
 base complete!
----------------------------
-Validating results...
-ARI correct!
-Fitness correct!
-Hypervolume correct!
-Trigger gens correct!
-base validated!
-
+Beginning precomputation for tevc_20_10_9_labels_headers.data...
+Num examples: 2690
+Num features: 20
+Num (actual) clusters: 10
+Precomputation complete!
+Delta: 90.35962640900377
+HV ref point: [1.0771137840115224, 1750.2426269840748]
+base starting...
+base done (took 122.400 secs) - collecting results...
+base complete!
+Beginning precomputation for tevc_150_60_9_labels_headers.data...
+Num examples: 4385
+Num features: 150
+Num (actual) clusters: 60Precomputation complete!
+Delta: 94.71719627641153
+HV ref point: [1.4088887345436487, 1903.858817460217]
+base starting...
+base done (took 205.586 secs) - collecting results...
+base complete!
+Beginning precomputation for tevc_100_120_9_labels_headers.data...
+Num examples: 8970
+Num features: 100
+Num (actual) clusters: 120
+bash: line 1: 29810 Terminated              python run_mock.py -runs 30 --synthdata "*_9*" --seed_file "seeds/seed_list_mutation_2018-09-14.json"
+19 secs) - collecting results...
+bash: line 1:  2824 Terminated              python run_mock.py -runs 30 --synthdata "*_9*" --seed_file "seeds/seed_list_mutation_2018-09-14.json"

@@ -5,10 +5,10 @@ def run_exp(servers, l_ranges):
     for server_name, mut_method in servers:
         # Special case - no parameter searching
         if mut_method == "original":
-            commands = ['python run_mock.py -runs 20 --synthdata "*_9*"']
+            commands = ['python run_mock.py -runs 30 --synthdata "*_9*" --seed_file "seeds/seed_list_mutation_2018-09-14.json"']
         else:
             # generate as many commands as params we're varying
-            commands = ['python run_mock.py -runs 20 --synthdata "*_9*"']*len(l_ranges)
+            commands = ['python run_mock.py -runs 30 --synthdata "*_9*" --seed_file "seeds/seed_list_mutation_2018-09-14.json"']*len(l_ranges)
 
             # Loop over these and customise the commands for relevant values
             for l_val, command in zip(l_ranges, commands):
@@ -65,9 +65,9 @@ if __name__ == '__main__':
     #     p = subprocess.Popen(base_cmd)
 
     servers = [
-        ("datascience1", "original"),
-        ("datascience2", "centroid")
-        # ("datascience3", "neighbour")
+        # ("datascience1", "original"),
+        ("datascience2", "centroid"),
+        ("datascience3", "neighbour")
     ]
-    l_ranges = range(1, 6)
+    l_ranges = [7,10,15,20,25,30,50]
     run_exp(servers, l_ranges)
