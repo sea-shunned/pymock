@@ -1,7 +1,10 @@
+import os
 import glob
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pathlib import Path
+from scipy import stats
 
 # try to construct this using the pathlib module
 
@@ -40,6 +43,14 @@ def plot_boxplot(data, ax, tick_labels, params):
 
     bxplot = ax.boxplot(data, **params['boxplot_kwargs'])
 
+    if params['stats_test']:
+
+        for patch, colour, hatch in zip(
+            bxplot['boxes'], params['colours'], params['hatches']):
+            
+            patch.set_facecolor(colour)
+            patch.set_hatch(hatch)
+
     ax.set_xlabel(params['xlabel'])
     ax.set_ylabel(params['ylabel'])
 
@@ -67,7 +78,8 @@ def stats_test(data_1, data_2, test_name="wilcoxon"):
         raise(f"Cannot find {test_name} in scipy.stats!")
 
     if test_name == "wilcoxon":
-        sum_ranks, p_val = stats_func(data_1, data_2)
+        print(data_1.shape, data_2.shape)
+        sum_ranks, p_val = stats_func(x=data_1, y=data_2, zero_method='wilcox')
         return sum_ranks, p_val
     else:
         raise ValueError(f"Whoopsie! Behaviour not yet implemented...")
@@ -76,20 +88,34 @@ def stats_test(data_1, data_2, test_name="wilcoxon"):
     # scipy.stats don't have unified function behaviour (obvs)
     # return stats_func(data_1, data_2)
 
-def stats_colours(data, params):
-    colours = []
+def stats_colours(data_list, params):
+    stats_colours = []
+    hatches = []
+    
+    for i, data in enumerate(data_list):
+        sum_ranks, p_val = stats_test(data_list[0], data)
 
-    for data_set in data:
-        pass
+        if p_val >= 0.05:
+            stats_colours.append(params['colours']['equal'])
+        else:
+            d = data_list[0] - data
+            d = np.compress(np.not_equal(d,0),d,axis=-1)
+            r = stats.rankdata(abs(d))
+            r_plus = np.sum((d>0)*r, axis=0)
+            r_minus = np.sum((d<0)*r, axis=0)
 
+            assert min(r_plus, r_minus) == sum_ranks, "Sum rank calculation error!"
 
-# would having one big container be useful?
-# like a dictionary where the keys are the different sets of results
-# then have sub_dicts with name, if it's the reference, actual data etc.
+            if r_plus > r_minus:
+                stats_colours.append(params['stats_colours']['worse'])
+                hatches.append(params['stats_hatches']['worse'])
+            else:
+                stats_colours.append(params['stats_colours']['better'])
+                hatches.append(params['stats_hatches']['better'])
 
-results = {
-
-}
+    params['colours'] = stats_colours
+    params['hatches'] = hatches
+    return params
 
 def aggreg_data(fpaths):
     # Set up empty list to hold the data
@@ -114,7 +140,7 @@ def get_bplot_data(res_folder, params):
         if params['show_orig']:
             orig_fpaths = get_fpaths(res_folder / "orig", glob_str=params['file_glob_str'])
             bplot_data = [aggreg_data(orig_fpaths)]
-            tick_labels = [r"$Orig$"]
+            tick_labels = ["Orig"]
         else:
             bplot_data = []
             tick_labels = []
@@ -131,6 +157,7 @@ def get_bplot_data(res_folder, params):
             
     return bplot_data, tick_labels
 
+
 def gen_graph_obj(params, nrows=1, ncols=1):
     fig, ax = plt.subplots(nrows, ncols, figsize=params['figsize'])
     return fig, ax
@@ -142,27 +169,38 @@ def main(params):
 
     bplot_data, tick_labels = get_bplot_data(results_folder, params)
 
+    if params['stats_test']:
+        params = stats_colours(bplot_data, params)
+
     # Generate a graph
     fig, ax = gen_graph_obj(params)
 
     ax = plot_boxplot(bplot_data, ax, tick_labels, params)
 
     if params['save_fig']:
-        pass
+        graph_path = params['graph_path'] / params['exp_name']
+        try:
+            os.makedirs(graph_path)
+        except FileExistsError:
+            pass
+            
+        savename = str(graph_path) + os.sep + "bplot-" + "-".join([params['file_glob_str'], params['mut_method']]) + ".pdf"
+        fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
+        plt.close(fig)
     else:
         plt.show()
 
 if __name__ == '__main__':
     params = {
         'exp_name': "mut_ops",
-        'mut_method': "centroid",
+        'mut_method': "neighbour",
         'group_by': "L",
-        'file_glob_str': "*80*ari*",
-        'xlabel': "L values",
+        'file_glob_str': "*ari*",
+        'xlabel': "L* values",
         'ylabel': "Adjusted Rand Index (ARI)",
         'show_orig': True,
         'colours': None,
-        'stats_test': False,
+        'stats_test': True,
         'boxplot_kwargs': {
             'medianprops': {
                 'linewidth': 2,
@@ -171,20 +209,21 @@ if __name__ == '__main__':
                 },
             'patch_artist': True
         },
-        'figsize': (10,6),
-        'save_fig': False
+        'figsize': (18,12),
+        'save_fig': False,
+        'graph_path': Path.cwd() / "results" / "graphs"
     }
 
     if params['stats_test']:
         # Define colours for stats test results
-        params['colours'] = {
+        params['stats_colours'] = {
             'better': '#158915',
             'worse': '#AC5C1A',
             'equal': "dimgray",
             'reference': 'white'
         }
         # Define hatching for these too
-        params['hatches'] = {
+        params['stats_hatches'] = {
             'better': "/",
             'worse': '\\',
             'equal': "",
@@ -194,5 +233,19 @@ if __name__ == '__main__':
     #     params['colours'] = {
 
     #     }
+
+    plt.style.use('seaborn-paper')
+    SMALL_SIZE = 28
+    MEDIUM_SIZE = 30
+    BIGGER_SIZE = 30
+    # plt.rc('text', usetex=True)
+    plt.rc('font', size=MEDIUM_SIZE, family='serif') # controls default text sizes
+    plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+    # plt.rc('font', family='serif')
 
     main(params)
