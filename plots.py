@@ -148,12 +148,14 @@ def get_bplot_data(res_folder, params):
         exp_folder = res_folder / params['mut_method']
 
         # get the individual folders of results
-        exp_folders = sorted([x for x in exp_folder.iterdir() if x.is_dir()])
-        
+        exp_folders = [x for x in exp_folder.iterdir() if x.is_dir()]
+        # Sort them specifically by the numerical value of L
+        exp_folders = sorted(exp_folders, key = lambda x: int(str(x).split(os.sep)[-1][1:]))
+
         for l_folder in exp_folders:
             data_files = get_fpaths(l_folder, glob_str=params['file_glob_str'])
             bplot_data.append(aggreg_data(data_files))
-            tick_labels.append(f"L{str(l_folder)[-1]}")
+            tick_labels.append(f"{str(l_folder).split(os.sep)[-1]}")
             
     return bplot_data, tick_labels
 
@@ -193,7 +195,7 @@ def main(params):
 if __name__ == '__main__':
     params = {
         'exp_name': "mut_ops",
-        'mut_method': "neighbour",
+        'mut_method': "centroid",
         'group_by': "L",
         'file_glob_str': "*ari*",
         'xlabel': "L* values",
@@ -210,7 +212,7 @@ if __name__ == '__main__':
             'patch_artist': True
         },
         'figsize': (18,12),
-        'save_fig': False,
+        'save_fig': True,
         'graph_path': Path.cwd() / "results" / "graphs"
     }
 
