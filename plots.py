@@ -44,10 +44,9 @@ def plot_boxplot(data, ax, tick_labels, params):
     bxplot = ax.boxplot(data, **params['boxplot_kwargs'])
 
     if params['stats_test']:
-
         for patch, colour, hatch in zip(
             bxplot['boxes'], params['colours'], params['hatches']):
-            
+
             patch.set_facecolor(colour)
             patch.set_hatch(hatch)
 
@@ -78,7 +77,7 @@ def stats_test(data_1, data_2, test_name="wilcoxon"):
         raise(f"Cannot find {test_name} in scipy.stats!")
 
     if test_name == "wilcoxon":
-        print(data_1.shape, data_2.shape)
+        # print(data_1.shape, data_2.shape)
         sum_ranks, p_val = stats_func(x=data_1, y=data_2, zero_method='wilcox')
         return sum_ranks, p_val
     else:
@@ -89,14 +88,15 @@ def stats_test(data_1, data_2, test_name="wilcoxon"):
     # return stats_func(data_1, data_2)
 
 def stats_colours(data_list, params):
-    stats_colours = []
+    colours = []
     hatches = []
     
     for i, data in enumerate(data_list):
         sum_ranks, p_val = stats_test(data_list[0], data)
 
         if p_val >= 0.05:
-            stats_colours.append(params['colours']['equal'])
+            colours.append(params['stats_colours']['equal'])
+            hatches.append(params['stats_hatches']['equal'])
         else:
             d = data_list[0] - data
             d = np.compress(np.not_equal(d,0),d,axis=-1)
@@ -107,13 +107,13 @@ def stats_colours(data_list, params):
             assert min(r_plus, r_minus) == sum_ranks, "Sum rank calculation error!"
 
             if r_plus > r_minus:
-                stats_colours.append(params['stats_colours']['worse'])
+                colours.append(params['stats_colours']['worse'])
                 hatches.append(params['stats_hatches']['worse'])
             else:
-                stats_colours.append(params['stats_colours']['better'])
+                colours.append(params['stats_colours']['better'])
                 hatches.append(params['stats_hatches']['better'])
 
-    params['colours'] = stats_colours
+    params['colours'] = colours
     params['hatches'] = hatches
     return params
 
@@ -126,7 +126,7 @@ def aggreg_data(fpaths):
         # Append the data to the list
         # Load in the data 
         # maybe add if statement here so we only use the max if measure is ari
-        data.append(np.max(np.loadtxt(file, delimiter=","), axis=0))
+        data.append(np.mean(np.loadtxt(file, delimiter=","), axis=0))
 
     # Concatenate the data together for the boxplot
     final_data = np.concatenate(data, axis=0)
@@ -186,7 +186,7 @@ def main(params):
         except FileExistsError:
             pass
             
-        savename = str(graph_path) + os.sep + "bplot-" + "-".join([params['file_glob_str'], params['mut_method']]) + ".pdf"
+        savename = str(graph_path) + os.sep + "bplot-" + "-".join([params['file_glob_str'], params['mut_method']]) + "-mean.pdf"
         fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
         plt.close(fig)
     else:
@@ -195,7 +195,7 @@ def main(params):
 if __name__ == '__main__':
     params = {
         'exp_name': "mut_ops",
-        'mut_method': "centroid",
+        'mut_method': "neighbour",
         'group_by': "L",
         'file_glob_str': "*ari*",
         'xlabel': "L* values",
@@ -229,7 +229,7 @@ if __name__ == '__main__':
             'better': "/",
             'worse': '\\',
             'equal': "",
-            'reference': ''            
+            'reference': ""            
         }
     # else:
     #     params['colours'] = {
