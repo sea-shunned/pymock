@@ -128,6 +128,10 @@ def aggreg_data(fpaths):
         # maybe add if statement here so we only use the max if measure is ari
         data.append(np.mean(np.loadtxt(file, delimiter=","), axis=0))
 
+        # res = np.loadtxt(file, delimiter=",")
+        # shp = res.shape
+        # data.append(res.reshape(shp[0]*shp[1],))
+
     # Concatenate the data together for the boxplot
     final_data = np.concatenate(data, axis=0)
     return final_data
@@ -186,7 +190,7 @@ def main(params):
         except FileExistsError:
             pass
             
-        savename = str(graph_path) + os.sep + "bplot-" + "-".join([params['file_glob_str'], params['mut_method']]) + "-mean.pdf"
+        savename = str(graph_path) + os.sep + "bplot-" + "-".join([params['file_glob_str'], params['mut_method']]) + ".pdf"
         fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
         plt.close(fig)
     else:
@@ -212,7 +216,7 @@ if __name__ == '__main__':
             'patch_artist': True
         },
         'figsize': (18,12),
-        'save_fig': True,
+        'save_fig': False,
         'graph_path': Path.cwd() / "results" / "graphs"
     }
 
