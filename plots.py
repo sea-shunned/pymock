@@ -189,8 +189,9 @@ def main(params):
             os.makedirs(graph_path)
         except FileExistsError:
             pass
-            
+        
         savename = str(graph_path) + os.sep + "bplot-" + "-".join([params['file_glob_str'], params['mut_method']]) + ".pdf"
+        savename.replace("*","")
         fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
         plt.close(fig)
     else:
@@ -255,3 +256,7 @@ if __name__ == '__main__':
     # plt.rc('font', family='serif')
 
     main(params)
+
+    # Need to add option to aggregate by max, mean, or use all
+    # Then add this to the filename
+    
