@@ -255,10 +255,11 @@ if __name__ == '__main__':
             'equal': "",
             'reference': ""            
         }
-    # else:
-    #     params['colours'] = {
 
-    #     }
+    if params['type'] == "eaf":
+        params["label_L"] = "Original"
+        # params["label_R"] = "Centroid" # combine this with the mut_method
+        params["L_val"] = 5
 
     plt.style.use('seaborn-paper')
     SMALL_SIZE = 28
