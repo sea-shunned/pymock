@@ -126,11 +126,19 @@ def aggreg_data(fpaths):
         # Append the data to the list
         # Load in the data 
         # maybe add if statement here so we only use the max if measure is ari
-        data.append(np.mean(np.loadtxt(file, delimiter=","), axis=0))
 
-        # res = np.loadtxt(file, delimiter=",")
-        # shp = res.shape
-        # data.append(res.reshape(shp[0]*shp[1],))
+        if params['aggreg'] == "mean":
+            data.append(np.mean(np.loadtxt(file, delimiter=","), axis=0))
+        elif params['aggreg'] == "max":
+            data.append(np.max(np.loadtxt(file, delimiter=","), axis=0))
+        elif params['aggreg'] == "all":
+            res = np.loadtxt(file, delimiter=",")
+            shp = res.shape
+            data.append(res.reshape(shp[0]*shp[1],))            
+        else:
+            raise ValueError(f"{params['aggreg']} aggregation method not implemented!")
+
+
 
     # Concatenate the data together for the boxplot
     final_data = np.concatenate(data, axis=0)
@@ -168,10 +176,15 @@ def gen_graph_obj(params, nrows=1, ncols=1):
     fig, ax = plt.subplots(nrows, ncols, figsize=params['figsize'])
     return fig, ax
 
+def check_graph_type(graph_type):
+    if graph_type not in ("bplot", "eaf", "generational"):
+        raise ValueError(f"{graph_type} has not been implemented!")
 
 def main(params):
     results_folder = base_res_folder(params['exp_name'])
     print(results_folder)
+
+    check_graph_type(params['type'])
 
     bplot_data, tick_labels = get_bplot_data(results_folder, params)
 
@@ -190,8 +203,13 @@ def main(params):
         except FileExistsError:
             pass
         
-        savename = str(graph_path) + os.sep + "bplot-" + "-".join([params['file_glob_str'], params['mut_method']]) + ".pdf"
-        savename.replace("*","")
+        savename = str(graph_path) + os.sep + "-".join([params['type'], params['file_glob_str'], params['mut_method'], params['aggreg']]) + ".pdf"
+        
+        savename = savename.replace("*","")
+
+        if os.path.isfile(savename):
+            print(f"Overwriting {savename}")
+
         fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
         plt.close(fig)
     else:
@@ -199,9 +217,10 @@ def main(params):
 
 if __name__ == '__main__':
     params = {
+        'type': "bplot",
         'exp_name': "mut_ops",
-        'mut_method': "neighbour",
-        'group_by': "L",
+        'mut_method': "centroid",
+        'aggreg': "all",
         'file_glob_str': "*ari*",
         'xlabel': "L* values",
         'ylabel': "Adjusted Rand Index (ARI)",
@@ -217,7 +236,7 @@ if __name__ == '__main__':
             'patch_artist': True
         },
         'figsize': (18,12),
-        'save_fig': False,
+        'save_fig': True,
         'graph_path': Path.cwd() / "results" / "graphs"
     }
 
@@ -259,4 +278,3 @@ if __name__ == '__main__':
 
     # Need to add option to aggregate by max, mean, or use all
     # Then add this to the filename
-    
