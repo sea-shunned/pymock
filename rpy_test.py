@@ -28,6 +28,9 @@ robjects.r('''
         max_ari_L = max(ari_L)
         max_ari_R = max(ari_R)
 
+        print(max_ari_L)
+        print(max_ari_R)
+
         # Adjust the column name so it works properly
         colnames(data_L)[3] <- "set"
         colnames(data_R)[3] <- "set"
@@ -36,7 +39,7 @@ robjects.r('''
         if (max_ari_L >= max_ari_R){
             indiv_num = which.max(apply(ari_L, MARGIN = 1, max))
             run_num = unname(which.max(apply(ari_L, MARGIN = 2, max)))
-            
+
             fit_vals = as.numeric(data_L[which(data_L$set==run_num),][indiv_num,1:2])
             
         } else
@@ -44,13 +47,14 @@ robjects.r('''
             run_num = unname(which.max(apply(ari_R, MARGIN = 2, max)))
             
             fit_vals = as.numeric(data_R[which(data_R$set==run_num),][indiv_num,1:2])                
+        print(fit_vals)
 
         eafdiffplot(data_L, data_R, 
             ylab="Intracluster Variance", xlab="Connectivity",
             title.left = label_L, title.right = label_R,
             type="area",
-            left.panel.last = { points(fit_vals[1], fit_vals[2], pch=21, cex=2, bg='red') },
-            right.panel.last = { points(fit_vals[1], fit_vals[2], pch=21, cex=2,bg='blue') }
+            left.panel.last = { points(fit_vals[1], fit_vals[2], pch=23, cex=1.5, bg='red') },
+            right.panel.last = { points(fit_vals[1], fit_vals[2], pch=23, cex=1.5, bg='red') }
         )
     }
 ''')
@@ -66,17 +70,22 @@ if __name__ == '__main__':
     base_folder = plots.base_res_folder("mut_ops")
     print(base_folder)
 
+    mut_method = "neighbour"
+    Lval = "L5"
+
     ari_L = plots.get_fpaths(base_folder / "orig", "*20_80*ari*")[0]
     fit_L = plots.get_fpaths(base_folder / "orig", "*20_80*fitness*")[0]
+    print(ari_L)
     print(fit_L)
 
-    ari_R = plots.get_fpaths(base_folder / "centroid" / "L5", "*20_80*ari*")[0]
-    fit_R = plots.get_fpaths(base_folder / "centroid" / "L5", "*20_80*fitness*")[0]
+    ari_R = plots.get_fpaths(base_folder / mut_method / Lval, "*20_80*ari*")[0]
+    fit_R = plots.get_fpaths(base_folder / mut_method / Lval, "*20_80*fitness*")[0]
     print(ari_R)
+    print(fit_R)
 
     # Need as params (if stmt) in plots
     label_L = "orig"
-    label_R = "centroid-L5"
+    label_R = mut_method+"-"+Lval
 
     ploteaf = robjects.r['plotEAF']
 

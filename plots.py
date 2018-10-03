@@ -6,15 +6,18 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from scipy import stats
 
-# try to construct this using the pathlib module
+import rpy2
+import readline # fixes problem with rpy2
+import rpy2.robjects as robjects
+from rpy2.robjects.packages import importr
 
-def get_folders(folder_str):
-    results_folder = Path.cwd() / "results"
+# def get_folders(folder_str):
+#     results_folder = Path.cwd() / "results"
     
-    # for folder in results_folder.glob(folder_str+"*"):
-    #     print(folder)
+#     # for folder in results_folder.glob(folder_str+"*"):
+#     #     print(folder)
 
-    print(results_folder.glob(folder_str / "*"))
+#     print(results_folder.glob(folder_str / "*"))
 
 def base_res_folder(exp_name):
     return Path.cwd() / "results" / exp_name
@@ -176,25 +179,37 @@ def gen_graph_obj(params, nrows=1, ncols=1):
     fig, ax = plt.subplots(nrows, ncols, figsize=params['figsize'])
     return fig, ax
 
-def check_graph_type(graph_type):
-    if graph_type not in ("bplot", "eaf", "generational"):
-        raise ValueError(f"{graph_type} has not been implemented!")
+
+def get_eaf_data(params, results_folder):
+    
+def r_setup():
+    eaf = importr('eaf', lib_loc="/home/cshand/R/x86_64-pc-linux-gnu-library/3.4")
+
+    ploteaf = robjects.r['plotEAF']
+
+    return ploteaf
+
 
 def main(params):
     results_folder = base_res_folder(params['exp_name'])
     print(results_folder)
 
-    check_graph_type(params['type'])
-
-    bplot_data, tick_labels = get_bplot_data(results_folder, params)
-
-    if params['stats_test']:
-        params = stats_colours(bplot_data, params)
-
-    # Generate a graph
+    # Generate the graph fig
     fig, ax = gen_graph_obj(params)
 
-    ax = plot_boxplot(bplot_data, ax, tick_labels, params)
+    if params['type'] == "bplot":
+        bplot_data, tick_labels = get_bplot_data(results_folder, params)
+
+        if params['stats_test']:
+            params = stats_colours(bplot_data, params)
+
+        ax = plot_boxplot(bplot_data, ax, tick_labels, params)
+    
+    elif params['type'] == "eaf":
+        get_eaf_data(params)
+    
+    else:
+        raise ValueError(f"{params['type']} has not been implemented!")
 
     if params['save_fig']:
         graph_path = params['graph_path'] / params['exp_name']
@@ -227,16 +242,8 @@ if __name__ == '__main__':
         'show_orig': True,
         'colours': None,
         'stats_test': True,
-        'boxplot_kwargs': {
-            'medianprops': {
-                'linewidth': 2,
-                'color': 'black',
-                'solid_capstyle': "butt"
-                },
-            'patch_artist': True
-        },
         'figsize': (18,12),
-        'save_fig': True,
+        'save_fig': False,
         'graph_path': Path.cwd() / "results" / "graphs"
     }
 
@@ -256,10 +263,24 @@ if __name__ == '__main__':
             'reference': ""            
         }
 
+    if params['type'] == "bplot":
+        params['boxplot_kwargs'] = {
+            'medianprops': {
+                'linewidth': 2,
+                'color': 'black',
+                'solid_capstyle': "butt"
+                },
+            'patch_artist': True
+        }
+
     if params['type'] == "eaf":
-        params["label_L"] = "Original"
-        # params["label_R"] = "Centroid" # combine this with the mut_method
-        params["L_val"] = 5
+        params["left_label"] = "Original"
+        params["left_method"] = "orig"
+        params["left_L"] = "" # "" if "orig", otherwise whatever
+
+        params["right_label"] = "Centroid"
+        params["right_method"] = "centroid"
+        params["right_L"] = 5
 
     plt.style.use('seaborn-paper')
     SMALL_SIZE = 28
