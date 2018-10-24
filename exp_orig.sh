@@ -1,1 +1,0 @@
-python run_mock.py --synthdata "*_9*" -e orig --seed_file "seeds/seed_list_mutation_2018-09-14.json"
