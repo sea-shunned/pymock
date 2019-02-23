@@ -6,15 +6,18 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from scipy import stats
 
-# try to construct this using the pathlib module
+import rpy2
+import readline # fixes problem with rpy2
+import rpy2.robjects as robjects
+from rpy2.robjects.packages import importr
 
-def get_folders(folder_str):
-    results_folder = Path.cwd() / "results"
+# def get_folders(folder_str):
+#     results_folder = Path.cwd() / "results"
     
-    # for folder in results_folder.glob(folder_str+"*"):
-    #     print(folder)
+#     # for folder in results_folder.glob(folder_str+"*"):
+#     #     print(folder)
 
-    print(results_folder.glob(folder_str / "*"))
+#     print(results_folder.glob(folder_str / "*"))
 
 def base_res_folder(exp_name):
     return Path.cwd() / "results" / exp_name
@@ -42,6 +45,7 @@ def plot_boxplot(data, ax, tick_labels, params):
     # medianprops = dict(linewidth=2, color='midnightblue')
 
     bxplot = ax.boxplot(data, **params['boxplot_kwargs'])
+<<<<<<< HEAD
 
     if params['stats_test']:
         for patch, colour, hatch in zip(
@@ -50,6 +54,16 @@ def plot_boxplot(data, ax, tick_labels, params):
             patch.set_facecolor(colour)
             patch.set_hatch(hatch)
 
+=======
+
+    if params['stats_test']:
+        for patch, colour, hatch in zip(
+            bxplot['boxes'], params['colours'], params['hatches']):
+
+            patch.set_facecolor(colour)
+            patch.set_hatch(hatch)
+
+>>>>>>> daf6068d61ab3d8624823eb5899edcf78239d2d3
     ax.set_xlabel(params['xlabel'])
     ax.set_ylabel(params['ylabel'])
 
@@ -126,7 +140,23 @@ def aggreg_data(fpaths):
         # Append the data to the list
         # Load in the data 
         # maybe add if statement here so we only use the max if measure is ari
+<<<<<<< HEAD
         data.append(np.mean(np.loadtxt(file, delimiter=","), axis=0))
+=======
+
+        if params['aggreg'] == "mean":
+            data.append(np.mean(np.loadtxt(file, delimiter=","), axis=0))
+        elif params['aggreg'] == "max":
+            data.append(np.max(np.loadtxt(file, delimiter=","), axis=0))
+        elif params['aggreg'] == "all":
+            res = np.loadtxt(file, delimiter=",")
+            shp = res.shape
+            data.append(res.reshape(shp[0]*shp[1],))            
+        else:
+            raise ValueError(f"{params['aggreg']} aggregation method not implemented!")
+
+
+>>>>>>> daf6068d61ab3d8624823eb5899edcf78239d2d3
 
     # Concatenate the data together for the boxplot
     final_data = np.concatenate(data, axis=0)
@@ -165,10 +195,24 @@ def gen_graph_obj(params, nrows=1, ncols=1):
     return fig, ax
 
 
+<<<<<<< HEAD
+=======
+def get_eaf_data(params, results_folder):
+    
+def r_setup():
+    eaf = importr('eaf', lib_loc="/home/cshand/R/x86_64-pc-linux-gnu-library/3.4")
+
+    ploteaf = robjects.r['plotEAF']
+
+    return ploteaf
+
+
+>>>>>>> daf6068d61ab3d8624823eb5899edcf78239d2d3
 def main(params):
     results_folder = base_res_folder(params['exp_name'])
     print(results_folder)
 
+<<<<<<< HEAD
     bplot_data, tick_labels = get_bplot_data(results_folder, params)
 
     if params['stats_test']:
@@ -178,6 +222,24 @@ def main(params):
     fig, ax = gen_graph_obj(params)
 
     ax = plot_boxplot(bplot_data, ax, tick_labels, params)
+=======
+    # Generate the graph fig
+    fig, ax = gen_graph_obj(params)
+
+    if params['type'] == "bplot":
+        bplot_data, tick_labels = get_bplot_data(results_folder, params)
+
+        if params['stats_test']:
+            params = stats_colours(bplot_data, params)
+
+        ax = plot_boxplot(bplot_data, ax, tick_labels, params)
+    
+    elif params['type'] == "eaf":
+        get_eaf_data(params)
+    
+    else:
+        raise ValueError(f"{params['type']} has not been implemented!")
+>>>>>>> daf6068d61ab3d8624823eb5899edcf78239d2d3
 
     if params['save_fig']:
         graph_path = params['graph_path'] / params['exp_name']
@@ -185,8 +247,19 @@ def main(params):
             os.makedirs(graph_path)
         except FileExistsError:
             pass
+<<<<<<< HEAD
             
         savename = str(graph_path) + os.sep + "bplot-" + "-".join([params['file_glob_str'], params['mut_method']]) + "-mean.pdf"
+=======
+        
+        savename = str(graph_path) + os.sep + "-".join([params['type'], params['file_glob_str'], params['mut_method'], params['aggreg']]) + ".pdf"
+        
+        savename = savename.replace("*","")
+
+        if os.path.isfile(savename):
+            print(f"Overwriting {savename}")
+
+>>>>>>> daf6068d61ab3d8624823eb5899edcf78239d2d3
         fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
         plt.close(fig)
     else:
@@ -194,14 +267,23 @@ def main(params):
 
 if __name__ == '__main__':
     params = {
+<<<<<<< HEAD
         'exp_name': "mut_ops",
         'mut_method': "centroid",
         'group_by': "L",
         'file_glob_str': "*numclusts*",
+=======
+        'type': "bplot",
+        'exp_name': "mut_ops",
+        'mut_method': "centroid",
+        'aggreg': "all",
+        'file_glob_str': "*ari*",
+>>>>>>> daf6068d61ab3d8624823eb5899edcf78239d2d3
         'xlabel': "L* values",
         'ylabel': "Adjusted Rand Index (ARI)",
         'show_orig': True,
         'colours': None,
+<<<<<<< HEAD
         'stats_test': False,
         'boxplot_kwargs': {
             'medianprops': {
@@ -211,6 +293,9 @@ if __name__ == '__main__':
                 },
             'patch_artist': True
         },
+=======
+        'stats_test': True,
+>>>>>>> daf6068d61ab3d8624823eb5899edcf78239d2d3
         'figsize': (18,12),
         'save_fig': False,
         'graph_path': Path.cwd() / "results" / "graphs"
@@ -231,10 +316,32 @@ if __name__ == '__main__':
             'equal': "",
             'reference': ""            
         }
+<<<<<<< HEAD
     # else:
     #     params['colours'] = {
 
     #     }
+=======
+
+    if params['type'] == "bplot":
+        params['boxplot_kwargs'] = {
+            'medianprops': {
+                'linewidth': 2,
+                'color': 'black',
+                'solid_capstyle': "butt"
+                },
+            'patch_artist': True
+        }
+
+    if params['type'] == "eaf":
+        params["left_label"] = "Original"
+        params["left_method"] = "orig"
+        params["left_L"] = "" # "" if "orig", otherwise whatever
+
+        params["right_label"] = "Centroid"
+        params["right_method"] = "centroid"
+        params["right_L"] = 5
+>>>>>>> daf6068d61ab3d8624823eb5899edcf78239d2d3
 
     plt.style.use('seaborn-paper')
     SMALL_SIZE = 28
@@ -250,4 +357,11 @@ if __name__ == '__main__':
     plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
     # plt.rc('font', family='serif')
 
+<<<<<<< HEAD
     main(params)
+=======
+    main(params)
+
+    # Need to add option to aggregate by max, mean, or use all
+    # Then add this to the filename
+>>>>>>> daf6068d61ab3d8624823eb5899edcf78239d2d3
