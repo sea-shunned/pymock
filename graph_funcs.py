@@ -949,6 +949,11 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
 
             if np.min(data_time) < min_val:
                 min_val = np.min(data_time)
+        
+        # print(data_metric_list)
+        print(len(data_metric_list))
+        print(type(data_metric_list[0]))
+        print(data_metric_list[0].shape)
 
         denom = max_val - min_val
 
@@ -1051,8 +1056,8 @@ def plotArtifExp_allDS(artif_folder, graph_path, strat_name_dict, dataname="*_9"
         fig.savefig(savename, format='pdf', dpi=1200, bbox_inches='tight')
         plt.close(fig)
 
-    else:
-        plt.show()
+    else:neighbour
+        pneighbour
 
     return ax2
 

@@ -445,6 +445,7 @@ def runMOCK(
     """
     # Set the seed
     random.seed(seed_num)
+    print(f"Seed number: {seed_num}")
 
     # Initialise local varibles
     # This can be abstracted out in future

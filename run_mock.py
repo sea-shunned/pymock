@@ -301,146 +301,154 @@ def run_mock(**cl_args):
                 else:
                     kwargs['hv_ref'] = calc_hv_ref(kwargs)
 
-            if cl_args['mut_method'] == "centroid":
-                distarray_cen = precompute.compDists(
-                    PartialClust.base_centres, PartialClust.base_centres)
-                kwargs['mut_meth_params'] = {
-                    'mut_method': "centroid",
-                    'argsortdists_cen': np.argsort(
-                        distarray_cen, kind='mergesort'),
-                    'nn_rankings_cen': precompute.nnRankings(
-                        distarray_cen, len(PartialClust.comp_dict)),
-                    'L_comp': cl_args['L_comp']
-                }                
-            elif cl_args['mut_method'] == "neighbour":
-                kwargs['mut_meth_params'] = {
-                    'mut_method': "neighbour",
-                    'component_nns': precompute.nn_comps(
-                        Dataset.num_examples, kwargs['argsortdists'], kwargs['data_dict'], cl_args['L_comp'])
-                }
-            else:
-                kwargs['mut_meth_params'] = {
-                    'mut_method': "original"
-                }
-            # print(kwargs['mut_meth_params'])
-            # calc_hv_ref(kwargs)
-            print(f"HV ref point: {kwargs['hv_ref']}")
-            
-            # Loop through the strategies
-            for strat_name in params['strategies']:
-                kwargs['strat_name'] = strat_name
-                if strat_name == "base":
-                    kwargs['adapt_delta'] = False
-                else:
-                    kwargs['adapt_delta'] = True
-
-                fitness_array = np.empty((cl_args['num_indivs']*cl_args['num_runs'], len(fitness_cols)))
-                hv_array = np.empty((cl_args['num_gens'], cl_args['num_runs']))
-                ari_array = np.empty((cl_args['num_indivs'], cl_args['num_runs']))
-                num_clusts_array = np.empty((cl_args['num_indivs'], cl_args['num_runs']))
-                time_array = np.empty(cl_args['num_runs'])
-                delta_triggers = []
-
-                # Abstract the below to a precompute func
-                # Can then choose which based on the mutation method
-                                
-
-                # kwargs['argsortdists_cen'] = np.argsort(distarray_cen, kind='mergesort')
-                # kwargs['nn_rankings_cen'] = precompute.nnRankings_cen(distarray_cen, len(PartialClust.comp_dict))
+            for l_comp in params['l_comp']:
                 
-                mock_func = partial(delta_mock.runMOCK, *list(kwargs.values()))
+                if cl_args['mut_method'] == "centroid":
+                    distarray_cen = precompute.compDists(
+                        PartialClust.base_centres, PartialClust.base_centres)
+                    kwargs['mut_meth_params'] = {
+                        'mut_method': "centroid",
+                        'argsortdists_cen': np.argsort(
+                            distarray_cen, kind='mergesort'),
+                        'nn_rankings_cen': precompute.nnRankings(
+                            distarray_cen, len(PartialClust.comp_dict)),
+                        'L_comp': l_comp
+                    }                
+                elif cl_args['mut_method'] == "neighbour":
+                    kwargs['mut_meth_params'] = {
+                        'mut_method': "neighbour",
+                        'component_nns': precompute.nn_comps(
+                            Dataset.num_examples, kwargs['argsortdists'],
+                            kwargs['data_dict'], l_comp)
+                    }
+                else:
+                    kwargs['mut_meth_params'] = {
+                        'mut_method': "original"
+                    }
+                # print(kwargs['mut_meth_params'])
+                # calc_hv_ref(kwargs)
+                print(f"HV ref point: {kwargs['hv_ref']}")
 
-                print(f"{strat_name} starting...")
-                # Measure the time taken for the runs
-                start_time = time.time()
-                # Send the function to a thread, each thread with a different seed
-                with multiprocessing.Pool() as pool:
-                    results = pool.starmap(mock_func, seed_list)
-                end_time = time.time()
-                print(f"{strat_name} done (took {end_time-start_time:.3f} secs) - collecting results...")
-
-                for run_num, run_result in enumerate(results):
-                    # Extract the population
-                    pop = run_result[0]
-                    # Extract hv list
-                    hv = run_result[1]
-                    # Extract final interesting links
-                    final_interest_inds = run_result[3]
-                    # Extract final genotype length
-                    final_gen_len = run_result[4]
-                    # Extract gens with delta trigger
-                    adapt_gens = run_result[5]
-
-                    # Assign values to arrays
-                    ind = cl_args['num_indivs']*run_num
-                    fitness_array[ind:ind+cl_args['num_indivs'], 0:3] = [indiv.fitness.values+(run_num+1,) for indiv in pop]
-
-                    hv_array[:, run_num] = hv
-
-                    num_clusts, aris = evaluation.finalPopMetrics(
-                        pop, kwargs['mst_genotype'], final_interest_inds, final_gen_len)
-                    num_clusts_array[:, run_num] = num_clusts
-                    ari_array[:, run_num] = aris
-
-                    delta_triggers.append(adapt_gens)
-
-                print(f"{strat_name} complete!")
-
-                if cl_args['validate']:
-                    print("---------------------------")
-                    print("Validating results...")
-                    valid = validate_results(
-                        os.path.join(os.getcwd(), "test_data", ""),
-                        strat_name,
-                        ari_array,
-                        hv_array,
-                        fitness_array,
-                        delta_triggers,
-                        cl_args['num_runs']
-                        )
-
-                    if not valid:
-                        raise ValueError(f"Results incorrect for {strat_name}")
+                # Loop through the strategies
+                for strat_name in params['strategies']:
+                    kwargs['strat_name'] = strat_name
+                    if strat_name == "base":
+                        kwargs['adapt_delta'] = False
                     else:
-                        print(f"{strat_name} validated!\n")
+                        kwargs['adapt_delta'] = True
 
-                if cl_args['exp_name'] != "":
-                    fname_prefix = "-".join(
-                        [results_folder+Dataset.data_name, strat_name])
+                    fitness_array = np.empty((cl_args['num_indivs']*cl_args['num_runs'], len(fitness_cols)))
+                    hv_array = np.empty((cl_args['num_gens'], cl_args['num_runs']))
+                    ari_array = np.empty((cl_args['num_indivs'], cl_args['num_runs']))
+                    num_clusts_array = np.empty((cl_args['num_indivs'], cl_args['num_runs']))
+                    time_array = np.empty(cl_args['num_runs'])
+                    delta_triggers = []
+
+                    # Abstract the below to a precompute func
+                    # Can then choose which based on the mutation method
+                                    
+
+                    # kwargs['argsortdists_cen'] = np.argsort(distarray_cen, kind='mergesort')
+                    # kwargs['nn_rankings_cen'] = precompute.nnRankings_cen(distarray_cen, len(PartialClust.comp_dict))
                     
-                    if kwargs['adapt_delta']:
-                        fname_suffix = "-adapt"
-                    else:
-                        fname_suffix = ""
+                    mock_func = partial(delta_mock.runMOCK, *list(kwargs.values()))
 
-                    # Save fitness values
-                    np.savetxt(
-                        fname_prefix+"-fitness-sr"+str(sr_val)+fname_suffix+".csv", fitness_array, 
-                        delimiter=",")
-                    # Save hypervolume values
-                    np.savetxt(
-                        fname_prefix+"-hv-sr"+str(sr_val)+fname_suffix+".csv", hv_array, 
-                        delimiter=",")
-                    # Save ARI values
-                    np.savetxt(
-                        fname_prefix+"-ari-sr"+str(sr_val)+fname_suffix+".csv", ari_array, 
-                        delimiter=",")
-                    # Save number of clusters
-                    np.savetxt(
-                        fname_prefix+"-numclusts-sr"+str(sr_val)+fname_suffix+".csv", num_clusts_array, 
-                        delimiter=",")
-                    # Save computation time
-                    np.savetxt(
-                        fname_prefix+"-time-sr"+str(sr_val)+fname_suffix+".csv", time_array, 
-                        delimiter=",")
+                    print(f"{strat_name}-{cl_args['mut_method']} starting...")
+                    # Measure the time taken for the runs
+                    start_time = time.time()
+                    # Send the function to a thread, each thread with a different seed
+                    with multiprocessing.Pool() as pool:
+                        results = pool.starmap(mock_func, seed_list)
+                    end_time = time.time()
+                    print(f"{strat_name} done (took {end_time-start_time:.3f} secs) - collecting results...")
 
-                    # Save delta triggers
-                    # No triggers for normal delta-MOCK
-                    if kwargs['adapt_delta']:
-                        with open(
-                            fname_prefix+"-triggers-sr"+str(sr_val)+fname_suffix+".csv","w") as f:
-                            writer=csv.writer(f)
-                            writer.writerows(delta_triggers)
+                    for run_num, run_result in enumerate(results):
+                        # Extract the population
+                        pop = run_result[0]
+                        # Extract hv list
+                        hv = run_result[1]
+                        # Extract final interesting links
+                        final_interest_inds = run_result[3]
+                        # Extract final genotype length
+                        final_gen_len = run_result[4]
+                        # Extract gens with delta trigger
+                        adapt_gens = run_result[5]
+
+                        # Assign values to arrays
+                        ind = cl_args['num_indivs']*run_num
+                        fitness_array[ind:ind+cl_args['num_indivs'], 0:3] = [indiv.fitness.values+(run_num+1,) for indiv in pop]
+
+                        hv_array[:, run_num] = hv
+
+                        num_clusts, aris = evaluation.finalPopMetrics(
+                            pop, kwargs['mst_genotype'], final_interest_inds, final_gen_len)
+                        num_clusts_array[:, run_num] = num_clusts
+                        ari_array[:, run_num] = aris
+
+                        delta_triggers.append(adapt_gens)
+
+                    print(f"{strat_name} complete!")
+
+                    if cl_args['validate']:
+                        print("---------------------------")
+                        print("Validating results...")
+                        valid = validate_results(
+                            os.path.join(os.getcwd(), "test_data", ""),
+                            strat_name,
+                            ari_array,
+                            hv_array,
+                            fitness_array,
+                            delta_triggers,
+                            cl_args['num_runs']
+                            )
+
+                        if not valid:
+                            raise ValueError(f"Results incorrect for {strat_name}")
+                        else:
+                            print(f"{strat_name} validated!\n")
+
+                    if cl_args['exp_name'] != "":
+                        try:
+                            fname_prefix = os.path.join(results_folder, cl_args["mut_method"], "L"+str(l_comp), "")
+                            os.makedirs(fname_prefix)
+                        except FileExistsError:
+                            fname_prefix = os.path.join(results_folder, cl_args["mut_method"], "L"+str(l_comp), "")
+                    
+                        fname_prefix += Dataset.data_name
+                        
+                        if kwargs['adapt_delta']:
+                            fname_suffix = "-adapt"
+                        else:
+                            fname_suffix = ""
+
+                        # Save fitness values
+                        np.savetxt(
+                            fname_prefix+"-fitness-sr"+str(sr_val)+fname_suffix+".csv", fitness_array, 
+                            delimiter=",")
+                        # Save hypervolume values
+                        np.savetxt(
+                            fname_prefix+"-hv-sr"+str(sr_val)+fname_suffix+".csv", hv_array, 
+                            delimiter=",")
+                        # Save ARI values
+                        np.savetxt(
+                            fname_prefix+"-ari-sr"+str(sr_val)+fname_suffix+".csv", ari_array, 
+                            delimiter=",")
+                        # Save number of clusters
+                        np.savetxt(
+                            fname_prefix+"-numclusts-sr"+str(sr_val)+fname_suffix+".csv", num_clusts_array, 
+                            delimiter=",")
+                        # Save computation time
+                        np.savetxt(
+                            fname_prefix+"-time-sr"+str(sr_val)+fname_suffix+".csv", time_array, 
+                            delimiter=",")
+
+                        # Save delta triggers
+                        # No triggers for normal delta-MOCK
+                        if kwargs['adapt_delta']:
+                            with open(
+                                fname_prefix+"-triggers-sr"+str(sr_val)+fname_suffix+".csv","w") as f:
+                                writer=csv.writer(f)
+                                writer.writerows(delta_triggers)
 
 if __name__ == '__main__':
     parser = utils.build_parser()
