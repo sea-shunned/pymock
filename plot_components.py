@@ -39,15 +39,26 @@ def save_components(labels, delta_val):
     np.savetxt(save_name, labels, delimiter=",", fmt="%i")
     return save_name
 
-def plot_components(data, labels):
+def plot_components(data, labels, delta_val, save=False):
     fig, ax = plt.subplots()
 
     data = np.hstack((data, labels[:, None]))
     print(data.shape)
-    df = pd.DataFrame(data=data, columns=["x", "y", "comp_label"])
+    df = pd.DataFrame(data=data, columns=["x", "y", "Component #"])
     print(df.head())
-    df.plot.scatter("x", "y", c="comp_label", colormap="jet", alpha=0.5, s=5)
-    plt.show()
+    print(len(df["Component #"].unique()))
+    ax = df.plot.scatter("x", "y", c="Component #", cmap='inferno', alpha=1.0, s=1, ax=ax)
+    plt.axis('off')
+    plt.tight_layout()
+    if save:
+        fig.savefig(
+            f"data_sr{delta_val}.pdf",
+            format="pdf",
+            dpi=200,
+            transparent=True
+        )
+    else:
+        plt.show()
 
 def load_data(file_path):
     data = np.genfromtxt(file_path, delimiter="\t", skip_header=4)
@@ -63,7 +74,7 @@ Then time it roughly to see if it's capable to do both
 """
 
 if __name__ == "__main__":
-    calc_components = True
+    calc_components = False
     delta_vals = [1, 5, 10, 50, 100, 500, 1000, 10000]
     
     f_paths, res_folder = run_mock.load_data(
@@ -88,9 +99,12 @@ if __name__ == "__main__":
         data = load_data(data_path)
 
         for delta_val in delta_vals:
-            fname = glob.glob(f"*component*{delta_val}.csv")[0]
-
+            try:
+                fname = glob.glob(f"*component*{delta_val}.csv")[0]
+                print(fname)
+            except IndexError:
+                raise("No files found")
             labels = np.loadtxt(fname)
 
-            plot_components(data, labels)
+            plot_components(data, labels, delta_val, save=True)
             
