@@ -47,14 +47,14 @@ def plot_components(data, labels, delta_val, save=False):
     df = pd.DataFrame(data=data, columns=["x", "y", "Component #"])
     print(df.head())
     print(len(df["Component #"].unique()))
-    ax = df.plot.scatter("x", "y", c="Component #", cmap='inferno', alpha=1.0, s=1, ax=ax)
+    ax = df.plot.scatter("x", "y", c="Component #", cmap='inferno', alpha=1.0, s=0.8, ax=ax, rasterized=True)
     plt.axis('off')
     plt.tight_layout()
     if save:
         fig.savefig(
             f"data_sr{delta_val}.pdf",
             format="pdf",
-            dpi=200,
+            dpi=300,
             transparent=True
         )
     else:
@@ -75,7 +75,7 @@ Then time it roughly to see if it's capable to do both
 
 if __name__ == "__main__":
     calc_components = False
-    delta_vals = [1, 5, 10, 50, 100, 500, 1000, 10000]
+    delta_vals = [0.01, 0.1, 1, 10, 100]
     
     f_paths, res_folder = run_mock.load_data(
         use_real_data=True,
