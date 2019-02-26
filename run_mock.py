@@ -110,7 +110,6 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
     distarray = precompute.normaliseDistArray(distarray)
     argsortdists = np.argsort(distarray, kind='mergesort')
 
-    
     # Calculate nearest neighbour rankings
     nn_rankings = precompute.nnRankings(distarray, Dataset.num_examples)
     
@@ -165,7 +164,7 @@ def create_seeds(num_runs, exp_name, seed_file=None):
     """
     # Load seeds if present
     if seed_file is not None:
-        seed_list = utils.load_json(seed_file)
+        seed_list = utils.load_json(seed_file)["seed_list"]
     else:
         # Randomly generate seeds
         seed_list = [random.uniform(0, 1000) for i in range(num_runs)]
@@ -186,6 +185,8 @@ def create_seeds(num_runs, exp_name, seed_file=None):
             with open(seed_fname, 'w') as out_file:
                 json.dump(seed_list, out_file, indent=4)
     # Ensure we have enough seeds
+    print(seed_list, len(seed_list))
+    print(num_runs)
     if len(seed_list) < num_runs:
         raise ValueError("Not enough seeds for number of runs")
     return seed_list
