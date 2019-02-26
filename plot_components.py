@@ -64,7 +64,7 @@ Then time it roughly to see if it's capable to do both
 
 if __name__ == "__main__":
     calc_components = True
-    delta_vals = [1, 5, 10]
+    delta_vals = [1, 5, 10, 50, 100, 500, 1000, 10000]
     
     f_paths, res_folder = run_mock.load_data(
         use_real_data=True,
@@ -82,7 +82,7 @@ if __name__ == "__main__":
             labels = get_components(kwargs, delta_val)
             fname = save_components(labels, delta_val)
 
-            plot_components(kwargs['data'], labels)
+            # plot_components(kwargs['data'], labels)
 
     else:
         data = load_data(data_path)
