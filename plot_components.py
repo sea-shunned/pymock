@@ -5,10 +5,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import run_mock
-from classes import Dataset, MOCKGenotype, PartialClust
+from classes import Datapoint, MOCKGenotype, PartialClust
 
 def component_labels(comp_dict):
-    labels = np.empty(Dataset.num_examples)
+    labels = np.empty(Datapoint.num_examples)
     labels[:] = np.nan
 
     for key, clust_obj in comp_dict.items():
@@ -84,27 +84,52 @@ if __name__ == "__main__":
     )
     data_path = f_paths[1]
 
-    label_list = []
-
-    if calc_components:
-        kwargs = run_mock.prepare_data(data_path)
+    # if calc_components:
+    #     kwargs = run_mock.prepare_data(
+    #         data_path,
+    #         L=10,
+    #         num_indivs=100,
+    #         num_gens=100
+    #     )
     
-        for delta_val in delta_vals:
+    #     for delta_val in delta_vals:
+    #         labels = get_components(kwargs, delta_val)
+    #         fname = save_components(labels, delta_val)
+
+    #         # plot_components(kwargs['data'], labels)
+
+    # else:
+    #     data = load_data(data_path)
+
+    #     for delta_val in delta_vals:
+    #         try:
+    #             fname = glob.glob(f"*component*{delta_val}.csv")[0]
+    #             print(fname)
+    #         except IndexError:
+    #             print("No files found")
+    #             raise
+    #         labels = np.loadtxt(fname)
+
+    #         plot_components(data, labels, delta_val, save=True)
+
+    data = load_data(data_path)
+
+    files_exist = all([glob.glob(f"*component*{delta_val}.csv") for delta_val in delta_vals])
+
+    if not files_exist:
+        kwargs = run_mock.prepare_data(
+            data_path,
+            L=10,
+            num_indivs=100,
+            num_gens=100
+        )
+
+    for delta_val in delta_vals:
+        if not files_exist:
             labels = get_components(kwargs, delta_val)
             fname = save_components(labels, delta_val)
 
-            # plot_components(kwargs['data'], labels)
+        labels = np.loadtxt(fname)
 
-    else:
-        data = load_data(data_path)
-
-        for delta_val in delta_vals:
-            try:
-                fname = glob.glob(f"*component*{delta_val}.csv")[0]
-                print(fname)
-            except IndexError:
-                raise("No files found")
-            labels = np.loadtxt(fname)
-
-            plot_components(data, labels, delta_val, save=True)
+        plot_components(data, labels, delta_val, save=True)
             
