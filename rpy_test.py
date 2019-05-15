@@ -7,11 +7,6 @@ from rpy2.robjects.packages import importr
 
 eaf = importr('eaf', lib_loc="/home/cshand/R/x86_64-pc-linux-gnu-library/3.4")
 
-
-
-# def format_data_eaf(fname1, fname2, method1, method2):
-#     pass
-
 robjects.r('''
     plotEAF <- function(fit_L, fit_R, ari_L, ari_R, label_L, label_R, switchcols=TRUE){
         data_L <-read.table(fit_L, sep=",")
