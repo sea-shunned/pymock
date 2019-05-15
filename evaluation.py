@@ -1,14 +1,14 @@
-from sklearn.metrics import adjusted_rand_score
-import classes
-import igraph
 import numpy as np
 import pandas as pd
+from sklearn.metrics import adjusted_rand_score
+import igraph
 
+import classes
 
 def finalPopMetrics2(pop, mst_genotype, int_links_indices, relev_links_len):
     final_pop_metrics = pd.DataFrame()
 
-    num_examples = classes.Dataset.num_examples
+    num_examples = classes.Datapoint.num_examples
 
     sol_num_clusters = []
     ari_values = []
@@ -49,7 +49,7 @@ def finalPopMetrics2(pop, mst_genotype, int_links_indices, relev_links_len):
             print("Label missing when trying to calculate ARI")
 
         # Add the ARI value
-        ari_values.append(adjusted_rand_score(labels_true=classes.Dataset.label_vals, labels_pred=pred_labels))
+        ari_values.append(adjusted_rand_score(labels_true=classes.Datapoint.label_vals, labels_pred=pred_labels))
 
         VARs.append(indiv.fitness.values[0])
         CNNs.append(indiv.fitness.values[1])
@@ -67,7 +67,7 @@ def finalPopMetrics2(pop, mst_genotype, int_links_indices, relev_links_len):
 # @profile
 def finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len):
 
-    num_examples = classes.Dataset.num_examples
+    num_examples = classes.Datapoint.num_examples
 
     sol_num_clusters = []
     ari_values = []
@@ -105,7 +105,7 @@ def finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len):
         assert np.any(np.isnan(pred_labels)) != True
 
         # Add the ARI value
-        ari_values.append(adjusted_rand_score(labels_true=classes.Dataset.label_vals, labels_pred=pred_labels))
+        ari_values.append(adjusted_rand_score(labels_true=classes.Datapoint.label_vals, labels_pred=pred_labels))
 
     ### Can use this attribute to get the number directly
     # Still need components though so may not be useful
@@ -122,7 +122,7 @@ def finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len):
 
 
 def numClusters(pop, mst_genotype, int_links_indices, relev_links_len):
-    num_examples = classes.Dataset.num_examples
+    num_examples = classes.Datapoint.num_examples
 
     sol_num_clusters = []
 

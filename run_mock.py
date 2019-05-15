@@ -1,4 +1,3 @@
- 
 # Standard libraries
 import os
 import glob
@@ -8,10 +7,11 @@ import time
 import csv
 from functools import partial
 import multiprocessing
+
 import numpy as np
 
 # Own functions
-from classes import Dataset, MOCKGenotype, PartialClust
+from classes import Datapoint, MOCKGenotype, PartialClust
 import precompute
 import evaluation
 import objectives
@@ -58,11 +58,11 @@ def load_data(use_real_data=False, synth_data_subset="*", real_data_subset="*", 
     
     return synth_data_files + real_data_files, results_folder
 
-def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
+def prepare_data(file_path, L, num_indivs, num_gens, delta_reduce=1):
     """Prepare the dataset (precomputation). Default values are overwritten by config file
     
     Arguments:
-        file_path {[type]} -- [description]
+        file_path {str} -- File path to the data
     
     Keyword Arguments:
         L {int} -- The neighbourhood hyperparameter (default: {10})
@@ -75,9 +75,9 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
     """
 
     if "synthetic" in file_path:
-        Dataset.data_name = file_path.split("/")[-1].split(".")[0][:-15]
+        Datapoint.data_name = file_path.split("/")[-1].split(".")[0][:-15]
     elif "UKC" in file_path:
-        Dataset.data_name = file_path.split("/")[-1].split(".")[0]
+        Datapoint.data_name = file_path.split("/")[-1].split(".")[0]
     # Current data has header with metadata
     with open(file_path) as file:
         head = [int(next(file)[:-1]) for _ in range(4)]
@@ -87,37 +87,37 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
     data = np.genfromtxt(file_path, delimiter="\t", skip_header=4)
 
     # Set the values for the data
-    Dataset.num_examples = head[0] # Num examples
-    Dataset.num_features = head[1] # Num features/dimensions
-    Dataset.k_user = head[3] # Num real clusters
+    Datapoint.num_examples = head[0] # Num examples
+    Datapoint.num_features = head[1] # Num features/dimensions
+    Datapoint.k_user = head[3] # Num real clusters
     
-    print("Num examples:", Dataset.num_examples)
-    print("Num features:", Dataset.num_features)
-    print("Num (actual) clusters:", Dataset.k_user)
+    print("Num examples:", Datapoint.num_examples)
+    print("Num features:", Datapoint.num_features)
+    print("Num (actual) clusters:", Datapoint.k_user)
 
     # Do we have labels?
     if head[2] == 1:
-        Dataset.labels = True
+        Datapoint.labels = True
     else:
-        Dataset.labels = False
+        Datapoint.labels = False
 
     # Remove labels if present and create data_dict
-    data, data_dict = Dataset.createDatasetGarza(data)   
+    data, data_dict = Datapoint.create_dataset_garza(data)   
 
     # Go through the precomputation specific to the dataset
     # Calculate distance array
-    distarray = precompute.compDists(data, data)
-    distarray = precompute.normaliseDistArray(distarray)
+    distarray = precompute.compute_dists(data, data)
+    distarray = precompute.normalize_dists(distarray)
     argsortdists = np.argsort(distarray, kind='mergesort')
 
     # Calculate nearest neighbour rankings
-    nn_rankings = precompute.nnRankings(distarray, Dataset.num_examples)
+    nn_rankings = precompute.nn_rankings(distarray, Datapoint.num_examples)
     
     # Calculate MST
-    MOCKGenotype.mst_genotype = precompute.createMST(distarray)
+    MOCKGenotype.mst_genotype = precompute.create_mst(distarray)
     
     # Calculate DI values
-    MOCKGenotype.degree_int = precompute.degreeInterest(MOCKGenotype.mst_genotype, nn_rankings, distarray)
+    MOCKGenotype.degree_int = precompute.degree_interest(MOCKGenotype.mst_genotype, nn_rankings, distarray)
     
     # Sort to get the indices of most to least interesting links
     MOCKGenotype.interest_links_indices()
@@ -139,7 +139,6 @@ def prepare_data(file_path, L=10, num_indivs=100, num_gens=100, delta_reduce=1):
         "delta_reduce": delta_reduce,
         "strat_name": None,
         "adapt_delta": None,
-        "reduced_length": None,
         "reduced_clust_nums": None,
         "mut_meth_params": None
     }
@@ -205,18 +204,16 @@ def calc_hv_ref(kwargs):
     mst_reduced_genotype = [MOCKGenotype.mst_genotype[i] for i in MOCKGenotype.reduced_genotype_indices]
 
     # Calculate chains
-    chains, superclusts = objectives.clusterChains(
+    chains, superclusts = objectives.cluster_chains(
         mst_reduced_genotype, kwargs['data_dict'], PartialClust.comp_dict, MOCKGenotype.reduced_cluster_nums
     )
-    
+    # Calculate the maximum possible intracluster variance
     PartialClust.max_var = objectives.objVAR(
         chains, PartialClust.comp_dict, PartialClust.base_members,
         PartialClust.base_centres, superclusts
     )
-
-    # Need to divide by N as this is done in evalMOCK() not objVAR()
-    PartialClust.max_var= PartialClust.max_var/Dataset.num_examples
-
+    # Need to divide by N as this is done in eval_mock() not objVAR()
+    PartialClust.max_var= PartialClust.max_var/Datapoint.num_examples
     # Set reference point just outside max values to ensure no overlap
     hv_ref = [
         PartialClust.max_var*1.01,
@@ -249,10 +246,16 @@ def run_mock(**cl_args):
     if cl_args['validate']:
         # override params for validation
         sr_vals = [1]
-        cl_args['num_runs'] = 4
+        cl_args['num_runs'] = 2
         
         seed_list = create_seeds(
             cl_args['num_runs'], cl_args['exp_name'], seed_file="seed_list_validate.json")
+        # This is a hack that needs to be fixed when we re-write how things
+        # work and get looped over
+        try:
+            params['l_comp'] = [1]
+        except KeyError:
+            pass
     else:
         seed_list = create_seeds(
             cl_args['num_runs'], cl_args['exp_name'],
@@ -305,21 +308,21 @@ def run_mock(**cl_args):
             for l_comp in params['l_comp']:
                 
                 if cl_args['mut_method'] == "centroid":
-                    distarray_cen = precompute.compDists(
+                    distarray_cen = precompute.compute_dists(
                         PartialClust.base_centres, PartialClust.base_centres)
                     kwargs['mut_meth_params'] = {
                         'mut_method': "centroid",
                         'argsortdists_cen': np.argsort(
                             distarray_cen, kind='mergesort'),
-                        'nn_rankings_cen': precompute.nnRankings(
+                        'nn_rankings_cen': precompute.nn_rankings(
                             distarray_cen, len(PartialClust.comp_dict)),
                         'L_comp': l_comp
                     }                
                 elif cl_args['mut_method'] == "neighbour":
                     kwargs['mut_meth_params'] = {
                         'mut_method': "neighbour",
-                        'component_nns': precompute.nn_comps(
-                            Dataset.num_examples, kwargs['argsortdists'],
+                        'component_nns': precompute.component_nn(
+                            Datapoint.num_examples, kwargs['argsortdists'],
                             kwargs['data_dict'], l_comp)
                     }
                 else:
@@ -332,32 +335,36 @@ def run_mock(**cl_args):
 
                 # Loop through the strategies
                 for strat_name in params['strategies']:
+                    # Add the strat name to the kwargs
                     kwargs['strat_name'] = strat_name
+                    # Adaptation flag to make it easier
                     if strat_name == "base":
                         kwargs['adapt_delta'] = False
                     else:
                         kwargs['adapt_delta'] = True
-
+                    # Initialize arrays for the results
                     fitness_array = np.empty((cl_args['num_indivs']*cl_args['num_runs'], len(fitness_cols)))
                     hv_array = np.empty((cl_args['num_gens'], cl_args['num_runs']))
                     ari_array = np.empty((cl_args['num_indivs'], cl_args['num_runs']))
                     num_clusts_array = np.empty((cl_args['num_indivs'], cl_args['num_runs']))
                     time_array = np.empty(cl_args['num_runs'])
-                    delta_triggers = []
+                    delta_triggers = [] # which generation delta was changed
 
                     # Abstract the below to a precompute func
                     # Can then choose which based on the mutation method
-                                    
+
 
                     # kwargs['argsortdists_cen'] = np.argsort(distarray_cen, kind='mergesort')
-                    # kwargs['nn_rankings_cen'] = precompute.nnRankings_cen(distarray_cen, len(PartialClust.comp_dict))
+                    # kwargs['nn_rankings_cen'] = precompute.nn_rankings_cen(distarray_cen, len(PartialClust.comp_dict))
                     
+                    # Create the partial function to give to multiprocessing
                     mock_func = partial(delta_mock.runMOCK, *list(kwargs.values()))
 
                     print(f"{strat_name}-{cl_args['mut_method']} starting...")
                     # Measure the time taken for the runs
                     start_time = time.time()
                     # Send the function to a thread, each thread with a different seed
+                    print("here", seed_list)
                     with multiprocessing.Pool() as pool:
                         results = pool.starmap(mock_func, seed_list)
                     end_time = time.time()
@@ -401,13 +408,14 @@ def run_mock(**cl_args):
                             fitness_array,
                             delta_triggers,
                             cl_args['num_runs']
-                            )
+                        )
 
                         if not valid:
                             raise ValueError(f"Results incorrect for {strat_name}")
                         else:
                             print(f"{strat_name} validated!\n")
 
+                    # Save results to the specified experiment folder
                     if cl_args['exp_name'] != "":
                         try:
                             fname_prefix = os.path.join(results_folder, cl_args["mut_method"], "L"+str(l_comp), "")
@@ -415,7 +423,7 @@ def run_mock(**cl_args):
                         except FileExistsError:
                             fname_prefix = os.path.join(results_folder, cl_args["mut_method"], "L"+str(l_comp), "")
                     
-                        fname_prefix += Dataset.data_name
+                        fname_prefix += Datapoint.data_name
                         
                         if kwargs['adapt_delta']:
                             fname_suffix = "-adapt"
@@ -450,6 +458,9 @@ def run_mock(**cl_args):
                                 fname_prefix+"-triggers-sr"+str(sr_val)+fname_suffix+".csv","w") as f:
                                 writer=csv.writer(f)
                                 writer.writerows(delta_triggers)
+                    else:
+                        print("No experiment folder given - results have not been saved!")
+
 
 if __name__ == '__main__':
     parser = utils.build_parser()

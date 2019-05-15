@@ -10,7 +10,7 @@ import precompute
 import initialisation
 import objectives
 import operators
-from classes import Dataset, MOCKGenotype, PartialClust
+from classes import Datapoint, MOCKGenotype, PartialClust
 
 # Run outside of multiprocessing scope
 # Can consider trying to move this, though we just run it once anyway so eh
@@ -27,82 +27,82 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
 
     # Register the initialisation function
     toolbox.register(
-        "initDelta", 
-        initialisation.initDeltaMOCK, 
-        k_user = Dataset.k_user, 
-        num_indivs = num_indivs,
-        argsortdists = argsortdists, 
-        L = L
+        "initDelta",
+        initialisation.init_deltamock,
+        k_user=Datapoint.k_user,
+        num_indivs=num_indivs,
+        argsortdists=argsortdists,
+        L=L
     )
 
     # Register the population function that uses the custom initialisation
     toolbox.register(
-        "population", 
-        tools.initIterate, 
-        list, 
+        "population",
+        tools.initIterate,
+        list,
         toolbox.initDelta
     )
 
     # Register the evaluation function
     toolbox.register(
-        "evaluate", 
-        objectives.evalMOCK, 
-        comp_dict = PartialClust.comp_dict,
-        reduced_clust_nums = MOCKGenotype.reduced_cluster_nums, 
-        cnn_array = PartialClust.cnn_array, 
-        max_cnn = PartialClust.max_cnn, 
-        num_examples = Dataset.num_examples, 
-        data_dict = data_dict, 
-        cnn_pairs = PartialClust.cnn_pairs, 
-        base_members = PartialClust.base_members, 
-        base_centres = PartialClust.base_centres
+        "evaluate",
+        objectives.eval_mock,
+        comp_dict=PartialClust.comp_dict,
+        reduced_clust_nums=MOCKGenotype.reduced_cluster_nums,
+        cnn_array=PartialClust.cnn_array,
+        max_cnn=PartialClust.max_cnn,
+        num_examples=Datapoint.num_examples,
+        data_dict=data_dict,
+        cnn_pairs=PartialClust.cnn_pairs,
+        base_members=PartialClust.base_members,
+        base_centres=PartialClust.base_centres
     )
 
     # Register the crossover function
     toolbox.register(
-        "mate", 
-        operators.uniformCrossover, 
-        cxpb = 1.0
+        "mate",
+        operators.uniform_xover,
+        cxpb=1.0
     )
 
     # Register the mutation function
     if mut_meth_params['mut_method'] == "original":
         toolbox.register(
-            "mutate", operators.neighbour_mut, 
-            MUTPB = 1.0, 
-            gen_length = MOCKGenotype.reduced_length, 
-            argsortdists = argsortdists, 
-            L = L, 
-            interest_indices = MOCKGenotype.interest_indices, 
-            nn_rankings = nn_rankings
+            "mutate", operators.neighbour_mut,
+            MUTPB=1.0,
+            gen_length=MOCKGenotype.reduced_length,
+            argsortdists=argsortdists,
+            L=L,
+            interest_indices=MOCKGenotype.interest_indices,
+            nn_rankings=nn_rankings
         )
 
     elif mut_meth_params['mut_method'] == "centroid":
         toolbox.register(
-            "mutate", operators.comp_centroid_mut, 
-            MUTPB = 1.0, 
-            gen_length = MOCKGenotype.reduced_length,
-            argsortdists_cen = mut_meth_params['argsortdists_cen'], 
-            L_comp = mut_meth_params['L_comp'], 
-            interest_indices = MOCKGenotype.interest_indices, 
-            nn_rankings_cen = mut_meth_params['nn_rankings_cen'],
-            data_dict = data_dict
+            "mutate", operators.comp_centroid_mut,
+            MUTPB=1.0,
+            gen_length=MOCKGenotype.reduced_length,
+            argsortdists_cen=mut_meth_params['argsortdists_cen'],
+            L_comp=mut_meth_params['L_comp'],
+            interest_indices=MOCKGenotype.interest_indices,
+            nn_rankings_cen=mut_meth_params['nn_rankings_cen'],
+            data_dict=data_dict
         )
     
     elif mut_meth_params['mut_method'] == "neighbour":
         toolbox.register(
             "mutate", operators.neighbour_comp_mut,
-            MUTPB = 1.0, 
-            gen_length = MOCKGenotype.reduced_length,
-            interest_indices = MOCKGenotype.interest_indices,
-            nn_rankings = nn_rankings,
-            component_nns = mut_meth_params['component_nns'],
-            data_dict = data_dict
+            MUTPB=1.0,
+            gen_length=MOCKGenotype.reduced_length,
+            interest_indices=MOCKGenotype.interest_indices,
+            nn_rankings=nn_rankings,
+            component_nns=mut_meth_params['component_nns'],
+            data_dict=data_dict
         )
     
     # Register the selection function (built-in with DEAP for NSGA2)
     toolbox.register(
-        "select", 
+        "select",
         tools.selNSGA2
     )
     return toolbox
@@ -235,7 +235,7 @@ def check_trigger(delta_val, gen, adapt_gens, max_adapts, block_trigger_gens, HV
 
     return False, ref_grad
 
-def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduce, reduced_length, mst_genotype, interest_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data):
+def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduce, mst_genotype, interest_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data):
     # Need to re-register the functions with new arguments
     toolbox.unregister("evaluate")
     toolbox.unregister("mutate")
@@ -250,7 +250,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
     if isinstance(delta_val, int):
         MOCKGenotype.delta_val -= delta_reduce
     else:
-        MOCKGenotype.delta_val -= (100*delta_reduce*np.sqrt(Dataset.num_examples))/Dataset.num_examples
+        MOCKGenotype.delta_val -= (100*delta_reduce*np.sqrt(Datapoint.num_examples))/Datapoint.num_examples
 
     # Ensure delta doesn't go below zero
     if MOCKGenotype.delta_val < 0:
@@ -274,59 +274,59 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
 
     # The evaluation function is the same for all (in current config)
     toolbox.register(
-        "evaluate", 
-        objectives.evalMOCK, 
-        comp_dict = PartialClust.comp_dict, 
-        reduced_clust_nums = MOCKGenotype.reduced_cluster_nums, 
-        cnn_array = PartialClust.cnn_array, 
-        max_cnn = PartialClust.max_cnn, 
-        num_examples = Dataset.num_examples, 
-        data_dict = data_dict, 
-        cnn_pairs = PartialClust.cnn_pairs, 
-        base_members = PartialClust.base_members, 
-        base_centres = PartialClust.base_centres
-        )
+        "evaluate",
+        objectives.eval_mock,
+        comp_dict=PartialClust.comp_dict,
+        reduced_clust_nums=MOCKGenotype.reduced_cluster_nums,
+        cnn_array=PartialClust.cnn_array,
+        max_cnn=PartialClust.max_cnn,
+        num_examples=Datapoint.num_examples,
+        data_dict=data_dict,
+        cnn_pairs=PartialClust.cnn_pairs,
+        base_members=PartialClust.base_members,
+        base_centres=PartialClust.base_centres
+    )
 
     # Different mutation operators for different strategies
     if strat_name == "hypermutall":
         toolbox.register(
-            "mutate", 
-            operators.neighbourHyperMutation_all, 
-            MUTPB = 1.0, 
-            gen_length = MOCKGenotype.reduced_length, 
-            argsortdists = argsortdists, 
-            L = L, 
-            interest_indices = MOCKGenotype.interest_indices, 
-            nn_rankings = nn_rankings, 
-            hyper_mut = 500
-            )
+            "mutate",
+            operators.neighbourHyperMutation_all,
+            MUTPB=1.0,
+            gen_length=MOCKGenotype.reduced_length,
+            argsortdists=argsortdists,
+            L=L,
+            interest_indices=MOCKGenotype.interest_indices,
+            nn_rankings=nn_rankings,
+            hyper_mut=500
+        )
 
     elif strat_name == "hypermutspec":
         toolbox.register(
-            "mutate", 
-            operators.neighbourHyperMutation_spec, 
-            MUTPB = 1.0, 
-            gen_length = MOCKGenotype.reduced_length, 
-            argsortdists = argsortdists, 
-            L = L, 
-            interest_indices = MOCKGenotype.interest_indices, 
-            nn_rankings = nn_rankings, 
-            hyper_mut = 500, 
-            new_genes = newly_unfixed_indices
-            )
+            "mutate",
+            operators.neighbourHyperMutation_spec,
+            MUTPB=1.0,
+            gen_length=MOCKGenotype.reduced_length,
+            argsortdists=argsortdists,
+            L=L,
+            interest_indices=MOCKGenotype.interest_indices,
+            nn_rankings=nn_rankings,
+            hyper_mut=500,
+            new_genes=newly_unfixed_indices
+        )
 
     elif strat_name == "fairmut":
         toolbox.register(
-            "mutateFair", 
-            operators.neighbourFairMutation, 
-            MUTPB = 1.0, 
-            gen_length = MOCKGenotype.reduced_length, 
-            argsortdists = argsortdists, 
-            L = L, 
-            interest_indices = MOCKGenotype.interest_indices, 
-            nn_rankings = nn_rankings, 
-            raised_mut = 50
-            )
+            "mutateFair",
+            operators.neighbourFairMutation,
+            MUTPB=1.0,
+            gen_length=MOCKGenotype.reduced_length,
+            argsortdists=argsortdists,
+            L=L,
+            interest_indices=MOCKGenotype.interest_indices,
+            nn_rankings=nn_rankings,
+            raised_mut=50
+        )
 
     elif strat_name == "reinit":
         # Unregister population functions first
@@ -334,45 +334,47 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
         toolbox.unregister("population")
 
         toolbox.register(
-            "initDelta", 
-            initialisation.initDeltaMOCKadapt,
-            Dataset.k_user,
+            "initDelta",
+            initialisation.init_deltamockadapt,
+            Datapoint.k_user,
             num_indivs,
             argsortdists,
             L
-            )
-        
-        toolbox.register("population", tools.initIterate, list, toolbox.initDelta)
+        )
         
         toolbox.register(
-            "mutate", operators.neighbour_mut, 
-            MUTPB = 1.0, 
-            gen_length = MOCKGenotype.reduced_length, 
-            argsortdists = argsortdists, 
-            L = L, 
-            interest_indices = MOCKGenotype.interest_indices, 
-            nn_rankings = nn_rankings
-            )
+            "population", tools.initIterate, list, toolbox.initDelta
+        )
+        
+        toolbox.register(
+            "mutate", operators.neighbour_mut,
+            MUTPB=1.0,
+            gen_length=MOCKGenotype.reduced_length,
+            argsortdists=argsortdists,
+            L=L,
+            interest_indices=MOCKGenotype.interest_indices,
+            nn_rankings=nn_rankings
+        )
 
     else:
         toolbox.register(
-            "mutate", operators.neighbour_mut, 
-            MUTPB = 1.0, 
-            gen_length = MOCKGenotype.reduced_length, 
-            argsortdists = argsortdists, 
-            L = L, 
-            interest_indices = MOCKGenotype.interest_indices, 
-            nn_rankings = nn_rankings
-            )
+            "mutate", operators.neighbour_mut,
+            MUTPB=1.0,
+            gen_length=MOCKGenotype.reduced_length,
+            argsortdists=argsortdists,
+            L=L,
+            interest_indices=MOCKGenotype.interest_indices,
+            nn_rankings=nn_rankings
+        )
 
     # Fix reduced_length here (need to look where returned)
     return pop, toolbox
 
 
 def select_generation_strategy(
-    pop, toolbox, HV, HV_ref, num_indivs, gen, 
-    adapt_delta, adapt_gens, strat_name, reduced_length, 
-    argsortdists, L, interest_indices, nn_rankings):
+        pop, toolbox, HV, HV_ref, num_indivs, gen, 
+        adapt_delta, adapt_gens, strat_name,
+        argsortdists, L, interest_indices, nn_rankings):
     # Check if we're adapting delta
     if adapt_delta:
         # If using the RO strategy
@@ -412,7 +414,7 @@ def select_generation_strategy(
 def runMOCK(
     data, data_dict, delta_val, hv_ref, argsortdists, 
     nn_rankings, mst_genotype, interest_indices, L, 
-    num_indivs, num_gens, delta_reduce, strat_name, adapt_delta, reduced_length, reduced_clust_nums, mut_meth_params, seed_num
+    num_indivs, num_gens, delta_reduce, strat_name, adapt_delta, reduced_clust_nums, mut_meth_params, seed_num
     ):
     """
     Run MOCK with specified inputs
@@ -432,7 +434,6 @@ def runMOCK(
         delta_reduce {int} -- Amount to reduce delta by for adaptation
         strat_name {str} -- Name of strategy being run
         adapt_delta {bool} -- If delta should be adapted
-        reduced_length {int} -- Length/number of relevant links (i.e. length of reduced genotype)
         reduced_clust_nums {list} -- List of the cluster id numbers for the base clusters/components that are available in the search
     
     Returns:
@@ -445,12 +446,14 @@ def runMOCK(
     """
     # Set the seed
     random.seed(seed_num)
+    np.random.seed(seed_num) # Currently unused, should switch to in future
     print(f"Seed number: {seed_num}")
 
     # Initialise local varibles
     # This can be abstracted out in future
     hv = []
     adapt_gens = None
+    # Set the parameters for adaptive delta mechanism
     if adapt_delta:
         window_size = 3 # Moving average of hv gradients to look at
         block_trigger_gens = 10 # Number of gens to wait between triggers
@@ -458,8 +461,6 @@ def runMOCK(
         max_adapts = 5 # Maximum number of adaptations allowed
         delta_reduce = 1 # Amount to reduce delta by
         ref_grad = None # Reference gradient for hv trigger
-
-    # print(mut_meth_params)
 
     # Create the DEAP toolbox
     toolbox = create_base_toolbox(
@@ -481,11 +482,15 @@ def runMOCK(
         #     print(f"Generation: {gen}")
         
         # Select the right type of generation for this strategy and generation
-        pop, hv, toolbox = select_generation_strategy(pop, toolbox, hv, hv_ref, num_indivs, gen, adapt_delta, adapt_gens, strat_name, reduced_length, argsortdists, L, interest_indices, nn_rankings)
+        pop, hv, toolbox = select_generation_strategy(
+            pop, toolbox, hv, hv_ref, num_indivs, gen, adapt_delta, adapt_gens, strat_name, argsortdists, L, interest_indices, nn_rankings
+        )
 
         # Check if delta should be changed
         if adapt_delta:
-            trigger_bool, ref_grad = check_trigger(MOCKGenotype.delta_val, gen, adapt_gens, max_adapts, block_trigger_gens, hv, window_size, ref_grad)
+            trigger_bool, ref_grad = check_trigger(
+                MOCKGenotype.delta_val, gen, adapt_gens, max_adapts, block_trigger_gens, hv, window_size, ref_grad
+            )
             
             # Execute changes if triggered
             if trigger_bool:
@@ -493,9 +498,9 @@ def runMOCK(
 
                 # Perform the trigger as specified by strat_name
                 pop, toolbox = adaptive_delta_trigger(
-                    pop, gen, strat_name,
-                    MOCKGenotype.delta_val, 
-                    toolbox, delta_reduce, reduced_length, mst_genotype, interest_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data)
+                    pop, gen, strat_name, MOCKGenotype.delta_val, 
+                    toolbox, delta_reduce, mst_genotype, interest_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data
+                )
 
     # Reset the ID count for the base clusters
     # PartialClust.id_value = count()

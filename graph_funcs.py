@@ -72,7 +72,7 @@ def normEAF(folder_path):
         # print(file.split(".")[0])
         print(name)
         np.savetxt(name, data, delimiter = " ")
-        # np.savetxt(results_basepath+classes.Dataset.data_name+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")
+        # np.savetxt(results_basepath+classes.Datapoint.data_name+"_eaf_"+str(delta)+".csv", arr, delimiter=" ")
 
     ### From precompute normdist func
     # max_val = np.max(data)
