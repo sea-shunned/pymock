@@ -65,7 +65,7 @@ def finalPopMetrics2(pop, mst_genotype, int_links_indices, relev_links_len):
     return final_pop_metrics
 
 # @profile
-def finalPopMetrics(pop, mst_genotype, int_links_indices, relev_links_len):
+def final_pop_metrics(pop, mst_genotype, int_links_indices, relev_links_len):
 
     num_examples = classes.Datapoint.num_examples
 
