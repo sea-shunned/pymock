@@ -5,10 +5,15 @@ import json
 import random
 import time
 import csv
+from itertools import product
+from datetime import datetime
 from functools import partial
+from pathlib import Path
 import multiprocessing
+import pdb
 
 import numpy as np
+import pandas as pd
 
 # Own functions
 from classes import Datapoint, MOCKGenotype, PartialClust
@@ -17,63 +22,77 @@ import evaluation
 import objectives
 import delta_mock
 import utils
-from tests import validate_results
+import tests
 
-def load_data(use_real_data=False, synth_data_subset="*", real_data_subset="*", exp_name=""):
-    """Get the file paths for all the data we're using
+# def load_data(use_real_data=False, synth_data_subset="*", real_data_subset="*", exp_name=""):
+#     """Get the file paths for all the data we're using
     
-    Keyword Arguments:
-        use_real_data {bool} -- The real data consumes a lot of memory, can choose to exclude it (default: {False})
-        synth_data_subset {str} -- Allows for selecting specific datasets from the synthetic set (default: {"*"})
-        real_data_subset {str} -- As above for the real (UKC) data (default: {"*"})
-        exp_name {str} -- Name for particular experiment to create subfolder in results directory
+#     Keyword Arguments:
+#         use_real_data {bool} -- The real data consumes a lot of memory, can choose to exclude it (default: {False})
+#         synth_data_subset {str} -- Allows for selecting specific datasets from the synthetic set (default: {"*"})
+#         real_data_subset {str} -- As above for the real (UKC) data (default: {"*"})
+#         exp_name {str} -- Name for particular experiment to create subfolder in results directory
     
-    Returns:
-        [list] -- List of all the data files
-        results_folder [str] -- Where the results should be saved
-    """
-    # Get the current directory path
-    base_path = os.getcwd()
+#     Returns:
+#         [list] -- List of all the data files
+#         experiment_folder [str] -- Where the results should be saved
+#     """
+#     # Get the current directory path
+#     base_path = os.getcwd()
 
-    data_folder = os.path.join(base_path, "data", "")
+#     data_folder = os.path.join(base_path, "data", "")
 
-    if exp_name != "":
-        results_path = os.path.join(base_path, "results", exp_name)
-        try:
-            os.makedirs(results_path)
-            results_folder = os.path.join(results_path, "")
-        except FileExistsError:
-            results_folder = os.path.join(results_path, "")
+#     if exp_name != "":
+#         results_path = os.path.join(base_path, "results", exp_name)
+#         try:
+#             os.makedirs(results_path)
+#             experiment_folder = os.path.join(results_path, "")
+#         except FileExistsError:
+#             experiment_folder = os.path.join(results_path, "")
+#     else:
+#         experiment_folder = os.path.join(base_path, "results", "")
+
+#     synth_data_folder = os.path.join(data_folder, "synthetic_datasets", "")
+#     synth_data_files = glob.glob(synth_data_folder+synth_data_subset+".data")
+
+#     if use_real_data:
+#         real_data_folder = os.path.join(data_folder, "UKC_datasets", "")
+#         real_data_files = glob.glob(real_data_folder+real_data_subset+".txt")
+#     else:
+#         real_data_files = []
+    
+#     return synth_data_files + real_data_files, experiment_folder
+
+def load_data(exp_name, data_folder, data_subset=""):
+    # Generate experiment name if not given
+    if exp_name is None:
+        exp_name = f"experiment_{datetime.today().strftime('%Y%m%d')}"
+    # Create the folder to store the results
+    experiment_folder = Path.cwd() / "experiments" / exp_name
+    # Warn if already made
+    if experiment_folder.is_dir():
+        print(f"{experiment_folder} already exists, results may be overwritten")
+    # Make the folder if not already
+    experiment_folder.mkdir(parents=True, exist_ok=True)
+    # Turn the folder into a Path
+    # If a relative path to the data is given this splits it properly for cross-platform
+    data_folder = Path.cwd().joinpath(*[i for i in data_folder.split("/")])
+    # Check if the data_folder exists
+    if not data_folder.is_dir():
+        raise NotADirectoryError(f"{data_folder} cannot be found")
+    # Select the datasets from the folder if a filter is given
+    if data_subset is None:
+        data_file_paths = data_folder.glob("*")
     else:
-        results_folder = os.path.join(base_path, "results", "")
+        data_file_paths = data_folder.glob("*"+data_subset+"*")
 
-    synth_data_folder = os.path.join(data_folder, "synthetic_datasets", "")
-    synth_data_files = glob.glob(synth_data_folder+synth_data_subset+".data")
+    return data_file_paths, experiment_folder
 
-    if use_real_data:
-        real_data_folder = os.path.join(data_folder, "UKC_datasets", "")
-        real_data_files = glob.glob(real_data_folder+real_data_subset+".txt")
-    else:
-        real_data_files = []
-    
-    return synth_data_files + real_data_files, results_folder
-
-def prepare_data(file_path, L, num_indivs, num_gens, delta_reduce=1):
-    """Prepare the dataset (precomputation). Default values are overwritten by config file
-    
-    Arguments:
-        file_path {str} -- File path to the data
-    
-    Keyword Arguments:
-        L {int} -- The neighbourhood hyperparameter (default: {10})
-        num_indivs {int} -- Number of individuals (default: {100})
-        num_gens {int} -- Number of generations (default: {100})
-        delta_reduce {int} -- Amount (square root multiple) to reduce delta (default: {1})
-    
-    Returns:
-        kwargs [dict] -- All the arguments we need to run MOCK
-    """
-
+def prepare_data(file_path):
+    # Some of this function is hard-coded for strings, so convert the Path
+    if isinstance(file_path, Path):
+        file_path = str(file_path)
+    # Get prettier names for the data
     if "synthetic" in file_path:
         Datapoint.data_name = file_path.split("/")[-1].split(".")[0][:-15]
     elif "UKC" in file_path:
@@ -102,8 +121,10 @@ def prepare_data(file_path, L, num_indivs, num_gens, delta_reduce=1):
         Datapoint.labels = False
 
     # Remove labels if present and create data_dict
-    data, data_dict = Datapoint.create_dataset_garza(data)   
+    data, data_dict = Datapoint.create_dataset_garza(data)
+    return data, data_dict
 
+def setup_mock(data, data_dict):
     # Go through the precomputation specific to the dataset
     # Calculate distance array
     distarray = precompute.compute_dists(data, data)
@@ -117,95 +138,81 @@ def prepare_data(file_path, L, num_indivs, num_gens, delta_reduce=1):
     MOCKGenotype.mst_genotype = precompute.create_mst(distarray)
     
     # Calculate DI values
-    MOCKGenotype.degree_int = precompute.degree_interest(MOCKGenotype.mst_genotype, nn_rankings, distarray)
+    MOCKGenotype.degree_int = precompute.degree_interest(
+        MOCKGenotype.mst_genotype, nn_rankings, distarray
+    )
     
     # Sort to get the indices of most to least interesting links
     MOCKGenotype.interest_links_indices()
+    return argsortdists, nn_rankings
 
+def prepare_mock_args(data, data_dict, argsortdists, nn_rankings, params):
     # Bundle all of the arguments together in a dict to pass to the function
     # This is in order of runMOCK() so that we can easily turn it into a partial func for multiprocessing
-    kwargs = {
+    mock_args = {
         "data": data,
         "data_dict": data_dict,
-        "delta_val": None,
         "hv_ref": None,
         "argsortdists": argsortdists,
         "nn_rankings": nn_rankings,
-        "mst_genotype": MOCKGenotype.mst_genotype,
-        "interest_indices": MOCKGenotype.interest_indices,
-        "L": L,
-        "num_indivs": num_indivs,
-        "num_gens": num_gens,
-        "delta_reduce": delta_reduce,
-        "strat_name": None,
+        "L": None,
+        "num_indivs": params["num_indivs"],
+        "num_gens": params["num_gens"],
+        "strategy": None,
         "adapt_delta": None,
-        "reduced_clust_nums": None,
         "mut_meth_params": None
     }
-    return kwargs
+    return mock_args
 
 
-def create_seeds(num_runs, exp_name, seed_file=None):
-    """Create the seed numbers
-    
-    Arguments:
-        num_runs {int} -- Number of runs
-        exp_name {str} -- Experiment name (for saving seeds)
-
-    Keyword Arguments:
-        seed_file {str} -- File location if giving previous seeds (default: {None})
-    
-    Raises:
-        ValueError -- Error if we don't have enough seeds
-    
-    Returns:
-        seed_list [list] -- List of the seed numbers
-    """
-    # Load seeds if present
-    if seed_file is not None:
-        seed_list = utils.load_json(seed_file)["seed_list"]
+def create_seeds(params, experiment_folder, validate):
+    # Need a special case just because we like to keep the validation folder separate
+    if validate:
+        seed_list = utils.load_json(Path.cwd() / "validation" / params["seed_file"])["seed_list"]
     else:
-        # Randomly generate seeds
-        seed_list = [random.uniform(0, 1000) for i in range(num_runs)]
-
-        # Ensure no collision
-        assert len(seed_list) == len(set(seed_list))
-
-        ### This needs rewriting
-        # We want to check if there is a seed file that matches
-        # but it won't line up with experiment name
-        # perhaps seed_file should be a cl_args
-
-        # Save a new set of seeds for this set of experiments
-        # (to ensure same start for each strategy)
-        if exp_name != "":
-            import datetime
-            seed_fname = "seeds/seed_list_"+exp_name.split("/")[-1]+"_"+str(datetime.date.today())+".json"
-            with open(seed_fname, 'w') as out_file:
-                json.dump(seed_list, out_file, indent=4)
+        # Load seeds if present
+        if params["seed_file"] is not None:
+            seed_list = utils.load_json(experiment_folder / params["seed_file"])["seed_list"]
+        # Otherwise make some seeds
+        else:
+            # Ensure no collision of seeds
+            while True:
+                # Randomly generate seeds
+                seed_list = [
+                    random.randint(0, 1000000) for i in range(params["num_runs"])
+                ]
+                # If no collisions, break
+                if len(seed_list) == len(set(seed_list)):
+                    break
+            # Save the seed_list in the results folder
+            seed_fname = experiment_folder / f"seed_list_{params['exp_name']}.json"
+            # Create a dict to save into the json just to be specific
+            seeds = {"seed_list": seed_list}
+            # Save the seeds
+            with open(seed_fname, "w") as out_file:
+                json.dump(seeds, out_file, indent=4)
+            # Add the seed list to the config file so when we save it it's complete
+            params["seed_file"] = f"seed_list_{params['exp_name']}.json"
     # Ensure we have enough seeds
-    print(seed_list, len(seed_list))
-    print(num_runs)
-    if len(seed_list) < num_runs:
+    if len(seed_list) < params["num_runs"]:
         raise ValueError("Not enough seeds for number of runs")
-    return seed_list
+    return seed_list, params
 
 
-def calc_hv_ref(kwargs):
+def calc_hv_ref(mock_args):
     """Calculates a hv reference/nadir point for use on all runs of that dataset
     
     Arguments:
-        kwargs {dict} -- Arguments for MOCK
+        mock_args {dict} -- Arguments for MOCK
     
     Returns:
         [list] -- The reference/nadir point
     """
-
+    # Reduce the MST genotype
     mst_reduced_genotype = [MOCKGenotype.mst_genotype[i] for i in MOCKGenotype.reduced_genotype_indices]
-
     # Calculate chains
     chains, superclusts = objectives.cluster_chains(
-        mst_reduced_genotype, kwargs['data_dict'], PartialClust.comp_dict, MOCKGenotype.reduced_cluster_nums
+        mst_reduced_genotype, mock_args['data_dict'], PartialClust.comp_dict, MOCKGenotype.reduced_cluster_nums
     )
     # Calculate the maximum possible intracluster variance
     PartialClust.max_var = objectives.objVAR(
@@ -224,242 +231,298 @@ def calc_hv_ref(kwargs):
 def run_mock(**cl_args):
     # Load the data file paths
     if cl_args['validate']:
-        data_file_paths, results_folder = load_data(
-            synth_data_subset="tevc_20_60_9*")
+        config_path = Path.cwd() / "configs" / "validate.json"
+        params = utils.load_json(config_path)
+        data_file_paths, experiment_folder = load_data(
+            params["exp_name"],
+            params["data_folder"],
+            params["data_subset"]
+        )
+        save_results = True
     else:
-        data_file_paths, results_folder = load_data(
-            synth_data_subset=cl_args['synthdata'],
-            exp_name=cl_args['exp_name'])
+        config_path = Path.cwd() / "configs" / cl_args["config"]
+        params = utils.load_json(config_path)
+        data_file_paths, experiment_folder = load_data(
+            params["exp_name"],
+            params["data_folder"],
+            params["data_subset"]
+        )
+    # Check the config and amend if needed
+    params = utils.check_config(params)
 
-    # Load general MOCK parameyers
-    params = utils.load_json("mock_config.json")
+    # # Column names for fitness array, formatted for EAF R plot package
+    # fitness_cols = ["VAR", "CNN", "Run"]
 
-    # A longer genotype means a higher possible maximum for the CNN objective
-    # By running the highest sr value first, we ensure that the HV_ref
-    # is the same and appropriate for all runs
-    sr_vals = sorted(params['sr_vals'], reverse=True)
-
-    # Column names for fitness array, formatted for EAF R plot package
-    fitness_cols = ["VAR", "CNN", "Run"]
-
-    # Create the seed list or load existing one
-    if cl_args['validate']:
-        # override params for validation
-        sr_vals = [1]
-        cl_args['num_runs'] = 2
-        
-        seed_list = create_seeds(
-            cl_args['num_runs'], cl_args['exp_name'], seed_file="seed_list_validate.json")
-        # This is a hack that needs to be fixed when we re-write how things
-        # work and get looped over
-        try:
-            params['l_comp'] = [1]
-        except KeyError:
-            pass
-    else:
-        seed_list = create_seeds(
-            cl_args['num_runs'], cl_args['exp_name'],
-            seed_file=cl_args['seed_file'])
-
+    # Create the seed list
+    seed_list, params = create_seeds(
+        params,
+        experiment_folder,
+        cl_args["validate"]
+    )
     # Restrict seed_list to the actual number of runs that we need
     # Truncating like this allows us to know that the run numbers and order of seeds correspond
-    seed_list = seed_list[:cl_args['num_runs']]
-    seed_list = [(i,) for i in seed_list]
+    seed_list = seed_list[:params["num_runs"]]
+    seed_list = [(i,) for i in seed_list] # for starmap
 
+    ##### TO FIX #####
     # Print the number of runs to get an idea of runtime (sort of)
-    print("---------------------------")
-    print("Number of MOCK Runs:")
-    print(f"{cl_args['num_runs']} run(s)")
-    print(f"{len(params['strategies'])} strategy/-ies")
-    print(f"{len(sr_vals)} delta value(s)")
-    print(f"{len(data_file_paths)} dataset(s)")
-    print(f"= {cl_args['num_runs']*len(params['strategies'])*len(sr_vals)*len(data_file_paths)} run(s)")
-    print("---------------------------")
+    # print("---------------------------")
+    # print("Number of MOCK Runs:")
+    # print(f"{cl_args['num_runs']} run(s)")
+    # print(f"{len(params['strategies'])} strategy/-ies")
+    # print(f"{len(sr_vals)} delta value(s)")
+    # print(f"{len(data_file_paths)} dataset(s)")
+    # print(f"= {cl_args['num_runs']*len(params['strategies'])*len(sr_vals)*len(data_file_paths)} run(s)")
+    # print("---------------------------")
+    ####################
+
+    # Save the config
+    utils.save_config(params, experiment_folder)
+    # Make a sub-folder to save results in
+    if save_results:
+        results_folder = experiment_folder / "results"
+        results_folder.mkdir(exist_ok=True)
 
     # Loop through the data to test
     for file_path in data_file_paths:
-        print(f"Beginning precomputation for {file_path.split(os.sep)[-1]}...")
-        
-        kwargs = prepare_data(file_path, cl_args['L'], cl_args['num_indivs'], cl_args['num_gens'])
+        print(f"Beginning precomputation for {file_path.name}...")
+        # Prepare the data
+        data, data_dict = prepare_data(file_path)
+        # Do the precomputation for MOCK
+        argsortdists, nn_rankings = setup_mock(data, data_dict)
+        # Wrap the arguments up for the main MOCK function
+        mock_args = prepare_mock_args(data, data_dict, argsortdists, nn_rankings, params)
         print("Precomputation complete!")
 
+        if save_results:
+            # Create a dataframe for the results
+            results_df = pd.DataFrame()
+
+        # A longer genotype means a higher possible maximum for the CNN objective
+        # By running the highest sr value first, we ensure that the HV_ref
+        # is the same and appropriate for all runs    
+        # If both sr and raw delta values are given, convert and unify them
+        if params["delta_sr_vals"] is not None and params["delta_raw_vals"] is not None:
+            delta_vals = sorted(
+                params["delta_raw_vals"] + [
+                    MOCKGenotype.calc_delta(sr_val) for sr_val in params["delta_sr_vals"]
+                ],
+                reverse=True
+            )
+        # If just raw values, then just reverse sort them
+        elif params["delta_sr_vals"] is None and params["delta_raw_vals"] is not None:
+            delta_vals = sorted(params['delta_raw_vals'], reverse=True)
+        # If just sr values, then convert and reverse sort them
+        elif params["delta_sr_vals"] is not None and params["delta_raw_vals"] is None:
+            delta_vals = sorted(
+                [MOCKGenotype.calc_delta(sr_val) for sr_val in params["delta_sr_vals"]],
+                reverse=True
+            )
+
         # Loop through the sr (square root) values
-        for sr_val in sr_vals:
-            # Calculate the delta value from the sr
-            MOCKGenotype.calc_delta(sr_val)
-            kwargs['delta_val'] = MOCKGenotype.delta_val
-            
-            print(f"Delta: {kwargs['delta_val']}")
+        for delta_val, L in product(delta_vals, params["L"]):
+            # Set the delta value in the args
+            # mock_args['delta_val'] = MOCKGenotype.delta_val
+            MOCKGenotype.delta_val = delta_val
+            print(f"Delta: {MOCKGenotype.delta_val}")
+
+            # Set the mock_args for this layer
+            mock_args["L"] = L
 
             # Setup some of the variables for the genotype
             MOCKGenotype.setup_genotype_vars()
-
-            PartialClust.partial_clusts(kwargs["data"], kwargs["data_dict"], kwargs["argsortdists"], kwargs["L"])
-            MOCKGenotype.calc_reduced_clusts(kwargs["data_dict"])
+            # Setup the components class
+            PartialClust.partial_clusts(
+                mock_args["data"], mock_args["data_dict"], mock_args["argsortdists"], mock_args["L"]
+            )
+            # Identify the component IDs of the link origins
+            MOCKGenotype.calc_reduced_clusts(mock_args["data_dict"])
 
             # Set the nadir point if first run
-            if kwargs['hv_ref'] is None:
-                # To ensure compatible results
+            if mock_args['hv_ref'] is None:
+                # To ensure compatible results for validation
                 if cl_args['validate']:
-                    kwargs['hv_ref'] = [3.0, 1469.0]
+                    mock_args['hv_ref'] = [3.0, 1469.0]
                 else:
-                    kwargs['hv_ref'] = calc_hv_ref(kwargs)
-
-            for l_comp in params['l_comp']:
-                
-                if cl_args['mut_method'] == "centroid":
-                    distarray_cen = precompute.compute_dists(
-                        PartialClust.base_centres, PartialClust.base_centres)
-                    kwargs['mut_meth_params'] = {
-                        'mut_method': "centroid",
-                        'argsortdists_cen': np.argsort(
-                            distarray_cen, kind='mergesort'),
-                        'nn_rankings_cen': precompute.nn_rankings(
-                            distarray_cen, len(PartialClust.comp_dict)),
-                        'L_comp': l_comp
-                    }                
-                elif cl_args['mut_method'] == "neighbour":
-                    kwargs['mut_meth_params'] = {
-                        'mut_method': "neighbour",
-                        'component_nns': precompute.component_nn(
-                            Datapoint.num_examples, kwargs['argsortdists'],
-                            kwargs['data_dict'], l_comp)
-                    }
+                    mock_args['hv_ref'] = calc_hv_ref(mock_args)
+            print(f"HV ref point: {mock_args['hv_ref']}")
+            
+            # Avoid more nested loops
+            for strategy, L_comp in product(
+                    params["strategies"], params["L_comp"]
+                ):
+                # Set the mock_args for this layer
+                mock_args["strategy"] = strategy
+                # mock_args["L_comp"] = L_comp
+                # Add mutation method-specific arguments
+                mock_args = delta_mock.get_mutation_params(
+                    params["mut_method"], mock_args, L_comp
+                )
+                # Add the strat name to the mock_args
+                mock_args['strategy'] = strategy
+                # Adaptation flag to make it easier to process
+                if strategy == "base":
+                    mock_args['adapt_delta'] = False
                 else:
-                    kwargs['mut_meth_params'] = {
-                        'mut_method': "original"
-                    }
-                # print(kwargs['mut_meth_params'])
-                # calc_hv_ref(kwargs)
-                print(f"HV ref point: {kwargs['hv_ref']}")
-
-                # Loop through the strategies
-                for strat_name in params['strategies']:
-                    # Add the strat name to the kwargs
-                    kwargs['strat_name'] = strat_name
-                    # Adaptation flag to make it easier
-                    if strat_name == "base":
-                        kwargs['adapt_delta'] = False
-                    else:
-                        kwargs['adapt_delta'] = True
-                    # Initialize arrays for the results
-                    fitness_array = np.empty((cl_args['num_indivs']*cl_args['num_runs'], len(fitness_cols)))
-                    hv_array = np.empty((cl_args['num_gens'], cl_args['num_runs']))
-                    ari_array = np.empty((cl_args['num_indivs'], cl_args['num_runs']))
-                    num_clusts_array = np.empty((cl_args['num_indivs'], cl_args['num_runs']))
-                    time_array = np.empty(cl_args['num_runs'])
+                    mock_args['adapt_delta'] = True
+                # Initialize arrays for the results
+                if save_results and mock_args["adapt_delta"]:
                     delta_triggers = [] # which generation delta was changed
+                
+                # print(mock_args.keys())
+                # for key, val in mock_args.items():
+                #     if key not in ["data", "data_dict"]:
+                #         print(key, val)
+                # raise
+                
+                # print(mock_args.values())
+                # Create the partial function to give to multiprocessing
+                # mock_func = partial(delta_mock.runMOCK, *list(mock_args.values()))
+                mock_func = partial(delta_mock.runMOCK, **mock_args)
+                # print(mock_func.args.keys())
+                # print(mock_func.keywords)
 
-                    # Abstract the below to a precompute func
-                    # Can then choose which based on the mutation method
+                print(f"{strategy}-{params['mut_method']} starting...")
+                # Measure the time taken for the runs
+                start_time = time.time()
+                # Send the function to a thread, each thread with a different seed
+                with multiprocessing.Pool() as pool:
+                    results = pool.starmap(mock_func, seed_list)
+                end_time = time.time()
+                # This does not given you a time per run
+                # Diving by number of seeds is also inaccurate, it depends on chunksize, num CPUs etc.
+                # These numbers are useful to compare relatively, though
+                time_taken = end_time-start_time
+                print(f"{strategy} done ({len(seed_list)} runs took {time_taken:.3f} secs)")
 
+                for run_num, run_result in enumerate(results):
+                    # Extract the population
+                    pop = run_result[0]
+                    # Extract hv list
+                    hvs = run_result[1]
+                    # Extract final interesting links
+                    final_interest_inds = run_result[3]
+                    # Extract final genotype length
+                    final_gen_len = run_result[4]
+                    # Extract gens with delta trigger
+                    adapt_gens = run_result[5]
 
-                    # kwargs['argsortdists_cen'] = np.argsort(distarray_cen, kind='mergesort')
-                    # kwargs['nn_rankings_cen'] = precompute.nn_rankings_cen(distarray_cen, len(PartialClust.comp_dict))
+                    ## Shorten the above #22.05.19
+                    # pop, hv, final_interest_inds, final_gen_len, adapt_gens = run_result
+                    # Calculate the number of clusters and ARIs
+                    num_clusts, aris = evaluation.final_pop_metrics(
+                        pop, MOCKGenotype.mst_genotype,
+                        final_interest_inds, final_gen_len
+                    )
+                    # Extract the fitness values
+                    var_vals = [indiv.fitness.values[0] for indiv in pop]
+                    cnn_vals = [indiv.fitness.values[1] for indiv in pop]
+                    print(var_vals)
+                    # Add strategy here for adaptive version
+                    results_dict = {
+                        "run": [run_num+1]*params["num_indivs"],
+                        "indiv": list(range(params["num_indivs"])),
+                        "L": [L]*params["num_indivs"],
+                        "delta": [delta_val]*params["num_indivs"],
+                        "VAR": var_vals,
+                        "CNN": cnn_vals,
+                        "HV": hvs,
+                        "ARI": aris,
+                        "clusters": num_clusts,
+                        "time": [time_taken]*params["num_indivs"]
+                    }
+                    results_df = results_df.append(
+                        pd.DataFrame.from_dict(results_dict), ignore_index=True
+                    )
                     
-                    # Create the partial function to give to multiprocessing
-                    mock_func = partial(delta_mock.runMOCK, *list(kwargs.values()))
-
-                    print(f"{strat_name}-{cl_args['mut_method']} starting...")
-                    # Measure the time taken for the runs
-                    start_time = time.time()
-                    # Send the function to a thread, each thread with a different seed
-                    print("here", seed_list)
-                    with multiprocessing.Pool() as pool:
-                        results = pool.starmap(mock_func, seed_list)
-                    end_time = time.time()
-                    print(f"{strat_name} done (took {end_time-start_time:.3f} secs) - collecting results...")
-
-                    for run_num, run_result in enumerate(results):
-                        # Extract the population
-                        pop = run_result[0]
-                        # Extract hv list
-                        hv = run_result[1]
-                        # Extract final interesting links
-                        final_interest_inds = run_result[3]
-                        # Extract final genotype length
-                        final_gen_len = run_result[4]
-                        # Extract gens with delta trigger
-                        adapt_gens = run_result[5]
-
-                        # Assign values to arrays
-                        ind = cl_args['num_indivs']*run_num
-                        fitness_array[ind:ind+cl_args['num_indivs'], 0:3] = [indiv.fitness.values+(run_num+1,) for indiv in pop]
-
-                        hv_array[:, run_num] = hv
-
-                        num_clusts, aris = evaluation.finalPopMetrics(
-                            pop, kwargs['mst_genotype'], final_interest_inds, final_gen_len)
-                        num_clusts_array[:, run_num] = num_clusts
-                        ari_array[:, run_num] = aris
-
+                    # if L_comp is not None:
+                    if save_results and mock_args["adapt_delta"]:
                         delta_triggers.append(adapt_gens)
 
-                    print(f"{strat_name} complete!")
+        print(results_df)
+        print(f"{file_path.name} complete!")
+        # pdb.set_trace()
 
-                    if cl_args['validate']:
-                        print("---------------------------")
-                        print("Validating results...")
-                        valid = validate_results(
-                            os.path.join(os.getcwd(), "test_data", ""),
-                            strat_name,
-                            ari_array,
-                            hv_array,
-                            fitness_array,
-                            delta_triggers,
-                            cl_args['num_runs']
-                        )
+    if cl_args['validate']:
+        valid = tests.validate_mock(
+            results_df, delta_triggers=[],
+            strategy=strategy, num_runs=params["num_runs"]
+        )
 
-                        if not valid:
-                            raise ValueError(f"Results incorrect for {strat_name}")
-                        else:
-                            print(f"{strat_name} validated!\n")
+        if valid:
+            print("Passed!")
+        else:
+            raise ValueError(f"Results incorrect!")
 
-                    # Save results to the specified experiment folder
-                    if cl_args['exp_name'] != "":
-                        try:
-                            fname_prefix = os.path.join(results_folder, cl_args["mut_method"], "L"+str(l_comp), "")
-                            os.makedirs(fname_prefix)
-                        except FileExistsError:
-                            fname_prefix = os.path.join(results_folder, cl_args["mut_method"], "L"+str(l_comp), "")
+                # if cl_args['validate']:
+                #     print("---------------------------")
+                #     print("Validating results...")
+                #     valid = validate_results(
+                #         os.path.join(os.getcwd(), "test_data", ""),
+                #         strategy,
+                #         ari_array,
+                #         hv_array,
+                #         fitness_array,
+                #         delta_triggers,
+                #         cl_args['num_runs']
+                #     )
+
+                #     if not valid:
+                #         raise ValueError(f"Results incorrect for {strategy}")
+                #     else:
+                #         print(f"{strategy} validated!\n")
+
+                # if save_results:
+                #     fname_prefix = results_folder / f""
+
+
+                # # Save results to the specified experiment folder
+                # if cl_args['exp_name'] != "":
+                #     try:
+                #         fname_prefix = os.path.join(experiment_folder, cl_args["mut_method"], "L"+str(l_comp), "")
+                #         os.makedirs(fname_prefix)
+                #     except FileExistsError:
+                #         fname_prefix = os.path.join(experiment_folder, cl_args["mut_method"], "L"+str(l_comp), "")
+                
+                #     fname_prefix += Datapoint.data_name
                     
-                        fname_prefix += Datapoint.data_name
-                        
-                        if kwargs['adapt_delta']:
-                            fname_suffix = "-adapt"
-                        else:
-                            fname_suffix = ""
+                #     if mock_args['adapt_delta']:
+                #         fname_suffix = "-adapt"
+                #     else:
+                #         fname_suffix = ""
 
-                        # Save fitness values
-                        np.savetxt(
-                            fname_prefix+"-fitness-sr"+str(sr_val)+fname_suffix+".csv", fitness_array, 
-                            delimiter=",")
-                        # Save hypervolume values
-                        np.savetxt(
-                            fname_prefix+"-hv-sr"+str(sr_val)+fname_suffix+".csv", hv_array, 
-                            delimiter=",")
-                        # Save ARI values
-                        np.savetxt(
-                            fname_prefix+"-ari-sr"+str(sr_val)+fname_suffix+".csv", ari_array, 
-                            delimiter=",")
-                        # Save number of clusters
-                        np.savetxt(
-                            fname_prefix+"-numclusts-sr"+str(sr_val)+fname_suffix+".csv", num_clusts_array, 
-                            delimiter=",")
-                        # Save computation time
-                        np.savetxt(
-                            fname_prefix+"-time-sr"+str(sr_val)+fname_suffix+".csv", time_array, 
-                            delimiter=",")
+                #     # # Save fitness values
+                #     # np.savetxt(
+                #     #     fname_prefix+"-fitness-sr"+str(sr_val)+fname_suffix+".csv", fitness_array, 
+                #     #     delimiter=",")
+                #     # # Save hypervolume values
+                #     # np.savetxt(
+                #     #     fname_prefix+"-hv-sr"+str(sr_val)+fname_suffix+".csv", hv_array, 
+                #     #     delimiter=",")
+                #     # # Save ARI values
+                #     # np.savetxt(
+                #     #     fname_prefix+"-ari-sr"+str(sr_val)+fname_suffix+".csv", ari_array, 
+                #     #     delimiter=",")
+                #     # # Save number of clusters
+                #     # np.savetxt(
+                #     #     fname_prefix+"-numclusts-sr"+str(sr_val)+fname_suffix+".csv", num_clusts_array, 
+                #     #     delimiter=",")
+                #     # # Save computation time
+                #     # np.savetxt(
+                #     #     fname_prefix+"-time-sr"+str(sr_val)+fname_suffix+".csv", time_array, 
+                #     #     delimiter=",")
 
-                        # Save delta triggers
-                        # No triggers for normal delta-MOCK
-                        if kwargs['adapt_delta']:
-                            with open(
-                                fname_prefix+"-triggers-sr"+str(sr_val)+fname_suffix+".csv","w") as f:
-                                writer=csv.writer(f)
-                                writer.writerows(delta_triggers)
-                    else:
-                        print("No experiment folder given - results have not been saved!")
+
+                #     # Save delta triggers
+                #     # No triggers for normal delta-MOCK
+                #     if mock_args['adapt_delta']:
+                #         with open(
+                #             fname_prefix+"-triggers-sr"+str(sr_val)+fname_suffix+".csv","w") as f:
+                #             writer=csv.writer(f)
+                #             writer.writerows(delta_triggers)
+                # ### Where should this be? ###
+                # # else:
+                # #     print("No experiment folder given - results have not been saved!")
 
 
 if __name__ == '__main__':
@@ -471,12 +534,6 @@ if __name__ == '__main__':
     run_mock(**cl_args)
 
     ######## TO DO ########
-    # sort out using consistent seeds across experiments
-    # add hook for crossover
-    # try to clean up arguments generally ### ehhhhh
-    # look at how results are saved and named ## so so
-    # send to servers and run
-    # then look at generating graphs
+    # look at how results are saved and named
     # evaluation.py is a shit show
-        # try except in chains func may be inefficient (probs not)
     # should clean up and define the required environment at some point

@@ -287,12 +287,16 @@ class MOCKGenotype(list):
             cls.delta_val = 0
         elif cls.delta_val > 100:
             raise ValueError("Delta value is over 100")
+        return cls.delta_val
+        
 
     @classmethod
     def calc_red_length(cls):
         """Calculate the reduced length of the genotype
         """
-        cls.reduced_length = int(np.ceil(((100-MOCKGenotype.delta_val)/100)*Datapoint.num_examples))
+        cls.reduced_length = int(
+            np.ceil(((100-MOCKGenotype.delta_val)/100)*Datapoint.num_examples)
+        )
 
     @classmethod
     def calc_base_genotype(cls):
@@ -314,7 +318,8 @@ class MOCKGenotype(list):
         # Add the links
         g.add_edges(zip(
             range(len(MOCKGenotype.base_genotype)),
-            MOCKGenotype.base_genotype))
+            MOCKGenotype.base_genotype)
+        )
         # Set the components as a class attribute
         cls.base_clusters = list(g.components(mode="WEAK"))
 

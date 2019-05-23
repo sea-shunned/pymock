@@ -235,7 +235,8 @@ def check_trigger(delta_val, gen, adapt_gens, max_adapts, block_trigger_gens, HV
 
     return False, ref_grad
 
-def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduce, mst_genotype, interest_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data):
+def adaptive_delta_trigger(pop, gen, strategy, delta_val, toolbox,
+    delta_reduce, num_indivs, argsortdists, L, data_dict, nn_rankings, data):
     # Need to re-register the functions with new arguments
     toolbox.unregister("evaluate")
     toolbox.unregister("mutate")
@@ -288,7 +289,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
     )
 
     # Different mutation operators for different strategies
-    if strat_name == "hypermutall":
+    if strategy == "hypermutall":
         toolbox.register(
             "mutate",
             operators.neighbourHyperMutation_all,
@@ -301,7 +302,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
             hyper_mut=500
         )
 
-    elif strat_name == "hypermutspec":
+    elif strategy == "hypermutspec":
         toolbox.register(
             "mutate",
             operators.neighbourHyperMutation_spec,
@@ -315,7 +316,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
             new_genes=newly_unfixed_indices
         )
 
-    elif strat_name == "fairmut":
+    elif strategy == "fairmut":
         toolbox.register(
             "mutateFair",
             operators.neighbourFairMutation,
@@ -328,7 +329,7 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
             raised_mut=50
         )
 
-    elif strat_name == "reinit":
+    elif strategy == "reinit":
         # Unregister population functions first
         toolbox.unregister("initDelta")
         toolbox.unregister("population")
@@ -366,55 +367,80 @@ def adaptive_delta_trigger(pop, gen, strat_name, delta_val, toolbox, delta_reduc
             interest_indices=MOCKGenotype.interest_indices,
             nn_rankings=nn_rankings
         )
-
     # Fix reduced_length here (need to look where returned)
     return pop, toolbox
 
 
 def select_generation_strategy(
         pop, toolbox, HV, HV_ref, num_indivs, gen, 
-        adapt_delta, adapt_gens, strat_name,
-        argsortdists, L, interest_indices, nn_rankings):
+        adapt_delta, adapt_gens, strategy,
+        argsortdists, L, nn_rankings):
     # Check if we're adapting delta
     if adapt_delta:
         # If using the RO strategy
-        if strat_name == "reinit":
+        if strategy == "reinit":
             # If we just triggered a change, generate offspring using strategy
             if adapt_gens[-1] == gen-1 and gen != 1:
                 pop, HV = generation_reinit(pop, toolbox, HV, HV_ref, num_indivs)
             # Otherwise normal
             else:
                 pop, HV = generation(pop, toolbox, HV, HV_ref, num_indivs)
-        
         # All other strategies 
         else:
             pop, HV = generation(pop, toolbox, HV, HV_ref, num_indivs)
 
         # If using a hypermutation strategy, we only apply rate for 1 generation
         # So revert back to normal mutation operator
-        if "hypermut" in strat_name:
+        if "hypermut" in strategy:
             if adapt_gens[-1] == gen-1 and gen != 1:
                 toolbox.unregister("mutate")
                 toolbox.register(
-                    "mutate", operators.neighbour_mut, 
-                    MUTPB = 1.0, 
-                    gen_length = MOCKGenotype.reduced_length, 
-                    argsortdists = argsortdists, 
-                    L = L, 
-                    interest_indices = MOCKGenotype.interest_indices, 
-                    nn_rankings = nn_rankings
-                    )
+                    "mutate", operators.neighbour_mut,
+                    MUTPB=1.0,
+                    gen_length=MOCKGenotype.reduced_length,
+                    argsortdists=argsortdists,
+                    L=L,
+                    interest_indices=MOCKGenotype.interest_indices,
+                    nn_rankings=nn_rankings
+                )
     # Non-adaptive
     else:
         pop, HV = generation(pop, toolbox, HV, HV_ref, num_indivs)
-
     return pop, HV, toolbox
 
+def get_mutation_params(mut_method, mock_args, L_comp=None):
+    if mut_method == "centroid":
+        distarray_cen = precompute.compute_dists(
+            PartialClust.base_centres, PartialClust.base_centres
+        )
+        mock_args['mut_meth_params'] = {
+            'mut_method': "centroid",
+            'argsortdists_cen': np.argsort(
+                distarray_cen, kind='mergesort'
+            ),
+            'nn_rankings_cen': precompute.nn_rankings(
+                distarray_cen, len(PartialClust.comp_dict)
+            ),
+            'L_comp': L_comp
+        }                
+    elif mut_method == "neighbour":
+        mock_args['mut_meth_params'] = {
+            'mut_method': "neighbour",
+            'component_nns': precompute.component_nn(
+                Datapoint.num_examples, mock_args['argsortdists'],
+                mock_args['data_dict'], L_comp
+            )
+        }
+    else:
+        mock_args['mut_meth_params'] = {
+            'mut_method': "original"
+        }    
+    return mock_args
 
 def runMOCK(
-    data, data_dict, delta_val, hv_ref, argsortdists, 
-    nn_rankings, mst_genotype, interest_indices, L, 
-    num_indivs, num_gens, delta_reduce, strat_name, adapt_delta, reduced_clust_nums, mut_meth_params, seed_num
+    seed_num, data, data_dict, hv_ref, argsortdists,
+    nn_rankings, L, num_indivs, num_gens, 
+    strategy, adapt_delta, mut_meth_params
     ):
     """
     Run MOCK with specified inputs
@@ -432,7 +458,7 @@ def runMOCK(
         num_indivs {int} -- Number of individuals in population
         num_gens {int} -- Number of generations
         delta_reduce {int} -- Amount to reduce delta by for adaptation
-        strat_name {str} -- Name of strategy being run
+        strategy {str} -- Name of strategy being run
         adapt_delta {bool} -- If delta should be adapted
         reduced_clust_nums {list} -- List of the cluster id numbers for the base clusters/components that are available in the search
     
@@ -457,7 +483,7 @@ def runMOCK(
     if adapt_delta:
         window_size = 3 # Moving average of hv gradients to look at
         block_trigger_gens = 10 # Number of gens to wait between triggers
-        adapt_gens = [0]
+        adapt_gens = [0] # Which generations delta adapts at
         max_adapts = 5 # Maximum number of adaptations allowed
         delta_reduce = 1 # Amount to reduce delta by
         ref_grad = None # Reference gradient for hv trigger
@@ -480,26 +506,24 @@ def runMOCK(
     for gen in range(1, num_gens):
         # if gen % 10 == 0:
         #     print(f"Generation: {gen}")
-        
+
         # Select the right type of generation for this strategy and generation
         pop, hv, toolbox = select_generation_strategy(
-            pop, toolbox, hv, hv_ref, num_indivs, gen, adapt_delta, adapt_gens, strat_name, argsortdists, L, interest_indices, nn_rankings
+            pop, toolbox, hv, hv_ref, num_indivs, gen, adapt_delta,
+            adapt_gens, strategy, argsortdists, L, nn_rankings
         )
-
         # Check if delta should be changed
         if adapt_delta:
             trigger_bool, ref_grad = check_trigger(
                 MOCKGenotype.delta_val, gen, adapt_gens, max_adapts, block_trigger_gens, hv, window_size, ref_grad
             )
-            
             # Execute changes if triggered
             if trigger_bool:
                 adapt_gens.append(gen)
-
-                # Perform the trigger as specified by strat_name
+                # Perform the trigger as specified by strategy
                 pop, toolbox = adaptive_delta_trigger(
-                    pop, gen, strat_name, MOCKGenotype.delta_val, 
-                    toolbox, delta_reduce, mst_genotype, interest_indices, num_indivs, argsortdists, L, data_dict, nn_rankings, reduced_clust_nums, data
+                    pop, gen, strategy, MOCKGenotype.delta_val, 
+                    toolbox, delta_reduce, num_indivs, argsortdists, L, data_dict, nn_rankings, data
                 )
 
     # Reset the ID count for the base clusters
