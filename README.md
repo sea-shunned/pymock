@@ -14,5 +14,12 @@ A `setup.py` is on the to-do list to enforce requirements, but some key requirem
 * python-igraph (best way is to install through conda-forge)
 * Usual python stack (numpy, scipy etc.)
 
-## Brief Intro
-A variety of command line arguments are available (full definition can be found in `utils.py`).
+## Quick Start
+Install the conda environment, run `conda env create -f mock_environ.yml`.
+
+To ensure that it works, run `python run_mock.py -v`. If no errors occur, success!
+
+To then run experiments, you need to create a config file, save it in the `configs` sub-folder, and then run `python run_mock.py -c configname.json`.
+
+## User Guide
+The full user guide can be found [here](https://github.com/sea-shunned/PyMOCK/user_guide.md), which explains some aspects of the code and the different files.

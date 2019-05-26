@@ -16,10 +16,13 @@ def cluster_chains(genotype, data_dict, comp_dict, reduced_clust_nums):
     # Find the connected components of this graph (the cluster chains)
     chains = list(g.components(mode="WEAK"))
 
+    ### Add the number of clusters encoded by this individual
+    ### Either add to the Genotype class when implemented or to DEAP creator
     # try:
     #     genotype.num_clusts = len(chains)
     # except AttributeError:
     #     pass
+    
     # Assign supercluster numbers to every member in each chain for easy membership check
     superclusts = np.empty(len(comp_dict), dtype=int)
     for i, chain in enumerate(chains):
