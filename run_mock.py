@@ -418,7 +418,7 @@ def run_mock(**cl_args):
             raise ValueError(f"Results incorrect!")
     # Save results
     if save_results:
-        results_df.to_csv(str(results_folder)+f"{config['exp_name']}_results.csv")
+        results_df.to_csv(results_folder / f"{config['exp_name']}_results.csv")
 
 if __name__ == '__main__':
     parser = utils.build_parser()
