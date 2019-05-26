@@ -383,7 +383,7 @@ def run_mock(**cl_args):
                     cnn_vals = [indiv.fitness.values[1] for indiv in pop]
                     # Add strategy here for adaptive version
                     results_dict = {
-                        "dataset": [Datapoint.data_name]*config["num_indivs"]
+                        "dataset": [Datapoint.data_name]*config["num_indivs"],
                         "run": [run_num+1]*config["num_indivs"],
                         "indiv": list(range(config["num_indivs"])),
                         "L": [L]*config["num_indivs"],
@@ -418,7 +418,7 @@ def run_mock(**cl_args):
             raise ValueError(f"Results incorrect!")
     # Save results
     if save_results:
-        results_df.to_csv(str(results_folder)+f"{exp_name}_results.csv")
+        results_df.to_csv(str(results_folder)+f"{config['exp_name']}_results.csv")
 
 if __name__ == '__main__':
     parser = utils.build_parser()
