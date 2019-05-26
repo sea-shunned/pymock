@@ -19,19 +19,34 @@ This document serves as a brief user guide, outlining the contents of each of th
 * `utils.py`: Some general functions, mainly related to command line parsing and config checking.
 
 # Config Guide
+Below is a short explanation of each of the fields for the config file. An example can be found in the validation sub-folder.
 
+* `"exp_name"`: The name for the experiment, which will be the name for the folder.
+* `"data_folder"`: The location of the folder where the data is (given as a relative path to the base directory, separated with `"/"`)
+* `"data_subset"`: A string that will select a subset of the data in the folder. Leave as `null` for every file in the folder to be used.
+* `"num_runs"`: The number of runs (e.g. independent seeds)
+* `"num_gens"`: The number of generations
+* `"num_indivs"`: The number of individuals in a population
+* `"delta_sr_vals"`: Which values of delta to use, in terms of multiples of the square root (as in Mario's paper)
+* `"delta_raw_vals"`: Raw delta values to use (between 0 and 100)
+* `"mut_method"`: Which mutation method to use (choice of "original", "centroid", or "neighbour")
+* `"crossover_prob"`: The probability of crossover.
+* `"L"`: The neighbourhood parameter
+* `"L_comp"`: The component neighbourhood parameer used in the other mutation methods (i.e. not "original")
+* `"strategies"`: The strategy to use - only important for the adaptive version of MOCK.
+* `"seed_file"`: For reproducible experiments, provide the name to a seed file. For details on this, see the example in the validation folder. If none is provided, random seeds are generated and saved in the experiment folder.
 
 # Code Overview
 ## Directory Structure & Saving/Loading
-In the main directory, there are several key directories: `config`, `experiments`, and `validation`.
+In the main directory, there are several key directories: `configs`, `experiments`, and `validation`.
 
-For ease, the configs where experiments are set up are stored in the `config` folder. At the command line, just the name of the config needs to be given, as it is assumed that it is in this folder. The config is then saved in the relevant experiment folder (discussed below). Some processing of the config occurs during the run, mainly filling in any gaps. The saved config in the experiment folder will be the corrected version, but this will not overwrite the one in the `configs` directory. This is intentional, but can change.
+For ease, the configs where experiments are set up are stored in the `configs` folder. At the command line, just the name of the config needs to be given, as it is assumed that it is in this folder. The config is then saved in the relevant experiment folder (discussed below). Some processing of the config occurs during the run, mainly filling in any gaps. The saved config in the experiment folder will be the corrected version, but this will not overwrite the one in the `configs` directory. This is intentional, but can change.
 
-The `validation` folder contains a single dataset, and some previous results to ensure that the algorithm performs consistently over changes. Of course, intentional algorithmic changes will violate this validation, but the options to pass this should always remain (as it is the default working of Delta-MOCK). unit testing is not currently implemented.
+The `validation` folder contains a single dataset, and some previous results to ensure that the algorithm performs consistently over changes. Of course, intentional algorithmic changes will violate this validation, but the options to pass this should always remain (as it is the default working of Delta-MOCK). Unit testing is not currently implemented.
 
 The path to the folder where the data is kept is given in the config, so this is up to the user.
 
-During a run, a folder is created in the `results` subdirectory, according to the `exp_name` parameter in the config. This is the "experiment folder". For reproducibility, the seeds are saved in this folder, along with the config (as mentioned). The results are then saved in here.
+During a run, a folder is created in the `experiments` subdirectory, according to the `exp_name` parameter in the config. This is the "experiment folder". For reproducibility, the seeds are saved in this folder, along with the config (as mentioned). The results are then saved in here.
 
 
 ## Processing Data

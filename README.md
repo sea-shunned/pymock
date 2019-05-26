@@ -8,16 +8,16 @@ For the original Delta-MOCK in high performance C++, please see Mario Garza-Fabr
 If you are having issues using this code, please don't hesitate to contact the repo owner (cameron.shand (at) manchester.ac.uk). 
 
 ## Requirements
-A `setup.py` is on the to-do list to enforce requirements, but some key requirements will be noted here:
+Until I sort out either a `setup.py` file, or just a conda environment, here are key requirements:
 * Python 3.6+ 
-* DEAP 1.2
+* DEAP 1.2 (probably best to pip install from their github)
 * python-igraph (best way is to install through conda-forge)
 * Usual python stack (numpy, scipy etc.)
 
 ## Quick Start
-Install the conda environment, run `conda env create -f mock_environ.yml`.
+If it is available, install the conda environment, run `conda env create -f mock_environ.yml`.
 
-To ensure that it works, run `python run_mock.py -v`. If no errors occur, success!
+To ensure that your setup works, run `python run_mock.py -v`. If no errors occur, success!
 
 To then run experiments, you need to create a config file, save it in the `configs` sub-folder, and then run `python run_mock.py -c configname.json`.
 

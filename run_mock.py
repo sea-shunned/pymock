@@ -93,6 +93,7 @@ def setup_mock(data, data_dict):
     nn_rankings = precompute.nn_rankings(distarray, Datapoint.num_examples)
     # Calculate MST
     MOCKGenotype.mst_genotype = precompute.create_mst(distarray)
+    print(MOCKGenotype.mst_genotype)
     # Calculate DI values
     MOCKGenotype.degree_int = precompute.degree_interest(
         MOCKGenotype.mst_genotype, nn_rankings, distarray
@@ -192,7 +193,7 @@ def run_mock(**cl_args):
             config["data_subset"]
         )
         # Just validating so don't save results
-        save_results = True
+        save_results = False
     else:
         config_path = Path.cwd() / "configs" / cl_args["config"]
         config = utils.load_json(config_path)
