@@ -18,7 +18,10 @@ This document serves as a brief user guide, outlining the contents of each of th
 * `tests.py`: Just a simple test to compare the output of the algorithm with previously saved results. Only used when the validate command-line argument is given.
 * `utils.py`: Some general functions, mainly related to command line parsing and config checking.
 
-# Overview
+# Config Guide
+
+
+# Code Overview
 ## Directory Structure & Saving/Loading
 In the main directory, there are several key directories: `config`, `experiments`, and `validation`.
 
