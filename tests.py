@@ -50,13 +50,13 @@ def validate_mock(results_df, delta_triggers, strategy, num_runs):
     return valid
 
 def convert_df(results_df):
+    # Select the ari results
     ari_df = results_df.pivot(index="indiv", columns="run", values="ARI")
     ari_array = ari_df.values
-    
+    # Select the hypervolume results
     hv_df = results_df.pivot(index="indiv", columns="run", values="HV")
     hv_array = hv_df.values
-
+    # Select the fitness func results
     fit_df = results_df[["VAR", "CNN", "run"]]
     fit_array = fit_df.values
-
     return ari_array, hv_array, fit_array

@@ -381,9 +381,9 @@ def run_mock(**cl_args):
                     # Extract the fitness values
                     var_vals = [indiv.fitness.values[0] for indiv in pop]
                     cnn_vals = [indiv.fitness.values[1] for indiv in pop]
-                    print(var_vals)
                     # Add strategy here for adaptive version
                     results_dict = {
+                        "dataset": [Datapoint.data_name]*config["num_indivs"]
                         "run": [run_num+1]*config["num_indivs"],
                         "indiv": list(range(config["num_indivs"])),
                         "L": [L]*config["num_indivs"],
@@ -403,21 +403,22 @@ def run_mock(**cl_args):
                     if save_results and mock_args["adapt_delta"]:
                         delta_triggers.append(adapt_gens)
 
-        print(results_df)
+        # print(results_df)
         print(f"{file_path.name} complete!")
-        # pdb.set_trace()
 
+    # Validate the results
     if cl_args['validate']:
         valid = tests.validate_mock(
             results_df, delta_triggers=[],
             strategy=strategy, num_runs=config["num_runs"]
         )
-
         if valid:
             print("Passed!")
         else:
             raise ValueError(f"Results incorrect!")
-
+    # Save results
+    if save_results:
+        results_df.to_csv(str(results_folder)+f"{exp_name}_results.csv")
 
 if __name__ == '__main__':
     parser = utils.build_parser()
