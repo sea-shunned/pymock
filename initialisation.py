@@ -66,35 +66,3 @@ def init_deltamock(k_user, num_indivs, argsortdists, L):
         red_genotype = [indiv[i] for i in MOCKGenotype.reduced_genotype_indices]
         pop.append(red_genotype)
     return pop
-
-def init_deltamockadapt(k_user, num_indivs, argsortdists, L):
-    # Create empty list for population
-    pop = []
-    # Set k_max to be 2* the k_user
-    k_max = k_user*2
-    # Generate set of k values to use
-    k_all = list(range(2,k_max+1))
-    # Shuffle this set
-    k_set = k_all[:]
-    random.shuffle(k_set)
-    # Empty list to hold selected k values
-    k_values = []
-    # If we don't have enough k values we need to resample
-    if len(k_all) < num_indivs:
-        while len(k_values) < num_indivs:
-            try:
-                k_values.append(k_set.pop())
-            except IndexError:
-                k_set = k_all[:]
-                random.shuffle(k_set)
-    # Otherwise just take the number of k values we need from the shuffled set
-    else:
-        k_values = k_set[:num_indivs]
-    assert len(k_values) == num_indivs, "Different number of k values to P (pop size)"
-    # Generate each individual
-    for k in k_values:
-        # n = k-1, with n being used in the Garza/Handl paper
-        indiv = next(create_solution(k-1, argsortdists, L))
-        red_genotype = [indiv[i] for i in MOCKGenotype.reduced_genotype_indices]
-        pop.append(red_genotype)
-    return pop

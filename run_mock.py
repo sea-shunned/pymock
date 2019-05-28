@@ -103,7 +103,6 @@ def prepare_mock_args(data, data_dict, argsortdists, nn_rankings, config):
     # Bundle all of the arguments together in a dict to pass to the function
     # This is in order of runMOCK() so that we can easily turn it into a partial func for multiprocessing
     mock_args = {
-        "data": data,
         "data_dict": data_dict,
         "hv_ref": None,
         "argsortdists": argsortdists,
@@ -111,13 +110,11 @@ def prepare_mock_args(data, data_dict, argsortdists, nn_rankings, config):
         "L": None,
         "num_indivs": config["num_indivs"],
         "num_gens": config["num_gens"],
-        "strategy": None,
-        "adapt_delta": None,
         "mut_meth_params": None
     }
     return mock_args
 
-def create_seeds(config, validate):
+def create_seeds(config):
     # Specify seed folder
     seed_folder = Path.cwd() / "seeds"
     # Load seeds if present
@@ -206,8 +203,7 @@ def run_mock(**cl_args):
     config = utils.check_config(config)
     # Create the seed list
     seed_list, config = create_seeds(
-        config,
-        cl_args["validate"]
+        config
     )
     # Restrict seed_list to the actual number of runs that we need
     # Truncating like this allows us to know that the run numbers and order of seeds correspond
@@ -290,7 +286,7 @@ def run_mock(**cl_args):
             MOCKGenotype.setup_genotype_vars()
             # Setup the components class
             PartialClust.partial_clusts(
-                mock_args["data"], mock_args["data_dict"], mock_args["argsortdists"], mock_args["L"]
+                data, mock_args["data_dict"], mock_args["argsortdists"], mock_args["L"]
             )
             # Identify the component IDs of the link origins
             MOCKGenotype.calc_reduced_clusts(mock_args["data_dict"])
@@ -303,42 +299,17 @@ def run_mock(**cl_args):
                 else:
                     mock_args['hv_ref'] = calc_hv_ref(mock_args)
             print(f"HV ref point: {mock_args['hv_ref']}")
-            
+            # Strategy is not used, but kept for result consistency with adaptive
             # Avoid more nested loops
             for strategy, L_comp in product(
                     config["strategies"], config["L_comp"]
                 ):
-                # Set the mock_args for this layer
-                mock_args["strategy"] = strategy
-                # mock_args["L_comp"] = L_comp
                 # Add mutation method-specific arguments
                 mock_args = delta_mock.get_mutation_params(
                     config["mut_method"], mock_args, L_comp
                 )
-                # Add the strat name to the mock_args
-                mock_args['strategy'] = strategy
-                # Adaptation flag to make it easier to process
-                if strategy == "base":
-                    mock_args['adapt_delta'] = False
-                else:
-                    mock_args['adapt_delta'] = True
-                # Initialize arrays for the results
-                if save_results and mock_args["adapt_delta"]:
-                    delta_triggers = [] # which generation delta was changed
-                
-                # print(mock_args.keys())
-                # for key, val in mock_args.items():
-                #     if key not in ["data", "data_dict"]:
-                #         print(key, val)
-                # raise
-                
-                # print(mock_args.values())
                 # Create the partial function to give to multiprocessing
-                # mock_func = partial(delta_mock.runMOCK, *list(mock_args.values()))
                 mock_func = partial(delta_mock.runMOCK, **mock_args)
-                # print(mock_func.args.keys())
-                # print(mock_func.keywords)
-
                 print(f"{strategy}-{config['mut_method']} starting...")
                 # Measure the time taken for the runs
                 # Send the function to a thread, each thread with a different seed
@@ -357,10 +328,8 @@ def run_mock(**cl_args):
                     final_interest_inds = run_result[3]
                     # Extract final genotype length
                     final_gen_len = run_result[4]
-                    # Extract gens with delta trigger
-                    adapt_gens = run_result[5]
                     # Get the running time for each run
-                    time_taken = run_result[6]
+                    time_taken = run_result[5]
                     # Calculate the number of clusters and ARIs
                     num_clusts, aris = evaluation.final_pop_metrics(
                         pop, MOCKGenotype.mst_genotype,
@@ -387,9 +356,6 @@ def run_mock(**cl_args):
                     results_df = results_df.append(
                         pd.DataFrame.from_dict(results_dict), ignore_index=True
                     )
-                    # Monitor when delta has changed
-                    if save_results and mock_args["adapt_delta"]:
-                        delta_triggers.append(adapt_gens)
         print(f"{file_path.name} complete!")
 
     # Validate the results

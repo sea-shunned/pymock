@@ -78,61 +78,6 @@ def neighbour_mut(parent, MUTPB, gen_length, argsortdists, L, interest_indices, 
             )
     return parent
 
-def neighbourHyperMutation_all(parent, MUTPB, gen_length, argsortdists, L, interest_indices, nn_rankings, hyper_mut):
-    first_term = (MUTPB / gen_length)
-
-    # Using a comprehension for this bit is faster
-    mutprobs = [
-        (
-            first_term + ((nn_rankings[interest_indices[index]][value] / gen_length) ** 2)
-        )*hyper_mut for index, value in enumerate(parent)
-    ]
-    # Now just loop over the probabilities
-    # As we're using assignment, can't really do this part in a comprehension!
-    for index, mutprob in enumerate(mutprobs):
-        if random.random() < mutprob:
-            parent[index] = MOCKGenotype.replace_link(
-                argsortdists, interest_indices[index], parent[index], L
-            )
-    return parent
-
-def neighbourHyperMutation_spec(parent, MUTPB, gen_length, argsortdists, L, interest_indices, nn_rankings, hyper_mut, new_genes):
-    first_term = (MUTPB / gen_length)
-    # Using a comprehension for this bit is faster
-    mutprobs = [
-        first_term +
-        ((nn_rankings[interest_indices[index]][value] / gen_length) ** 2)
-        for index,value in enumerate(parent)
-    ]
-    # Now multiply the probabilities for the newly introduced variables
-    new_probs = [mut_value * hyper_mut for mut_value in mutprobs[-len(new_genes):]]
-    mutprobs[-len(new_genes):] = new_probs
-    # Now just loop over the probabilities
-    # As we're using assignment, can't really do this part in a comprehension!
-    for index, mutprob in enumerate(mutprobs):
-        if random.random() < mutprob:
-            parent[index] = MOCKGenotype.replace_link(
-                argsortdists, interest_indices[index], parent[index], L
-            )
-    return parent
-
-def neighbourFairMutation(parent, MUTPB, gen_length, argsortdists, L, interest_indices, nn_rankings, raised_mut):
-    first_term = (MUTPB / gen_length)
-    # Using a comprehension for this bit is faster
-    mutprobs = [
-        (
-            first_term + ((nn_rankings[interest_indices[index]][value] / gen_length) ** 2)
-        )*raised_mut for index,value in enumerate(parent)
-    ]
-    # Now just loop over the probabilities
-    # As we're using assignment, can't really do this part in a comprehension!
-    for index, mutprob in enumerate(mutprobs):
-        if random.random() < mutprob:
-            parent[index] = MOCKGenotype.replace_link(
-                argsortdists, interest_indices[index], parent[index], L
-            )
-    return parent
-
 def comp_centroid_mut(parent, MUTPB, gen_length, argsortdists_cen, L_comp, interest_indices, nn_rankings_cen, data_dict):
     first_term = (MUTPB / gen_length)
     # Using a comprehension for this bit is faster
