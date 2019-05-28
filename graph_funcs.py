@@ -1,15 +1,16 @@
-import pandas as pd
 import glob
-import numpy as np
-# import matplotlib
-# matplotlib.use('PS')
-import matplotlib.pyplot as plt
-import matplotlib.lines as mlines
 import os
 import random
 from itertools import cycle
-from scipy.stats import wilcoxon
 
+import numpy as np
+import pandas as pd
+from scipy.stats import wilcoxon
+import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
+
+# import matplotlib
+# matplotlib.use('PS')
 
 plt.style.use('seaborn-paper')
 # plt.rc('text', usetex=True)

@@ -1,7 +1,4 @@
-import itertools
-
 import numpy as np
-from scipy.spatial.distance import cdist
 import igraph
 
 def cluster_chains(genotype, data_dict, comp_dict, reduced_clust_nums):
@@ -22,7 +19,7 @@ def cluster_chains(genotype, data_dict, comp_dict, reduced_clust_nums):
     #     genotype.num_clusts = len(chains)
     # except AttributeError:
     #     pass
-    
+
     # Assign supercluster numbers to every member in each chain for easy membership check
     superclusts = np.empty(len(comp_dict), dtype=int)
     for i, chain in enumerate(chains):

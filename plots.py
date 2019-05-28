@@ -1,9 +1,10 @@
 import os
 import glob
+from pathlib import Path
+
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from pathlib import Path
 from scipy import stats
 
 import rpy2

@@ -1,5 +1,5 @@
 import random
-import numpy as np
+
 from classes import MOCKGenotype
 
 def create_solution(n, argsortdists, L):

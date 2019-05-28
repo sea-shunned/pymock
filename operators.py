@@ -1,10 +1,10 @@
 import random
+
 import numpy as np
 from deap import base
-from classes import MOCKGenotype
-# from numba import jit
 
-# @profile
+from classes import MOCKGenotype
+
 def uniform_xover(parent1, parent2, cxpb):
     """Uniform crossover
     
@@ -46,7 +46,6 @@ def uniform_xover(parent1, parent2, cxpb):
     # We'll keep their fitnesses so we don't need to re-evaluate (unless mutation changes)
     return parent1, parent2
 
-# @profile
 def neighbour_mut(parent, MUTPB, gen_length, argsortdists, L, interest_indices, nn_rankings):
     """Neighbourhood-biased mutation operator
     

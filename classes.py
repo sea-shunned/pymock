@@ -1,12 +1,8 @@
 import itertools
-import numpy as np
-import igraph
-from sklearn.cluster import KMeans
-from itertools import count
 import random
-import precompute
-# import objectives
-# from collections import OrderedDict
+
+import igraph
+import numpy as np
 
 class PartialClust(object):
     # ID value iterates every time PartialClust is called
@@ -114,7 +110,7 @@ class PartialClust(object):
             [obj.centroid for obj in cls.comp_dict.values()]
             ).squeeze()
         # Reset the counter
-        cls.id_value = count()
+        cls.id_value = itertools.count()
 
 class Datapoint(object):
     # We only ever handle one instance at a time

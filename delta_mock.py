@@ -1,11 +1,11 @@
-# External
+# Standard
 import random
-import numpy as np
 from itertools import count
+# External
+import numpy as np
 from deap import base, creator, tools
 from deap.benchmarks.tools import hypervolume
-
-# Own function
+# Own
 import precompute
 import initialisation
 import objectives
