@@ -34,7 +34,7 @@ Below is a short explanation of each of the fields for the config file. An examp
 * `"L"`: The neighbourhood parameter
 * `"L_comp"`: The component neighbourhood parameer used in the other mutation methods (i.e. not "original")
 * `"strategies"`: The strategy to use - only important for the adaptive version of MOCK.
-* `"seed_file"`: For reproducible experiments, provide the name to a seed file. For details on this, see the example in the validation folder. If none is provided, random seeds are generated and saved in the experiment folder.
+* `"seed_file"`: For reproducible experiments, provide the name to a seed file. It is expected that this is in the `seeds` subdirectory. If none is provided, random seeds are generated and saved in the experiment folder.
 
 # Code Overview
 ## Directory Structure & Saving/Loading
@@ -46,7 +46,7 @@ The `validation` folder contains a single dataset, and some previous results to 
 
 The path to the folder where the data is kept is given in the config, so this is up to the user.
 
-During a run, a folder is created in the `experiments` subdirectory, according to the `exp_name` parameter in the config. This is the "experiment folder". For reproducibility, the seeds are saved in this folder, along with the config (as mentioned). The results are then saved in here.
+During a run, a folder is created in the `experiments` subdirectory, according to the `exp_name` parameter in the config. This is the "experiment folder". For reproducibility, the config (as mentioned) is saved in this folder. The seed file is saved in the root `seeds` directory so it can be used by other experiments if desired. The results are also saved in this experiment folder.
 
 
 ## Processing Data

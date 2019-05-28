@@ -21,7 +21,7 @@ import delta_mock
 import utils
 import tests
 
-def load_data(exp_name, data_folder, data_subset=""):
+def load_data(exp_name, data_folder, validate, data_subset=""):
     # Generate experiment name if not given
     if exp_name is None:
         exp_name = f"experiment_{datetime.today().strftime('%Y%m%d')}"
@@ -30,8 +30,9 @@ def load_data(exp_name, data_folder, data_subset=""):
     # Warn if already made
     if experiment_folder.is_dir():
         print(f"{experiment_folder} already exists, results may be overwritten")
-    # Make the folder if not already
-    experiment_folder.mkdir(parents=True, exist_ok=True)
+    if validate is None:
+        # Make the folder if not already
+        experiment_folder.mkdir(parents=True, exist_ok=True)
     # Turn the folder into a Path
     # If a relative path to the data is given this splits it properly for cross-platform
     data_folder = Path.cwd().joinpath(*[i for i in data_folder.split("/")])
@@ -51,7 +52,7 @@ def prepare_data(file_path):
     if isinstance(file_path, Path):
         file_path = str(file_path)
     # Get prettier names for the data
-    if "synthetic" in file_path:
+    if "tevc" in file_path:
         Datapoint.data_name = file_path.split("/")[-1].split(".")[0][:-15]
     elif "UKC" in file_path:
         Datapoint.data_name = file_path.split("/")[-1].split(".")[0]
@@ -116,34 +117,32 @@ def prepare_mock_args(data, data_dict, argsortdists, nn_rankings, config):
     }
     return mock_args
 
-def create_seeds(config, experiment_folder, validate):
-    # Need a special case just because we like to keep the validation folder separate
-    if validate:
-        seed_list = utils.load_json(Path.cwd() / "validation" / config["seed_file"])["seed_list"]
+def create_seeds(config, validate):
+    # Specify seed folder
+    seed_folder = Path.cwd() / "seeds"
+    # Load seeds if present
+    if config["seed_file"] is not None:
+        seed_list = utils.load_json(seed_folder / config["seed_file"])["seed_list"]
+    # Otherwise make some seeds
     else:
-        # Load seeds if present
-        if config["seed_file"] is not None:
-            seed_list = utils.load_json(experiment_folder / config["seed_file"])["seed_list"]
-        # Otherwise make some seeds
-        else:
-            # Ensure no collision of seeds
-            while True:
-                # Randomly generate seeds
-                seed_list = [
-                    random.randint(0, 1000000) for i in range(config["num_runs"])
-                ]
-                # If no collisions, break
-                if len(seed_list) == len(set(seed_list)):
-                    break
-            # Save the seed_list in the results folder
-            seed_fname = experiment_folder / f"seed_list_{config['exp_name']}.json"
-            # Create a dict to save into the json just to be specific
-            seeds = {"seed_list": seed_list}
-            # Save the seeds
-            with open(seed_fname, "w") as out_file:
-                json.dump(seeds, out_file, indent=4)
-            # Add the seed list to the config file so when we save it it's complete
-            config["seed_file"] = f"seed_list_{config['exp_name']}.json"
+        # Ensure no collision of seeds
+        while True:
+            # Randomly generate seeds
+            seed_list = [
+                random.randint(0, 1000000) for i in range(config["num_runs"])
+            ]
+            # If no collisions, break
+            if len(seed_list) == len(set(seed_list)):
+                break
+        # Save the seed_list in the results folder
+        seed_fname = seed_folder / f"seed_list_{config['exp_name']}.json"
+        # Create a dict to save into the json just to be specific
+        seeds = {"seed_list": seed_list}
+        # Save the seeds
+        with open(seed_fname, "w") as out_file:
+            json.dump(seeds, out_file, indent=4)
+        # Add the seed list to the config file so when we save it it's complete
+        config["seed_file"] = f"seed_list_{config['exp_name']}.json"
     # Ensure we have enough seeds
     if len(seed_list) < config["num_runs"]:
         raise ValueError("Not enough seeds for number of runs")
@@ -186,16 +185,18 @@ def run_mock(**cl_args):
         data_file_paths, experiment_folder = load_data(
             config["exp_name"],
             config["data_folder"],
+            cl_args['validate'],
             config["data_subset"]
         )
         # Just validating so don't save results
-        save_results = True
+        save_results = False
     else:
         config_path = Path.cwd() / "configs" / cl_args["config"]
         config = utils.load_json(config_path)
         data_file_paths, experiment_folder = load_data(
             config["exp_name"],
             config["data_folder"],
+            cl_args['validate'],
             config["data_subset"]
         )
         # Save experimental results
@@ -206,7 +207,6 @@ def run_mock(**cl_args):
     # Create the seed list
     seed_list, config = create_seeds(
         config,
-        experiment_folder,
         cl_args["validate"]
     )
     # Restrict seed_list to the actual number of runs that we need
@@ -238,11 +238,7 @@ def run_mock(**cl_args):
     print("---------------------------")
 
     # Save the config
-    utils.save_config(config, experiment_folder)
-    # Make a sub-folder to save results in
-    if save_results:
-        results_folder = experiment_folder / "results"
-        results_folder.mkdir(exist_ok=True)
+    utils.save_config(config, experiment_folder, cl_args["validate"])
 
     # Loop through the data to test
     for file_path in data_file_paths:
@@ -255,7 +251,7 @@ def run_mock(**cl_args):
         mock_args = prepare_mock_args(data, data_dict, argsortdists, nn_rankings, config)
         print("Precomputation complete!")
 
-        if save_results:
+        if save_results or cl_args["validate"]:
             # Create a dataframe for the results
             results_df = pd.DataFrame()
 
@@ -345,16 +341,12 @@ def run_mock(**cl_args):
 
                 print(f"{strategy}-{config['mut_method']} starting...")
                 # Measure the time taken for the runs
-                start_time = time.time()
                 # Send the function to a thread, each thread with a different seed
+                start_time = time.time()
                 with multiprocessing.Pool() as pool:
                     results = pool.starmap(mock_func, seed_list)
-                end_time = time.time()
-                # This does not given you a time per run
-                # Diving by number of seeds is also inaccurate, it depends on chunksize, num CPUs etc.
-                # These numbers are useful to compare relatively, though
-                time_taken = end_time-start_time
-                print(f"{strategy} done ({len(seed_list)} runs took {time_taken:.3f} secs)")
+                mp_time = time.time() - start_time
+                print(f"{len(seed_list)} runs complete...took {mp_time:.3f} secs)")
 
                 for run_num, run_result in enumerate(results):
                     # Extract the population
@@ -367,9 +359,8 @@ def run_mock(**cl_args):
                     final_gen_len = run_result[4]
                     # Extract gens with delta trigger
                     adapt_gens = run_result[5]
-
-                    ## Shorten the above #22.05.19
-                    # pop, hv, final_interest_inds, final_gen_len, adapt_gens = run_result
+                    # Get the running time for each run
+                    time_taken = run_result[6]
                     # Calculate the number of clusters and ARIs
                     num_clusts, aris = evaluation.final_pop_metrics(
                         pop, MOCKGenotype.mst_genotype,
@@ -392,30 +383,27 @@ def run_mock(**cl_args):
                         "clusters": num_clusts,
                         "time": [time_taken]*config["num_indivs"]
                     }
+                    # Add the new results
                     results_df = results_df.append(
                         pd.DataFrame.from_dict(results_dict), ignore_index=True
                     )
-                    
-                    # if L_comp is not None:
+                    # Monitor when delta has changed
                     if save_results and mock_args["adapt_delta"]:
                         delta_triggers.append(adapt_gens)
-
-        # print(results_df)
         print(f"{file_path.name} complete!")
 
     # Validate the results
     if cl_args['validate']:
-        valid = tests.validate_mock(
-            results_df, delta_triggers=[],
-            strategy=strategy, num_runs=config["num_runs"]
+        tests.validate_results(
+            results_df
         )
-        if valid:
-            print("Passed!")
-        else:
-            raise ValueError(f"Results incorrect!")
+        print("Test passed!")
     # Save results
     if save_results:
-        results_df.to_csv(results_folder / f"{config['exp_name']}_results.csv")
+        results_df.to_csv(
+            experiment_folder / f"{config['exp_name']}_results.csv",
+            index=False
+        )
 
 if __name__ == '__main__':
     parser = utils.build_parser()

@@ -1,5 +1,6 @@
 # Standard
 import random
+import time
 from itertools import count
 # External
 import numpy as np
@@ -475,6 +476,7 @@ def runMOCK(
     np.random.seed(seed_num) # Currently unused, should switch to in future
     print(f"Seed number: {seed_num}")
 
+    start_time = time.time()
     # Initialise local varibles
     # This can be abstracted out in future
     hv = []
@@ -525,10 +527,10 @@ def runMOCK(
                     pop, gen, strategy, MOCKGenotype.delta_val, 
                     toolbox, delta_reduce, num_indivs, argsortdists, L, data_dict, nn_rankings, data
                 )
-
+    time_taken = time.time() - start_time
     # Reset the ID count for the base clusters
     # PartialClust.id_value = count()
-    return pop, hv, hv_ref, MOCKGenotype.interest_indices, MOCKGenotype.reduced_length, adapt_gens
+    return pop, hv, hv_ref, MOCKGenotype.interest_indices, MOCKGenotype.reduced_length, adapt_gens, time_taken
 
 # add a main func here if we just want to run this thing once
 # a main func is used within a script only, a main should not be imported

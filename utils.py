@@ -73,10 +73,11 @@ def set_config_defaults(config):
             config["L_comp"] = [5]
     return config
 
-def save_config(config, experiment_folder):
+def save_config(config, experiment_folder, validate):
     """Save the final config file into the results folder for easy access
     """
     config_path = experiment_folder / f"config_{config['exp_name']}.json"
 
-    with open(config_path, "w") as out_file:
-        json.dump(config, out_file, indent=4)
+    if validate is None:
+        with open(config_path, "w") as out_file:
+            json.dump(config, out_file, indent=4)
