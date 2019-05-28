@@ -288,86 +288,16 @@ def adaptive_delta_trigger(pop, gen, strategy, delta_val, toolbox,
         base_members=PartialClust.base_members,
         base_centres=PartialClust.base_centres
     )
-
-    # Different mutation operators for different strategies
-    if strategy == "hypermutall":
-        toolbox.register(
-            "mutate",
-            operators.neighbourHyperMutation_all,
-            MUTPB=1.0,
-            gen_length=MOCKGenotype.reduced_length,
-            argsortdists=argsortdists,
-            L=L,
-            interest_indices=MOCKGenotype.interest_indices,
-            nn_rankings=nn_rankings,
-            hyper_mut=500
-        )
-
-    elif strategy == "hypermutspec":
-        toolbox.register(
-            "mutate",
-            operators.neighbourHyperMutation_spec,
-            MUTPB=1.0,
-            gen_length=MOCKGenotype.reduced_length,
-            argsortdists=argsortdists,
-            L=L,
-            interest_indices=MOCKGenotype.interest_indices,
-            nn_rankings=nn_rankings,
-            hyper_mut=500,
-            new_genes=newly_unfixed_indices
-        )
-
-    elif strategy == "fairmut":
-        toolbox.register(
-            "mutateFair",
-            operators.neighbourFairMutation,
-            MUTPB=1.0,
-            gen_length=MOCKGenotype.reduced_length,
-            argsortdists=argsortdists,
-            L=L,
-            interest_indices=MOCKGenotype.interest_indices,
-            nn_rankings=nn_rankings,
-            raised_mut=50
-        )
-
-    elif strategy == "reinit":
-        # Unregister population functions first
-        toolbox.unregister("initDelta")
-        toolbox.unregister("population")
-
-        toolbox.register(
-            "initDelta",
-            initialisation.init_deltamockadapt,
-            Datapoint.k_user,
-            num_indivs,
-            argsortdists,
-            L
-        )
-        
-        toolbox.register(
-            "population", tools.initIterate, list, toolbox.initDelta
-        )
-        
-        toolbox.register(
-            "mutate", operators.neighbour_mut,
-            MUTPB=1.0,
-            gen_length=MOCKGenotype.reduced_length,
-            argsortdists=argsortdists,
-            L=L,
-            interest_indices=MOCKGenotype.interest_indices,
-            nn_rankings=nn_rankings
-        )
-
-    else:
-        toolbox.register(
-            "mutate", operators.neighbour_mut,
-            MUTPB=1.0,
-            gen_length=MOCKGenotype.reduced_length,
-            argsortdists=argsortdists,
-            L=L,
-            interest_indices=MOCKGenotype.interest_indices,
-            nn_rankings=nn_rankings
-        )
+    # Register the mutation operator
+    toolbox.register(
+        "mutate", operators.neighbour_mut,
+        MUTPB=1.0,
+        gen_length=MOCKGenotype.reduced_length,
+        argsortdists=argsortdists,
+        L=L,
+        interest_indices=MOCKGenotype.interest_indices,
+        nn_rankings=nn_rankings
+    )
     # Fix reduced_length here (need to look where returned)
     return pop, toolbox
 
