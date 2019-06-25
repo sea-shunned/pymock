@@ -82,11 +82,10 @@ def final_pop_metrics(pop, mst_genotype, int_links_indices, relev_links_len):
         # Get the base nodes
         base_nodes = list(range(num_examples))
 
-        # Get the mst_genotype
-        new_values = np.asarray(mst_genotype)
-
-        # Modify the relevant part of the mst_genotype
-        new_values[int_links_indices[:relev_links_len]] = indiv
+        # Rebuild full individual genotype
+        new_values = rebuild_ind_genotype(indiv,
+                                          classes.MOCKGenotype.interest_indices,
+                                          classes.MOCKGenotype.mst_genotype)
 
         # Create the graph
         g.add_edges(zip(base_nodes, new_values))
@@ -136,7 +135,6 @@ def numClusters(pop, mst_genotype, int_links_indices, relev_links_len):
         # Get the base nodes
         base_nodes = list(range(num_examples))
 
-        # Get the mst_genotype
         new_values = np.asarray(mst_genotype)
 
         # Modify the relevant part of the mst_genotype
@@ -150,3 +148,16 @@ def numClusters(pop, mst_genotype, int_links_indices, relev_links_len):
         sol_num_clusters.append(len(conn_components))
     
     return np.asarray(sol_num_clusters)
+
+
+def rebuild_ind_genotype(genotype, di_index, mst):
+    """
+    :param genotype: list. Reduced individual's genotype
+    :param di: list. DI index
+    :param mst: list. full mst
+    :return: full individual's genotype
+    """
+    genotype_index = di_index[:len(genotype)]
+    for i, idx in enumerate(genotype_index):
+        mst[idx] = genotype[i]
+    return mst

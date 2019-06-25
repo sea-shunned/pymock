@@ -7,6 +7,7 @@ import igraph
 # Add a try except for igraph?
 # Shouldn't need this if the setup.py is done properly
 
+
 def compute_dists(data1,data2):
     '''
     Compute distances between two datasets. Usually the same dataset will be passed as data1 and data2
@@ -15,7 +16,8 @@ def compute_dists(data1,data2):
     :return: Distance array (or dissimilarity matrix) of the data
     '''
     return metrics.pairwise.euclidean_distances(data1, data2)
-    
+
+
 def compute_dists_sp(data):
     '''
     Compute the distance array of some data
@@ -27,6 +29,7 @@ def compute_dists_sp(data):
     
     # Perhaps have a single function and try to catch a memory error, and use this distance if it fails
     return spt.distance.squareform(spt.distance.pdist(data,'euclidean'))
+
 
 def create_mst(distarray):
     # Create directed, weighted graph (loops=False means ignore diagonal)
@@ -69,6 +72,7 @@ def create_mst(distarray):
     # Return as a list
     return mst_genotype.tolist()
 
+
 def normalize_dists(distarray):
     """Normalize the distance array
     """
@@ -81,12 +85,14 @@ def normalize_dists(distarray):
     distarray /= denom
     return distarray
 
+
 def degree_interest(mst_genotype, nn_rankings, distarray):
     """Calculate the degree of interest for each link in the MST
     """
     # Calculate the degree of interest for each edge in the MST
     # This reads pretty much exactly as the formula (distances have been scaled)
     return [min(nn_rankings[i][j],nn_rankings[j][i])+distarray[i][j] for i,j in enumerate(mst_genotype)]
+
 
 def nn_rankings(distarray, num_examples):
     """This function calculates the nearest neighbour ranking between all examples
@@ -103,6 +109,7 @@ def nn_rankings(distarray, num_examples):
     for i, row in enumerate(distarray):
         nn_rankings[i] = rankdata(row, method='ordinal')-1 # minus 1 so that 0 rank is itself
     return nn_rankings
+
 
 def component_nn(num_examples, argsortdists, data_dict, L_comp):
     """Determine which are the L_comp nearest components for each datapoint
@@ -140,3 +147,20 @@ def component_nn(num_examples, argsortdists, data_dict, L_comp):
         # Add values to the array
         component_nns[i,:] = nearest_l_ids
     return component_nns
+
+
+def L_nn(distances, L):
+    """
+    Computes the index of L nn for each node.
+
+    :param distances: Distance array, as given by compute_dists.
+    :param L: Number of nn to take into account.
+    :return: NxL Matrix with L nn per node.
+    """
+    argsortdist = np.argsort(distances, axis=1)
+    return cut_L_nn(argsortdist, L)
+
+
+def cut_L_nn(argsortdist, L):
+    L = min(L, argsortdist.shape[0] - 1)
+    return argsortdist[:, 1:L + 1]

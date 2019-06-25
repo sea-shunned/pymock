@@ -1,6 +1,7 @@
 import numpy as np
 import igraph
 
+
 def cluster_chains(genotype, data_dict, comp_dict, reduced_clust_nums):
     # Identify what base clusters the points in the new genotype are in
     new_clust_nums = [data_dict[i].base_cluster_num for i in genotype]
@@ -26,6 +27,7 @@ def cluster_chains(genotype, data_dict, comp_dict, reduced_clust_nums):
         superclusts[chain] = i
     return chains, superclusts
 
+
 def objCNN(chains, superclusts, cnn_pairs, cnn_array, max_cnn):
     # Saves time for a single cluster solutions
     if len(chains) == 1:
@@ -38,6 +40,7 @@ def objCNN(chains, superclusts, cnn_pairs, cnn_array, max_cnn):
             if superclusts[pair[0]] == superclusts[pair[1]]:
                 conn_score -= cnn_array[pair[0], pair[1]]
     return conn_score
+
 
 # @profile
 def objVAR(chains, comp_dict, base_members, base_centres, superclusts):
@@ -56,15 +59,17 @@ def objVAR(chains, comp_dict, base_members, base_centres, superclusts):
     # We have taken the sum, so need to divide
     centres = np.divide(centres, members)
     # Calculate the intracluster variance for the superclusters
-    wcss = np.sum([comp_dict[index].num_members * np.dot(comp_dict[index].centroid.squeeze() - centres[value], comp_dict[index].centroid.squeeze() - centres[value]) for index, value in enumerate(superclusts)])
+    wcss = np.sum([comp_dict[index].num_members *
+                   np.dot(comp_dict[index].centroid.squeeze() -
+                          centres[value], comp_dict[index].centroid.squeeze() - centres[value])
+                   for index, value in enumerate(superclusts)])
     # print(wcss, variances)
     return wcss + variances
 
+
 # @profile
-def eval_mock(genotype, comp_dict, reduced_clust_nums, cnn_array, max_cnn, num_examples, data_dict, cnn_pairs, base_members, base_centres):
-    # Not really necessary but just in case
-    if len(genotype) != len(reduced_clust_nums):
-        raise ValueError("The genotype being evaluated is not the same length as the reduced, partial genotype")
+def eval_mock(genotype, comp_dict, reduced_clust_nums, cnn_array, max_cnn, num_examples, data_dict, cnn_pairs,
+              base_members, base_centres):
     # Identifies which components are connected (delta-evaluation)
     chains, superclusts = cluster_chains(genotype, data_dict, comp_dict, reduced_clust_nums)
     # Calculate the objectives

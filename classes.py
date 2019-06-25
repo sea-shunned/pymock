@@ -4,6 +4,9 @@ import random
 import igraph
 import numpy as np
 
+from custom_warnings import warning_min_max_delta
+
+
 class PartialClust(object):
     # ID value iterates every time PartialClust is called
     # So we can ensure every object (base cluster) has a unique ID value
@@ -28,13 +31,13 @@ class PartialClust(object):
 
     @staticmethod
     def cnn_precomp(base_clusters, data_dict, argsortdists, L):
-        cnn_array = np.zeros((len(base_clusters),len(base_clusters)))
+        cnn_array = np.zeros((len(base_clusters), len(base_clusters)))
         # pairs = np.zeros((int(len(base_clusters)*(len(base_clusters)/2)),),dtype=(int,2))
         # Initialise variables
         cnn_pair_list = []
         max_cnn = 0
         # Easier (one less nested loop, though same number of items)
-            # than looping through base clusters - though it's equivalent
+        # than looping through base clusters - though it's equivalent
         for point in data_dict.values():
             # Get the L nearest neighbours
             # this matches the C++ code, where they consider the nearest neighbour to be the point itself
@@ -112,6 +115,7 @@ class PartialClust(object):
         # Reset the counter
         cls.id_value = itertools.count()
 
+
 class Datapoint(object):
     # We only ever handle one instance at a time
     # If we were to handle more, we'd need to actually move these into the __init__
@@ -182,10 +186,12 @@ class Datapoint(object):
             data_dict[curr_datapoint.id] = curr_datapoint
         return data, data_dict
 
+
 class MOCKGenotype(list):
-    mst_genotype = None # the MST genotype
-    degree_int = None # Degree of interestingness of the MST
-    interest_indices = None # Indices of the most to least interesting links in the MST (formerly int_links_indices)
+    mst_genotype = None  # the MST genotype
+    n_links = None
+    degree_int = None  # Degree of interestingness of the MST
+    interest_indices = None  # Indices of the most to least interesting links in the MST (formerly int_links_indices)
     # Delta value
     #### In the future, can set this as the start
     #### And we redefine individual deltas as attributes if we have varying levels
@@ -204,17 +210,46 @@ class MOCKGenotype(list):
     base_clusters = None
 
     def __init__(self):
-        # Set full genotype as None - don't store a potentially long list unless we need to (we always have the base as a class variable and can reconstruct)
+        # Set full genotype as None - don't store a potentially long list unless we need to
+        # (we always have the base as a class variable and can reconstruct)
         self.full_genotype = None        
         # The (reduced) genotype
         self.genotype = None
         # Number of clusters the individual defines
         self.num_clusts = None
-    
+
+    @staticmethod
+    def get_n_genes(delta, total):
+        return int(round((100 - delta) / 100 * total, 0))
+
+    @classmethod
+    def get_random_delta(cls, min_delta, max_delta, precision=3):
+        """Generates a random delta in a given interval"""
+        min_delta, max_delta = warning_min_max_delta(min_delta, max_delta)
+
+        delta_diff = max_delta - min_delta
+        delta = round(random.random() * delta_diff + min_delta, precision)
+        n_genes = cls.get_n_genes(delta, cls.n_links)
+
+        return delta, n_genes
+
+    @classmethod
+    def delta_individual(cls, icls, min_delta, max_delta, mst, di_index, delta=None, precision=3):
+        """Generates an individual with a random delta in a given interval or value"""
+        if delta is None:
+            # Get the value for delta and the number of genes it represents
+            delta, n_genes = cls.get_random_delta(min_delta, max_delta, precision)
+        else:
+            n_genes = cls.get_n_genes(delta, cls.n_links)
+
+        ind = icls([mst[i] for i in di_index[:n_genes]])
+        ind.delta = delta
+        return ind
+
     @classmethod
     def setup_genotype_vars(cls):
         # Calculate the length of the reduced genotype
-        cls.calc_red_length()
+        # cls.calc_red_length()
         # Find the indices of the most to least interesting links
         cls.interest_links_indices()
         # Store the indices that we need for our reduced genotype
@@ -284,7 +319,6 @@ class MOCKGenotype(list):
         elif cls.delta_val > 100:
             raise ValueError("Delta value is over 100")
         return cls.delta_val
-        
 
     @classmethod
     def calc_red_length(cls):
@@ -363,4 +397,3 @@ class MOCKGenotype(list):
             if new_j != j:
                 break
         return new_j
-        

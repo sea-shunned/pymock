@@ -1,9 +1,6 @@
 import random
-
-import numpy as np
-from deap import base
-
 from classes import MOCKGenotype
+
 
 def uniform_xover(parent1, parent2, cxpb):
     """Uniform crossover
@@ -16,11 +13,15 @@ def uniform_xover(parent1, parent2, cxpb):
     Returns:
         [type] -- [description]
     """
-    # Below not really necessary
-    assert len(parent1) == len(parent2)
+    # Standardize parent's length
+    child_len = min(len(parent1), len(parent2))
+    parent1[:] = parent1[:child_len]
+    parent2[:] = parent2[:child_len]
+
     # Make copies of the parents
     child1 = parent1[:]
     child2 = parent2[:]
+
     # Test if we undergo crossover
     if cxpb == 1:
         for i in range(len(parent1)):
@@ -32,6 +33,7 @@ def uniform_xover(parent1, parent2, cxpb):
                 parent2[i] = child1[i]
         # Caveat: there is a 0.5**len(parent1) chance the parents will be equal to children
         del parent1.fitness.values, parent2.fitness.values
+
     # In case another probability is used; we avoid a random.random() call in normal case
     elif random.random() <= cxpb:
         for i in range(len(parent1)):
@@ -46,7 +48,8 @@ def uniform_xover(parent1, parent2, cxpb):
     # We'll keep their fitnesses so we don't need to re-evaluate (unless mutation changes)
     return parent1, parent2
 
-def neighbour_mut(parent, MUTPB, gen_length, argsortdists, L, interest_indices, nn_rankings):
+
+def neighbour_mut(parent, MUTPB, argsortdists, L, interest_indices, nn_rankings):
     """Neighbourhood-biased mutation operator
     
     Arguments:
@@ -61,50 +64,88 @@ def neighbour_mut(parent, MUTPB, gen_length, argsortdists, L, interest_indices, 
     Returns:
         parent {DEAP individual} -- The mutated genotype
     """
-    # Calculate the first term of the mutation equation
-    first_term = (MUTPB / gen_length)
-    # Using a comprehension for this bit is faster
-    mutprobs = [
-        first_term +
-        ((nn_rankings[interest_indices[index]][value] / gen_length) ** 2)
-        for index, value in enumerate(parent)
-    ]
-    # Now just loop over the probabilities
-    # As we're using assignment, can't really do this part in a comprehension!
-    for index, mutprob in enumerate(mutprobs):
-        if random.random() < mutprob:
-            parent[index] = MOCKGenotype.replace_link(
-                argsortdists, interest_indices[index], parent[index], L
-            )
+    if len(parent) > 0:
+        # Calculate the first term of the mutation equation
+        first_term = (MUTPB / len(parent))
+        # Using a comprehension for this bit is faster
+        mutprobs = [
+            first_term +
+            ((nn_rankings[interest_indices[index]][value] / len(parent)) ** 2)
+            for index, value in enumerate(parent)
+        ]
+        # Now just loop over the probabilities
+        # As we're using assignment, can't really do this part in a comprehension!
+        for index, mutprob in enumerate(mutprobs):
+            if random.random() < mutprob:
+                parent[index] = MOCKGenotype.replace_link(
+                    argsortdists, interest_indices[index], parent[index], L
+                )
+
     return parent
 
-def comp_centroid_mut(parent, MUTPB, gen_length, argsortdists_cen, L_comp, interest_indices, nn_rankings_cen, data_dict):
-    first_term = (MUTPB / gen_length)
-    # Using a comprehension for this bit is faster
-    mutprobs = [
-        first_term +
-        ((nn_rankings_cen[data_dict[index].base_cluster_num][data_dict[value].base_cluster_num] / gen_length) ** 2)
-        for index,value in enumerate(parent)
-    ]
-    # Now just loop over the probabilities
-    # As we're using assignment, can't really do this part in a comprehension!
-    for index, mutprob in enumerate(mutprobs):
-        if random.random() < mutprob:
-            parent[index] = MOCKGenotype.centroid_replace_link(
-                argsortdists_cen, interest_indices[index], parent[index], L_comp, data_dict
-            )
+
+def comp_centroid_mut(parent, MUTPB, argsortdists_cen, L_comp, interest_indices, nn_rankings_cen, data_dict):
+    if len(parent) > 0:
+        first_term = (MUTPB / len(parent))
+        # Using a comprehension for this bit is faster
+        mutprobs = [
+            first_term +
+            ((nn_rankings_cen[data_dict[index].base_cluster_num][data_dict[value].base_cluster_num] / len(parent)) ** 2)
+            for index,value in enumerate(parent)
+        ]
+        # Now just loop over the probabilities
+        # As we're using assignment, can't really do this part in a comprehension!
+        for index, mutprob in enumerate(mutprobs):
+            if random.random() < mutprob:
+                parent[index] = MOCKGenotype.centroid_replace_link(
+                    argsortdists_cen, interest_indices[index], parent[index], L_comp, data_dict
+                )
+
     return parent
 
-def neighbour_comp_mut(parent, MUTPB, gen_length, interest_indices, nn_rankings, component_nns, data_dict):
-    first_term = (MUTPB / gen_length)
-    mutprobs = [
-        first_term +
-        ((nn_rankings[interest_indices[index]][value] / gen_length) ** 2)
-        for index,value in enumerate(parent)
-    ]
-    for index, mutprob in enumerate(mutprobs):
-        if random.random() < mutprob:
-            parent[index] = MOCKGenotype.neighbour_replace_link(
-                component_nns, interest_indices[index], parent[index], data_dict
-            )
+
+def neighbour_comp_mut(parent, MUTPB, interest_indices, nn_rankings, component_nns, data_dict):
+    if len(parent) > 0:
+        first_term = (MUTPB / len(parent))
+        mutprobs = [
+            first_term +
+            ((nn_rankings[interest_indices[index]][value] / len(parent)) ** 2)
+            for index,value in enumerate(parent)
+        ]
+        for index, mutprob in enumerate(mutprobs):
+            if random.random() < mutprob:
+                parent[index] = MOCKGenotype.neighbour_replace_link(
+                    component_nns, interest_indices[index], parent[index], data_dict
+                )
+
+    return parent
+
+
+def gaussian_mutation_delta(parent, sigma, MUTPB, precision=3, sigma_perct=False, inverse=False):
+    # Set parameters
+    mu = parent.delta
+    if sigma_perct:
+        if inverse:
+            sigma = (100-mu)*sigma + 1/(101-mu)
+        else:
+            sigma = mu * sigma
+
+    # Test if mutation is happening
+    if random.random() < MUTPB:
+        old_delta = parent.delta
+
+        # Mutate
+        parent.delta = round(max(min(random.gauss(mu, sigma), 100), 0), precision)
+
+        # Number of genes that the new delta represents
+        n = MOCKGenotype.get_n_genes(parent.delta, MOCKGenotype.n_links)
+
+        # Lock genes
+        if parent.delta > old_delta:
+            parent[:] = parent[:n]
+
+        # Unlock genes
+        else:
+            parent[:] += MOCKGenotype.mst_genotype[len(parent):n]
+
     return parent

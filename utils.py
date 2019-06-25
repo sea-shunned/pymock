@@ -2,6 +2,7 @@ import argparse
 import json
 from pathlib import Path
 
+
 def build_parser():
     parser = argparse.ArgumentParser()    
     # You need to either validate or give a config file name
@@ -20,6 +21,7 @@ def build_parser():
     )
     return parser
 
+
 def check_cl_args(cl_args):
     # Check that the provided config exists
     if cl_args["config"] is not None:
@@ -31,6 +33,7 @@ def check_cl_args(cl_args):
     if not config_path.is_file():
         raise FileNotFoundError(f"Config file does not exist, expected {config_path}")
 
+
 def load_json(f_path):
     try:
         with open(f_path) as json_file:
@@ -40,21 +43,21 @@ def load_json(f_path):
         raise
     return params
 
+
 def check_config(config):
     """Check that the config parameters provided are valid,
     or make them so
     """
-    if config["delta_sr_vals"] is None and config["delta_raw_vals"] is None:
-        raise ValueError(f"A delta value must be provided")
     # Set some defaults if needed
     config = set_config_defaults(config)
     # Some of the parameters need to be lists
-    list_params = ["delta_sr_vals", "delta_raw_vals", "L_comp"]
+    list_params = ["L_comp"]
     # If a value has been provided but isn't a list, convert it
     for key in list_params:
         if config[key] is not None and not isinstance(config[key], list):
             config[key] = list(config[key])
     return config
+
 
 def set_config_defaults(config):
     # Set default values
@@ -72,6 +75,7 @@ def set_config_defaults(config):
             # Set as a list to use product
             config["L_comp"] = [5]
     return config
+
 
 def save_config(config, experiment_folder, validate):
     """Save the final config file into the results folder for easy access

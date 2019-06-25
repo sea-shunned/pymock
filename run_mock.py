@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import partial
 from pathlib import Path
 import multiprocessing
-import pdb
+# import pdb
 
 import numpy as np
 import pandas as pd
@@ -20,6 +20,7 @@ import objectives
 import delta_mock
 import utils
 import tests
+
 
 def load_data(exp_name, data_folder, validate, data_subset=""):
     # Generate experiment name if not given
@@ -46,6 +47,7 @@ def load_data(exp_name, data_folder, validate, data_subset=""):
         data_file_paths = data_folder.glob("*"+data_subset+"*")
     # Return the data and the base experiment folder
     return list(data_file_paths), experiment_folder
+
 
 def prepare_data(file_path):
     # Some of this function is hard-coded for strings, so convert the Path
@@ -81,38 +83,56 @@ def prepare_data(file_path):
     data, data_dict = Datapoint.create_dataset_garza(data)
     return data, data_dict
 
-def setup_mock(data, data_dict):
+
+def setup_mock(data):
     # Go through the precomputation specific to the dataset
     # Calculate distance array
     distarray = precompute.compute_dists(data, data)
     distarray = precompute.normalize_dists(distarray)
     argsortdists = np.argsort(distarray, kind='mergesort')
+
     # Calculate nearest neighbour rankings
     nn_rankings = precompute.nn_rankings(distarray, Datapoint.num_examples)
+
     # Calculate MST
     MOCKGenotype.mst_genotype = precompute.create_mst(distarray)
+    MOCKGenotype.n_links = len(MOCKGenotype.mst_genotype)
+
     # Calculate DI values
     MOCKGenotype.degree_int = precompute.degree_interest(
         MOCKGenotype.mst_genotype, nn_rankings, distarray
     )
+
     # Sort to get the indices of most to least interesting links
     MOCKGenotype.interest_links_indices()
+
     return argsortdists, nn_rankings
+
 
 def prepare_mock_args(data, data_dict, argsortdists, nn_rankings, config):
     # Bundle all of the arguments together in a dict to pass to the function
     # This is in order of runMOCK() so that we can easily turn it into a partial func for multiprocessing
     mock_args = {
+        "data": data,
         "data_dict": data_dict,
         "hv_ref": None,
         "argsortdists": argsortdists,
         "nn_rankings": nn_rankings,
         "L": None,
+        "Lnn": None,
         "num_indivs": config["num_indivs"],
         "num_gens": config["num_gens"],
-        "mut_meth_params": None
+        "mut_meth_params": None,
+        "min_delta": config['min_delta'],
+        "max_delta": config['max_delta'],
+        "delta_precision": config['delta_precision'],
+        "delta_mutpb": config["delta_mutation_probability"],
+        "delta_sigma": config['delta_gauss_mutation_sigma'],
+        "delta_sigma_as_perct": config['delta_gauss_mutation_sigma_as_perct'],
+        "delta_inverse": config['delta_gauss_mutation_inverse']
     }
     return mock_args
+
 
 def create_seeds(config):
     # Specify seed folder
@@ -145,6 +165,7 @@ def create_seeds(config):
         raise ValueError("Not enough seeds for number of runs")
     return seed_list, config
 
+
 def calc_hv_ref(mock_args):
     """Calculates a hv reference/nadir point for use on all runs of that dataset
     
@@ -174,8 +195,11 @@ def calc_hv_ref(mock_args):
     ]
     return hv_ref
 
+
 def run_mock(**cl_args):
     # Load the data file paths
+    print('Loading data...')
+
     if cl_args['validate']:
         config_path = Path.cwd() / "configs" / "validate.json"
         config = utils.load_json(config_path)
@@ -193,7 +217,7 @@ def run_mock(**cl_args):
         data_file_paths, experiment_folder = load_data(
             config["exp_name"],
             config["data_folder"],
-            cl_args['validate'],
+            None,
             config["data_subset"]
         )
         # Save experimental results
@@ -210,31 +234,23 @@ def run_mock(**cl_args):
     seed_list = seed_list[:config["num_runs"]]
     seed_list = [(i,) for i in seed_list] # for starmap
 
-    # Calculate number of delta values
-    # Just needed here to print
-    if config["delta_sr_vals"] is None:
-        a = 0
-    else:
-        a = len(config["delta_sr_vals"])
-
-    if config["delta_raw_vals"] is None:
-        b = 0
-    else:
-        b = len(config["delta_raw_vals"])
-    num_delta = a + b
-
     # Print the number of runs to get an idea of runtime (sort of)
     print("---------------------------")
     print("Number of MOCK Runs:")
     print(f"{config['num_runs']} run(s)")
     print(f"{len(config['strategies'])} strategy/-ies")
-    print(f"{num_delta} delta value(s)")
+    print(f"{config['num_gens']} generations")
+    print(f"{config['num_indivs']} individuals per generation.")
+    print(f"{config['min_delta']}-{config['max_delta']} delta range")
     print(f"{len(data_file_paths)} dataset(s)")
-    print(f"= {config['num_runs']*len(config['strategies'])*num_delta*len(data_file_paths)} run(s)")
     print("---------------------------")
 
     # Save the config
     utils.save_config(config, experiment_folder, cl_args["validate"])
+
+    # df for results
+    results_df = pd.DataFrame()
+    hvs_df = pd.DataFrame()
 
     # Loop through the data to test
     for file_path in data_file_paths:
@@ -242,45 +258,16 @@ def run_mock(**cl_args):
         # Prepare the data
         data, data_dict = prepare_data(file_path)
         # Do the precomputation for MOCK
-        argsortdists, nn_rankings = setup_mock(data, data_dict)
+        argsortdists, nn_rankings = setup_mock(data)
         # Wrap the arguments up for the main MOCK function
         mock_args = prepare_mock_args(data, data_dict, argsortdists, nn_rankings, config)
         print("Precomputation complete!")
 
-        if save_results or cl_args["validate"]:
-            # Create a dataframe for the results
-            results_df = pd.DataFrame()
-
-        # A longer genotype means a higher possible maximum for the CNN objective
-        # By running the highest sr value first, we ensure that the HV_ref
-        # is the same and appropriate for all runs    
-        # If both sr and raw delta values are given, convert and unify them
-        if config["delta_sr_vals"] is not None and config["delta_raw_vals"] is not None:
-            delta_vals = sorted(
-                config["delta_raw_vals"] + [
-                    MOCKGenotype.calc_delta(sr_val) for sr_val in config["delta_sr_vals"]
-                ],
-                reverse=True
-            )
-        # If just raw values, then just reverse sort them
-        elif config["delta_sr_vals"] is None and config["delta_raw_vals"] is not None:
-            delta_vals = sorted(config['delta_raw_vals'], reverse=True)
-        # If just sr values, then convert and reverse sort them
-        elif config["delta_sr_vals"] is not None and config["delta_raw_vals"] is None:
-            delta_vals = sorted(
-                [MOCKGenotype.calc_delta(sr_val) for sr_val in config["delta_sr_vals"]],
-                reverse=True
-            )
-
-        # Loop through the sr (square root) values
-        for delta_val, L in product(delta_vals, config["L"]):
-            # Set the delta value in the args
-            # mock_args['delta_val'] = MOCKGenotype.delta_val
-            MOCKGenotype.delta_val = delta_val
-            print(f"Delta: {MOCKGenotype.delta_val}")
-
+        # Loop through the Ls
+        for L in config["L"]:
             # Set the mock_args for this layer
             mock_args["L"] = L
+            mock_args["Lnn"] = precompute.cut_L_nn(argsortdists, L)
 
             # Setup some of the variables for the genotype
             MOCKGenotype.setup_genotype_vars()
@@ -338,38 +325,35 @@ def run_mock(**cl_args):
                     # Extract the fitness values
                     var_vals = [indiv.fitness.values[0] for indiv in pop]
                     cnn_vals = [indiv.fitness.values[1] for indiv in pop]
+                    delta_vals = [indiv.delta for indiv in pop]
                     # Add strategy here for adaptive version
                     results_dict = {
                         "dataset": [Datapoint.data_name]*config["num_indivs"],
                         "run": [run_num+1]*config["num_indivs"],
                         "indiv": list(range(config["num_indivs"])),
                         "L": [L]*config["num_indivs"],
-                        "delta": [delta_val]*config["num_indivs"],
+                        "delta": delta_vals,
                         "VAR": var_vals,
                         "CNN": cnn_vals,
-                        "HV": hvs,
+                        # "HV": hvs, This is evaluated per generation and not per individual
                         "ARI": aris,
                         "clusters": num_clusts,
                         "time": [time_taken]*config["num_indivs"]
                     }
                     # Add the new results
-                    results_df = results_df.append(
-                        pd.DataFrame.from_dict(results_dict), ignore_index=True
-                    )
+                    results_df = results_df.append(pd.DataFrame(results_dict), sort=False)
+                    hvs_df = hvs_df.append(pd.DataFrame({'N': [i for i in range(len(hvs))], 'HV': hvs}), sort=False)
         print(f"{file_path.name} complete!")
 
     # Validate the results
     if cl_args['validate']:
-        tests.validate_results(
-            results_df
-        )
+        tests.validate_results(results_df)
         print("Test passed!")
     # Save results
     if save_results:
-        results_df.to_csv(
-            experiment_folder / f"{config['exp_name']}_results.csv",
-            index=False
-        )
+        results_df.to_csv(f"{experiment_folder}/{config['exp_name']}_results.csv", index=False)
+        hvs_df.to_csv(f"{experiment_folder}/{config['exp_name']}_hvs.csv", index=False)
+
 
 if __name__ == '__main__':
     parser = utils.build_parser()
