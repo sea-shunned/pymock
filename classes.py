@@ -4,8 +4,6 @@ import random
 import igraph
 import numpy as np
 
-from custom_warnings import warning_min_max_delta
-
 
 class PartialClust(object):
     # ID value iterates every time PartialClust is called
@@ -187,11 +185,12 @@ class Datapoint(object):
         return data, data_dict
 
 
-class MOCKGenotype(list):
+class MOCKGenotype:
     mst_genotype = None  # the MST genotype
     n_links = None
     degree_int = None  # Degree of interestingness of the MST
     interest_indices = None  # Indices of the most to least interesting links in the MST (formerly int_links_indices)
+    interest_sorted_mst_genotype = None
     # Delta value
     #### In the future, can set this as the start
     #### And we redefine individual deltas as attributes if we have varying levels
@@ -218,33 +217,42 @@ class MOCKGenotype(list):
         # Number of clusters the individual defines
         self.num_clusts = None
 
-    @staticmethod
-    def get_n_genes(delta, total):
-        return int(round((100 - delta) / 100 * total, 0))
+    @classmethod
+    def get_n_genes(cls, delta):
+        return int(round((100 - delta) / 100 * cls.n_links, 0))
 
     @classmethod
     def get_random_delta(cls, min_delta, max_delta, precision=3):
         """Generates a random delta in a given interval"""
-        min_delta, max_delta = warning_min_max_delta(min_delta, max_delta)
-
         delta_diff = max_delta - min_delta
         delta = round(random.random() * delta_diff + min_delta, precision)
-        n_genes = cls.get_n_genes(delta, cls.n_links)
 
-        return delta, n_genes
+        return delta
 
     @classmethod
-    def delta_individual(cls, icls, min_delta, max_delta, mst, di_index, delta=None, precision=3):
+    def delta_individual(cls, icls, min_delta, max_delta, delta=None, precision=3):
         """Generates an individual with a random delta in a given interval or value"""
         if delta is None:
             # Get the value for delta and the number of genes it represents
-            delta, n_genes = cls.get_random_delta(min_delta, max_delta, precision)
-        else:
-            n_genes = cls.get_n_genes(delta, cls.n_links)
+            delta = cls.get_random_delta(min_delta, max_delta, precision)
 
-        ind = icls([mst[i] for i in di_index[:n_genes]])
+        n_genes = cls.get_n_genes(delta)
+
+        ind = icls(cls.interest_sorted_mst_genotype[:n_genes])
         ind.delta = delta
         return ind
+
+    @classmethod
+    def rebuild_ind_genotype(cls, genotype):
+        """
+        :param genotype: list. Reduced individual's genotype
+        :return: full individual's genotype
+        """
+        genotype_index = cls.interest_indices[:len(genotype)]
+        full_genotype = cls.mst_genotype.copy()
+        for i, idx in enumerate(genotype_index):
+            full_genotype[idx] = genotype[i]
+        return full_genotype
 
     @classmethod
     def setup_genotype_vars(cls):
@@ -258,75 +266,16 @@ class MOCKGenotype(list):
         # i.e. set the most interesting links as specified by delta to be self-connecting so we create the base clusters
         cls.calc_base_genotype()
         # Identify these base clusters as the connected components of the defined base genotype
-        cls.calc_base_clusters()      
-
-    def reduce_genotype(self):
-        if self.full_genotype is None:
-            self.full_genotype = MOCKGenotype.mst_genotype[:]
-        
-        self.genotype = [self.full_genotype[i] for i in MOCKGenotype.reduced_genotype_indices]
-        # Remove the full genotype again to save memory
-        # Consider just using a local variable
-        self.full_genotype = None
-
-    def expand_genotype(self):
-        """Expand the reduced genotype to the full version (i.e. insert fixed links)
-        """
-        self.full_genotype = MOCKGenotype.mst_genotype[:]
-        
-        for i, val in enumerate(self.genotype):
-            self.full_genotype[
-                MOCKGenotype.reduced_genotype_indices[i]] = val
-    
-    def decode_genotype(self):
-        """Get the connected components from a genotype
-        """
-        # Need to expand the genotype first to get the full graph
-        self.expand_genotype()
-        # Create the graph
-        g = igraph.Graph()
-        # Add the nodes
-        g.add_vertices(len(self.full_genotype))
-        # Add the edges (where a link is from index to value)
-        g.add_edges(zip(
-            range(len(self.full_genotype)),
-            self.full_genotype
-        ))
-        # Return the connected components
-        return list(g.components(mode="WEAK"))
+        cls.calc_base_clusters()
     
     @classmethod
     def interest_links_indices(cls):
         # Sort DI values to get the indices of most to least interesting links
-        MOCKGenotype.interest_indices = np.argsort(
+        cls.interest_indices = np.argsort(
             -(np.asarray(MOCKGenotype.degree_int)), 
             kind='mergesort'
         ).tolist()
-
-    @classmethod
-    def calc_delta(cls, sr_val):
-        # Calculate the delta value from the square root value
-        cls.delta_val = 100-(
-            (100*sr_val*np.sqrt(Datapoint.num_examples))
-            /Datapoint.num_examples
-        )
-        # Error handle the resulting delta
-        if cls.delta_val is None: # When would this happen?
-            raise ValueError("Delta value has not been set")
-        elif cls.delta_val < 0:
-            print("Delta value is below 0, setting to 0...")
-            cls.delta_val = 0
-        elif cls.delta_val > 100:
-            raise ValueError("Delta value is over 100")
-        return cls.delta_val
-
-    @classmethod
-    def calc_red_length(cls):
-        """Calculate the reduced length of the genotype
-        """
-        cls.reduced_length = int(
-            np.ceil(((100-MOCKGenotype.delta_val)/100)*Datapoint.num_examples)
-        )
+        cls.interest_sorted_mst_genotype = [cls.mst_genotype[i] for i in cls.interest_indices]
 
     @classmethod
     def calc_base_genotype(cls):

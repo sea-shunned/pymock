@@ -22,6 +22,14 @@ def calc_base_clusters(genotype):
     return list(g.components(mode="WEAK"))
 
 
+def max_cnn(N, L):
+    penalty = 0
+    for l in range(L):
+        penalty += 1/(l+2)
+
+    return N * penalty
+
+
 def CNN(nn, clusters):
     """Add a penalty for every nn that is not in the same cluster.
     nn: list of indices of L nearest neighbours.

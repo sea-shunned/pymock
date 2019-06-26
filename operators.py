@@ -121,7 +121,8 @@ def neighbour_comp_mut(parent, MUTPB, interest_indices, nn_rankings, component_n
     return parent
 
 
-def gaussian_mutation_delta(parent, sigma, MUTPB, precision=3, sigma_perct=False, inverse=False):
+def gaussian_mutation_delta(parent, sigma, MUTPB, min_delta, max_delta, precision=3,
+                            sigma_perct=False, inverse=False):
     # Set parameters
     mu = parent.delta
     if sigma_perct:
@@ -135,17 +136,17 @@ def gaussian_mutation_delta(parent, sigma, MUTPB, precision=3, sigma_perct=False
         old_delta = parent.delta
 
         # Mutate
-        parent.delta = round(max(min(random.gauss(mu, sigma), 100), 0), precision)
+        parent.delta = round(max(min(random.gauss(mu, sigma), max_delta), min_delta), precision)
 
         # Number of genes that the new delta represents
-        n = MOCKGenotype.get_n_genes(parent.delta, MOCKGenotype.n_links)
+        n = MOCKGenotype.get_n_genes(parent.delta)
 
-        # Lock genes
+        # Lock genes if delta has been increased
         if parent.delta > old_delta:
             parent[:] = parent[:n]
 
-        # Unlock genes
+        # Otherwise, unlock new genes
         else:
-            parent[:] += MOCKGenotype.mst_genotype[len(parent):n]
+            parent[:] += MOCKGenotype.interest_sorted_mst_genotype[len(parent):n]
 
     return parent

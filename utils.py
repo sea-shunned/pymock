@@ -2,6 +2,8 @@ import argparse
 import json
 from pathlib import Path
 
+from custom_warnings import warning_min_max_delta
+
 
 def build_parser():
     parser = argparse.ArgumentParser()    
@@ -38,7 +40,7 @@ def load_json(f_path):
     try:
         with open(f_path) as json_file:
             params = json.load(json_file)
-    except JSONDecodeError:
+    except json.JSONDecodeError:
         print("Unable to load config file")
         raise
     return params
@@ -74,6 +76,10 @@ def set_config_defaults(config):
         if config["L_comp"] is None: 
             # Set as a list to use product
             config["L_comp"] = [5]
+
+    # Check/change min/max delta
+    config['min_delta'], config['max_delta'] = warning_min_max_delta(config['min_delta'], config['max_delta'])
+
     return config
 
 

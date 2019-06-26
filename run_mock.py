@@ -16,7 +16,7 @@ import pandas as pd
 from classes import Datapoint, MOCKGenotype, PartialClust
 import precompute
 import evaluation
-import objectives
+import no_precomp_objectives
 import delta_mock
 import utils
 import tests
@@ -175,25 +175,15 @@ def calc_hv_ref(mock_args):
     Returns:
         [list] -- The reference/nadir point
     """
-    # Reduce the MST genotype
-    mst_reduced_genotype = [MOCKGenotype.mst_genotype[i] for i in MOCKGenotype.reduced_genotype_indices]
-    # Calculate chains
-    chains, superclusts = objectives.cluster_chains(
-        mst_reduced_genotype, mock_args['data_dict'], PartialClust.comp_dict, MOCKGenotype.reduced_cluster_nums
-    )
-    # Calculate the maximum possible intracluster variance
-    PartialClust.max_var = objectives.objVAR(
-        chains, PartialClust.comp_dict, PartialClust.base_members,
-        PartialClust.base_centres, superclusts
-    )
-    # Need to divide by N as this is done in eval_mock() not objVAR()
-    PartialClust.max_var= PartialClust.max_var/Datapoint.num_examples
-    # Set reference point just outside max values to ensure no overlap
-    hv_ref = [
-        PartialClust.max_var*1.01,
-        PartialClust.max_cnn*1.01
-    ]
-    return hv_ref
+    # Calculate the maximum possible VAR, this is, one cluster
+    max_var = no_precomp_objectives.VAR(mock_args['data'],
+                                        [[i for i in range(mock_args['data'].shape[0])]])
+
+    # Calculate the maximum possible CNN, this is, N clusters
+    max_cnn = no_precomp_objectives.max_cnn(mock_args['data'].shape[0], mock_args['L'])
+
+    # Set reference point just outside max values to ensure no overlap and return
+    return [max_var*1.01, max_cnn*1.01]
 
 
 def run_mock(**cl_args):
@@ -278,14 +268,14 @@ def run_mock(**cl_args):
             # Identify the component IDs of the link origins
             MOCKGenotype.calc_reduced_clusts(mock_args["data_dict"])
 
-            # Set the nadir point if first run
-            if mock_args['hv_ref'] is None:
+            # Set the nadir point
+            if cl_args['validate']:
                 # To ensure compatible results for validation
-                if cl_args['validate']:
-                    mock_args['hv_ref'] = [3.0, 1469.0]
-                else:
-                    mock_args['hv_ref'] = calc_hv_ref(mock_args)
+                mock_args['hv_ref'] = [3.0, 1469.0]
+            else:
+                mock_args['hv_ref'] = calc_hv_ref(mock_args)
             print(f"HV ref point: {mock_args['hv_ref']}")
+
             # Strategy is not used, but kept for result consistency with adaptive
             # Avoid more nested loops
             for strategy, L_comp in product(
@@ -342,7 +332,9 @@ def run_mock(**cl_args):
                     }
                     # Add the new results
                     results_df = results_df.append(pd.DataFrame(results_dict), sort=False)
-                    hvs_df = hvs_df.append(pd.DataFrame({'N': [i for i in range(len(hvs))], 'HV': hvs}), sort=False)
+                    hvs_df = hvs_df.append(pd.DataFrame({'N': [i for i in range(len(hvs))],
+                                                         'Run': [run_num+1]*len(hvs),
+                                                         'HV': hvs}), sort=False)
         print(f"{file_path.name} complete!")
 
     # Validate the results

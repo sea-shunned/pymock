@@ -38,8 +38,6 @@ def create_base_toolbox(num_indivs, argsortdists, L, Lnn, data, data_dict,
         icls = creator.Individual,
         min_delta=min_delta,
         max_delta=max_delta,
-        mst=MOCKGenotype.mst_genotype,
-        di_index=MOCKGenotype.interest_indices,
         precision=delta_precision
     )
 
@@ -64,6 +62,7 @@ def create_base_toolbox(num_indivs, argsortdists, L, Lnn, data, data_dict,
         list,
         toolbox.initDelta
     )
+
     # Register the evaluation function
     toolbox.register(
         "evaluate",
@@ -73,6 +72,7 @@ def create_base_toolbox(num_indivs, argsortdists, L, Lnn, data, data_dict,
         data=data,
         Lnn=Lnn
     )
+
     # Register the crossover function
     toolbox.register(
         "mate",
@@ -116,6 +116,8 @@ def create_base_toolbox(num_indivs, argsortdists, L, Lnn, data, data_dict,
         sigma=delta_sigma,
         MUTPB=delta_mutpb,
         precision=delta_precision,
+        min_delta=min_delta,
+        max_delta=max_delta,
         sigma_perct=delta_sigma_as_perct,
         inverse=delta_inverse
     )

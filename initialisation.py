@@ -76,7 +76,8 @@ def create_delta_solution(k, delta, argsortdists, L, indiv_creator):
     sufficient free links.
 
     Arguments:
-        n {int} -- Number of top-ranking links to remove
+        k {int} -- Number of top-ranking links to remove.
+        delta {int} -- delta parameter for the individual.
         argsortdists {np.array} -- Argsorted distance array
         L {int} -- Neighbourhood hyperparameter
         indiv_creator -- DEAP toolbox individual
@@ -86,7 +87,7 @@ def create_delta_solution(k, delta, argsortdists, L, indiv_creator):
     n = min(k-1, len(indiv))
 
     while True:
-        # Need to only choose n (k-1) from the unfixed set
+        # Need to only choose n elements
         for index, i in enumerate(MOCKGenotype.interest_indices[:n]):
             j = indiv[index]
             # Replace the link
