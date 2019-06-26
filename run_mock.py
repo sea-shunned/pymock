@@ -16,7 +16,8 @@ import pandas as pd
 from classes import Datapoint, MOCKGenotype, PartialClust
 import precompute
 import evaluation
-import no_precomp_objectives
+import objectives
+# import no_precomp_objectives
 import delta_mock
 import utils
 import tests
@@ -123,13 +124,13 @@ def prepare_mock_args(data, data_dict, argsortdists, nn_rankings, config):
         "num_indivs": config["num_indivs"],
         "num_gens": config["num_gens"],
         "mut_meth_params": None,
-        "min_delta": config['min_delta'],
-        "max_delta": config['max_delta'],
+        "min_delta": None,
+        "max_delta": None,
         "delta_precision": config['delta_precision'],
-        "delta_mutpb": config["delta_mutation_probability"],
-        "delta_sigma": config['delta_gauss_mutation_sigma'],
-        "delta_sigma_as_perct": config['delta_gauss_mutation_sigma_as_perct'],
-        "delta_inverse": config['delta_gauss_mutation_inverse']
+        "delta_mutpb": None,
+        "delta_sigma": None,
+        "delta_sigma_as_perct": None,
+        "delta_inverse": None
     }
     return mock_args
 
@@ -175,15 +176,25 @@ def calc_hv_ref(mock_args):
     Returns:
         [list] -- The reference/nadir point
     """
-    # Calculate the maximum possible VAR, this is, one cluster
-    max_var = no_precomp_objectives.VAR(mock_args['data'],
-                                        [[i for i in range(mock_args['data'].shape[0])]])
-
-    # Calculate the maximum possible CNN, this is, N clusters
-    max_cnn = no_precomp_objectives.max_cnn(mock_args['data'].shape[0], mock_args['L'])
-
-    # Set reference point just outside max values to ensure no overlap and return
-    return [max_var*1.01, max_cnn*1.01]
+    # Reduce the MST genotype
+    mst_reduced_genotype = [MOCKGenotype.mst_genotype[i] for i in MOCKGenotype.reduced_genotype_indices]
+    # Calculate chains
+    chains, superclusts = objectives.cluster_chains(
+        mst_reduced_genotype, mock_args['data_dict'], PartialClust.comp_dict, MOCKGenotype.reduced_cluster_nums
+    )
+    # Calculate the maximum possible intracluster variance
+    PartialClust.max_var = objectives.objVAR(
+        chains, PartialClust.comp_dict, PartialClust.base_members,
+        PartialClust.base_centres, superclusts
+    )
+    # Need to divide by N as this is done in eval_mock() not objVAR()
+    PartialClust.max_var = PartialClust.max_var / Datapoint.num_examples
+    # Set reference point just outside max values to ensure no overlap
+    hv_ref = [
+        PartialClust.max_var * 1.01,
+        PartialClust.max_cnn * 1.01
+    ]
+    return hv_ref
 
 
 def run_mock(**cl_args):
@@ -231,7 +242,7 @@ def run_mock(**cl_args):
     print(f"{len(config['strategies'])} strategy/-ies")
     print(f"{config['num_gens']} generations")
     print(f"{config['num_indivs']} individuals per generation.")
-    print(f"{config['min_delta']}-{config['max_delta']} delta range")
+    print(f"{config['min_deltas']}-{config['max_deltas']} delta range")
     print(f"{len(data_file_paths)} dataset(s)")
     print("---------------------------")
 
@@ -241,6 +252,9 @@ def run_mock(**cl_args):
     # df for results
     results_df = pd.DataFrame()
     hvs_df = pd.DataFrame()
+
+    # Prepare deltas for looping
+    deltas = zip(config['min_deltas'], config['max_deltas'])
 
     # Loop through the data to test
     for file_path in data_file_paths:
@@ -254,87 +268,106 @@ def run_mock(**cl_args):
         print("Precomputation complete!")
 
         # Loop through the Ls
-        for L in config["L"]:
-            # Set the mock_args for this layer
-            mock_args["L"] = L
-            mock_args["Lnn"] = precompute.cut_L_nn(argsortdists, L)
+        for L, d in product(config["L"], deltas):
 
-            # Setup some of the variables for the genotype
-            MOCKGenotype.setup_genotype_vars()
-            # Setup the components class
-            PartialClust.partial_clusts(
-                data, mock_args["data_dict"], mock_args["argsortdists"], mock_args["L"]
-            )
-            # Identify the component IDs of the link origins
-            MOCKGenotype.calc_reduced_clusts(mock_args["data_dict"])
+            # Loop through delta mutation values
+            for dmutpb, dms, dmsp, dmsr in zip(config["delta_mutation_probability"],
+                                               config["delta_gauss_mutation_sigma"],
+                                               config["delta_gauss_mutation_sigma_as_perct"],
+                                               config["delta_gauss_mutation_inverse"]):
 
-            # Set the nadir point
-            if cl_args['validate']:
-                # To ensure compatible results for validation
-                mock_args['hv_ref'] = [3.0, 1469.0]
-            else:
-                mock_args['hv_ref'] = calc_hv_ref(mock_args)
-            print(f"HV ref point: {mock_args['hv_ref']}")
+                # Set the mock_args for this layer
+                mock_args["L"] = L
+                mock_args["Lnn"] = precompute.cut_L_nn(argsortdists, L)
+                mock_args['min_delta'] = d[0]
+                mock_args['max_delta'] = d[1]
+                mock_args["delta_mutpb"] = dmutpb
+                mock_args["delta_sigma"] = dms
+                mock_args["delta_sigma_as_perct"] = dmsp
+                mock_args["delta_inverse"] = dmsr
 
-            # Strategy is not used, but kept for result consistency with adaptive
-            # Avoid more nested loops
-            for strategy, L_comp in product(
-                    config["strategies"], config["L_comp"]
-                ):
-                # Add mutation method-specific arguments
-                mock_args = delta_mock.get_mutation_params(
-                    config["mut_method"], mock_args, L_comp
+                # Setup some of the variables for the genotype
+                MOCKGenotype.min_delta_val = mock_args['min_delta']
+                MOCKGenotype.n_min_delta = MOCKGenotype.get_n_genes(mock_args['min_delta'])
+                MOCKGenotype.setup_genotype_vars()
+                # Setup the components class
+                PartialClust.partial_clusts(
+                    data, mock_args["data_dict"], mock_args["argsortdists"], mock_args["L"]
                 )
-                # Create the partial function to give to multiprocessing
-                mock_func = partial(delta_mock.runMOCK, **mock_args)
-                print(f"{strategy}-{config['mut_method']} starting...")
-                # Measure the time taken for the runs
-                # Send the function to a thread, each thread with a different seed
-                start_time = time.time()
-                with multiprocessing.Pool() as pool:
-                    results = pool.starmap(mock_func, seed_list)
-                mp_time = time.time() - start_time
-                print(f"{len(seed_list)} runs complete...took {mp_time:.3f} secs)")
+                # Identify the component IDs of the link origins
+                MOCKGenotype.calc_reduced_clusts(mock_args["data_dict"])
 
-                for run_num, run_result in enumerate(results):
-                    # Extract the population
-                    pop = run_result[0]
-                    # Extract hv list
-                    hvs = run_result[1]
-                    # Extract final interesting links
-                    final_interest_inds = run_result[3]
-                    # Extract final genotype length
-                    final_gen_len = run_result[4]
-                    # Get the running time for each run
-                    time_taken = run_result[5]
-                    # Calculate the number of clusters and ARIs
-                    num_clusts, aris = evaluation.final_pop_metrics(
-                        pop, MOCKGenotype.mst_genotype,
-                        final_interest_inds, final_gen_len
+                # Set the nadir point
+                if cl_args['validate']:
+                    # To ensure compatible results for validation
+                    mock_args['hv_ref'] = [3.0, 1469.0]
+                else:
+                    mock_args['hv_ref'] = calc_hv_ref(mock_args)
+                print(f"HV ref point: {mock_args['hv_ref']}")
+
+                # Strategy is not used, but kept for result consistency with adaptive
+                # Avoid more nested loops
+                for strategy, L_comp in product(
+                        config["strategies"], config["L_comp"]
+                    ):
+                    # Add mutation method-specific arguments
+                    mock_args = delta_mock.get_mutation_params(
+                        config["mut_method"], mock_args, L_comp
                     )
-                    # Extract the fitness values
-                    var_vals = [indiv.fitness.values[0] for indiv in pop]
-                    cnn_vals = [indiv.fitness.values[1] for indiv in pop]
-                    delta_vals = [indiv.delta for indiv in pop]
-                    # Add strategy here for adaptive version
-                    results_dict = {
-                        "dataset": [Datapoint.data_name]*config["num_indivs"],
-                        "run": [run_num+1]*config["num_indivs"],
-                        "indiv": list(range(config["num_indivs"])),
-                        "L": [L]*config["num_indivs"],
-                        "delta": delta_vals,
-                        "VAR": var_vals,
-                        "CNN": cnn_vals,
-                        # "HV": hvs, This is evaluated per generation and not per individual
-                        "ARI": aris,
-                        "clusters": num_clusts,
-                        "time": [time_taken]*config["num_indivs"]
-                    }
-                    # Add the new results
-                    results_df = results_df.append(pd.DataFrame(results_dict), sort=False)
-                    hvs_df = hvs_df.append(pd.DataFrame({'N': [i for i in range(len(hvs))],
-                                                         'Run': [run_num+1]*len(hvs),
-                                                         'HV': hvs}), sort=False)
+                    # Create the partial function to give to multiprocessing
+                    mock_func = partial(delta_mock.runMOCK, **mock_args)
+                    print(f"{strategy}-{config['mut_method']} starting...")
+                    # Measure the time taken for the runs
+                    # Send the function to a thread, each thread with a different seed
+                    start_time = time.time()
+                    with multiprocessing.Pool() as pool:
+                        results = pool.starmap(mock_func, seed_list)
+                    mp_time = time.time() - start_time
+                    print(f"{len(seed_list)} runs complete...took {mp_time:.3f} secs)")
+
+                    for run_num, run_result in enumerate(results):
+                        # Extract the population
+                        pop = run_result[0]
+                        # Extract hv list
+                        hvs = run_result[1]
+                        # Extract final interesting links
+                        final_interest_inds = run_result[3]
+                        # Extract final genotype length
+                        final_gen_len = run_result[4]
+                        # Get the running time for each run
+                        time_taken = run_result[5]
+                        # Calculate the number of clusters and ARIs
+                        num_clusts, aris = evaluation.final_pop_metrics(
+                            pop, MOCKGenotype.mst_genotype,
+                            final_interest_inds, final_gen_len
+                        )
+                        # Extract the fitness values
+                        var_vals = [indiv.fitness.values[0] for indiv in pop]
+                        cnn_vals = [indiv.fitness.values[1] for indiv in pop]
+                        delta_vals = [indiv.delta for indiv in pop]
+                        # Add strategy here for adaptive version
+                        results_dict = {
+                            "dataset": [Datapoint.data_name]*config["num_indivs"],
+                            "run": [run_num+1]*config["num_indivs"],
+                            "indiv": list(range(config["num_indivs"])),
+                            "L": [L] * config["num_indivs"],
+                            "delta": delta_vals,
+                            "delta_mutpb": [dmutpb] * config["num_indivs"],
+                            "delta_sigma": [dms] * config["num_indivs"],
+                            "delta_sigma_as_perct": [dmsp] * config["num_indivs"],
+                            "delta_inverse": [dmsr] * config["num_indivs"],
+                            "VAR": var_vals,
+                            "CNN": cnn_vals,
+                            # "HV": hvs, This is evaluated per generation and not per individual
+                            "ARI": aris,
+                            "clusters": num_clusts,
+                            "time": [time_taken]*config["num_indivs"]
+                        }
+                        # Add the new results
+                        results_df = results_df.append(pd.DataFrame(results_dict), sort=False)
+                        hvs_df = hvs_df.append(pd.DataFrame({'N': [i for i in range(len(hvs))],
+                                                             'Run': [run_num+1]*len(hvs),
+                                                             'HV': hvs}), sort=False)
         print(f"{file_path.name} complete!")
 
     # Validate the results

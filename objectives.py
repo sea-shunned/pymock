@@ -1,5 +1,6 @@
 import numpy as np
 import igraph
+from classes import MOCKGenotype
 
 
 def cluster_chains(genotype, data_dict, comp_dict, reduced_clust_nums):
@@ -69,9 +70,13 @@ def objVAR(chains, comp_dict, base_members, base_centres, superclusts):
 
 # @profile
 def eval_mock(genotype, comp_dict, reduced_clust_nums, cnn_array, max_cnn, num_examples, data_dict, cnn_pairs,
-              base_members, base_centres):
+              base_members, base_centres, toolbox):
+    # Extend genotype to match min_delta length
+    cloned = toolbox.clone(genotype)
+    cloned[:] += MOCKGenotype.interest_sorted_mst_genotype[len(cloned):MOCKGenotype.n_min_delta]
+
     # Identifies which components are connected (delta-evaluation)
-    chains, superclusts = cluster_chains(genotype, data_dict, comp_dict, reduced_clust_nums)
+    chains, superclusts = cluster_chains(cloned, data_dict, comp_dict, reduced_clust_nums)
     # Calculate the objectives
     CNN = objCNN(chains, superclusts, cnn_pairs, cnn_array, max_cnn)
     VAR = objVAR(chains, comp_dict, base_members, base_centres, superclusts)

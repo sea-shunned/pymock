@@ -13,7 +13,7 @@ import objectives
 import operators
 from classes import Datapoint, MOCKGenotype, PartialClust
 # New
-import no_precomp_objectives
+# import no_precomp_objectives
 
 # Run outside of multiprocessing scope
 # Can consider trying to move this, though we just run it once anyway so eh
@@ -66,11 +66,17 @@ def create_base_toolbox(num_indivs, argsortdists, L, Lnn, data, data_dict,
     # Register the evaluation function
     toolbox.register(
         "evaluate",
-        no_precomp_objectives.evaluate_mock,
-        mst=MOCKGenotype.mst_genotype,
-        di_index=MOCKGenotype.interest_indices,
-        data=data,
-        Lnn=Lnn
+        objectives.eval_mock,
+        comp_dict=PartialClust.comp_dict,
+        reduced_clust_nums=MOCKGenotype.reduced_cluster_nums,
+        cnn_array=PartialClust.cnn_array,
+        max_cnn=PartialClust.max_cnn,
+        num_examples=Datapoint.num_examples,
+        data_dict=data_dict,
+        cnn_pairs=PartialClust.cnn_pairs,
+        base_members=PartialClust.base_members,
+        base_centres=PartialClust.base_centres,
+        toolbox=toolbox
     )
 
     # Register the crossover function

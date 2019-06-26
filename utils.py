@@ -52,12 +52,25 @@ def check_config(config):
     """
     # Set some defaults if needed
     config = set_config_defaults(config)
+
     # Some of the parameters need to be lists
-    list_params = ["L_comp"]
+    list_params = ["L_comp", "min_deltas", "max_deltas", "delta_mutation_probability",
+                   "delta_gauss_mutation_sigma", "delta_gauss_mutation_sigma_as_perct",
+                   "delta_gauss_mutation_inverse"]
     # If a value has been provided but isn't a list, convert it
     for key in list_params:
         if config[key] is not None and not isinstance(config[key], list):
-            config[key] = list(config[key])
+            config[key] = [config[key]]
+
+    # Check parameter lengths are congruent
+    assert len(config['min_deltas']) == len(config['max_deltas']), "Min/Max delta should have the same length"
+    assert len(config['delta_mutation_probability']) == len(config['delta_gauss_mutation_sigma']), \
+        "delta_gauss_mutation_sigma and delta_mutation_probability should have the same length"
+    assert len(config['delta_mutation_probability']) == len(config['delta_gauss_mutation_sigma_as_perct']), \
+        "delta_gauss_mutation_sigma_as_perct and delta_mutation_probability should have the same length"
+    assert len(config['delta_mutation_probability']) == len(config['delta_gauss_mutation_inverse']), \
+        "delta_gauss_mutation_inverse and delta_mutation_probability should have the same length"
+
     return config
 
 
@@ -78,7 +91,11 @@ def set_config_defaults(config):
             config["L_comp"] = [5]
 
     # Check/change min/max delta
-    config['min_delta'], config['max_delta'] = warning_min_max_delta(config['min_delta'], config['max_delta'])
+    deltas = []
+    for min_delta, max_delta in zip(config['min_deltas'], config['max_deltas']):
+        deltas.append(warning_min_max_delta(min_delta, max_delta))
+    config['min_deltas'] = [d[0] for d in deltas]
+    config['max_deltas'] = [d[1] for d in deltas]
 
     return config
 

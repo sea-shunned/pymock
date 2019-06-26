@@ -194,7 +194,8 @@ class MOCKGenotype:
     # Delta value
     #### In the future, can set this as the start
     #### And we redefine individual deltas as attributes if we have varying levels
-    delta_val = None
+    min_delta_val = None
+    n_min_delta = None
     # Length of the reduced genotype
     reduced_length = None
     # Use these indices to slice from the genotype
@@ -257,7 +258,7 @@ class MOCKGenotype:
     @classmethod
     def setup_genotype_vars(cls):
         # Calculate the length of the reduced genotype
-        # cls.calc_red_length()
+        cls.calc_red_length()
         # Find the indices of the most to least interesting links
         cls.interest_links_indices()
         # Store the indices that we need for our reduced genotype
@@ -346,3 +347,11 @@ class MOCKGenotype:
             if new_j != j:
                 break
         return new_j
+
+    @classmethod
+    def calc_red_length(cls):
+        """Calculate the reduced length of the genotype
+        """
+        cls.reduced_length = int(
+            np.ceil(((100-MOCKGenotype.min_delta_val)/100)*Datapoint.num_examples)
+        )
