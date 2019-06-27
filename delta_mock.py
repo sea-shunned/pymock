@@ -292,10 +292,8 @@ def runMOCK(
         min_delta, max_delta, delta_precision, delta_mutpb, delta_sigma, delta_sigma_as_perct,
         delta_inverse
     )
-    print(f'{seed_num}: toolbox done.')
 
     # Create the initial population
-    print(f"{seed_num} population initialization:")
     pop, hv, VAR_init, CNN_init = initial_setup(toolbox, hv, hv_ref)
     print(f'{seed_num}: Initial population done.')
 

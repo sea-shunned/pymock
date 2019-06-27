@@ -353,5 +353,5 @@ class MOCKGenotype:
         """Calculate the reduced length of the genotype
         """
         cls.reduced_length = int(
-            np.ceil(((100-MOCKGenotype.min_delta_val)/100)*Datapoint.num_examples)
+            np.ceil(((100-MOCKGenotype.min_delta_val)/100) * Datapoint.num_examples)
         )

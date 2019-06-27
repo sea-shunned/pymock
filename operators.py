@@ -129,7 +129,7 @@ def gaussian_mutation_delta(parent, sigma, MUTPB, min_delta, max_delta, precisio
         if inverse:
             sigma = (100-mu)*sigma + 1/(101-mu)
         else:
-            sigma = mu * sigma
+            sigma = mu * sigma + (100-mu)/100
 
     # Test if mutation is happening
     if random.random() < MUTPB:
