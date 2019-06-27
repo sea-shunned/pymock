@@ -374,11 +374,17 @@ def multi_run_mock(**cl_args):
                 for seed in seed_list:
                     runs_list.append([L, d[0], d[1], dmutpb, dms, dmsp, dmsr, seed])
 
-        print('Beginning {} runs.'.format(len(runs_list)))
-        mock_func = partial(single_run_mock, mock_args=mock_args, argsortdists=argsortdists,
-                            data=data, config=config)
-        with multiprocessing.Pool() as pool:
-            results = pool.starmap(mock_func, runs_list)
+        n_runs = len(runs_list)
+        print('Beginning {} runs.'.format(n_runs))
+
+        if n_runs == 1:
+            # Don't enter multiprocessing if only one run
+            results = single_run_mock(mock_args=mock_args, argsortdists=argsortdists,
+                            data=data, config=config, *runs_list[0])
+        else:
+            mock_func = partial(single_run_mock, )
+            with multiprocessing.Pool() as pool:
+                results = pool.starmap(mock_func, runs_list)
                 
         results_df = pd.DataFrame()
         hvs_df = pd.DataFrame()
