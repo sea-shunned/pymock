@@ -379,10 +379,11 @@ def multi_run_mock(**cl_args):
 
         if n_runs == 1:
             # Don't enter multiprocessing if only one run
-            results = single_run_mock(mock_args=mock_args, argsortdists=argsortdists,
-                            data=data, config=config, *runs_list[0])
+            results = [single_run_mock(mock_args=mock_args, argsortdists=argsortdists,
+                            data=data, config=config, *runs_list[0])]
         else:
-            mock_func = partial(single_run_mock, )
+            mock_func = partial(single_run_mock, mock_args=mock_args, argsortdists=argsortdists,
+                            data=data, config=config)
             with multiprocessing.Pool() as pool:
                 results = pool.starmap(mock_func, runs_list)
                 
