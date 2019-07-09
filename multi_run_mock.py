@@ -32,7 +32,7 @@ def load_data(exp_name, data_folder, validate, data_subset=""):
     # Warn if already made
     if experiment_folder.is_dir():
         print(f"{experiment_folder} already exists, results may be overwritten")
-    if validate is None:
+    if validate is False:
         # Make the folder if not already
         experiment_folder.mkdir(parents=True, exist_ok=True)
     # Turn the folder into a Path
@@ -110,27 +110,29 @@ def setup_mock(data):
     return argsortdists, nn_rankings
 
 
-def prepare_mock_args(data, data_dict, argsortdists, nn_rankings, config):
+def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
     # Bundle all of the arguments together in a dict to pass to the function
     # This is in order of runMOCK() so that we can easily turn it into a partial func for multiprocessing
     mock_args = {
-        "data": data,
+        # "data": data,
         "data_dict": data_dict,
         "hv_ref": None,
         "argsortdists": argsortdists,
         "nn_rankings": nn_rankings,
         "L": None,
-        "Lnn": None,
         "num_indivs": config["num_indivs"],
         "num_gens": config["num_gens"],
         "mut_meth_params": None,
         "min_delta": None,
         "max_delta": None,
+        "flexible_limits": config['flexible_limits'],
+        "delta_mutation": config['delta_mutation'],
         "delta_precision": config['delta_precision'],
         "delta_mutpb": None,
         "delta_sigma": None,
         "delta_sigma_as_perct": None,
-        "delta_inverse": None
+        "delta_inverse": None,
+        "crossover": config['crossover']
     }
     return mock_args
 
@@ -197,11 +199,10 @@ def calc_hv_ref(mock_args):
     return hv_ref
 
 
-def single_run_mock(L, min_delta, max_delta, dmutpb, dms, dmsp, dmsr, seed,
-                    mock_args, argsortdists, data, config):
+def single_run_mock(L, min_delta, max_delta, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_number,
+                    n_run, mock_args, data, config, validate):
     # Set the mock_args for this layer
     mock_args["L"] = L
-    mock_args["Lnn"] = precompute.cut_L_nn(argsortdists, L)
     mock_args['min_delta'] = min_delta
     mock_args['max_delta'] = max_delta
     mock_args["delta_mutpb"] = dmutpb
@@ -221,15 +222,15 @@ def single_run_mock(L, min_delta, max_delta, dmutpb, dms, dmsp, dmsr, seed,
     MOCKGenotype.calc_reduced_clusts(mock_args["data_dict"])
 
     # Set the nadir point
-    if cl_args['validate']:
+    if validate:
         # To ensure compatible results for validation
         mock_args['hv_ref'] = [3.0, 1469.0]
     else:
         mock_args['hv_ref'] = calc_hv_ref(mock_args)
-    print(f"HV ref point: {mock_args['hv_ref']}")
+    # print(f"HV ref point: {mock_args['hv_ref']}")
 
     # Strategy is not used, but kept for result consistency with adaptive
-    # Avoid more nested loops
+    # Same with L_comp
     for strategy, L_comp in product(
             config["strategies"], config["L_comp"]
     ):
@@ -240,9 +241,9 @@ def single_run_mock(L, min_delta, max_delta, dmutpb, dms, dmsp, dmsr, seed,
         
         # Run MOCK
         start_time = time.time()
-        result = delta_mock.runMOCK(seed, **mock_args)
+        result = delta_mock.runMOCK(seed, run_number=n_run, **mock_args)
         mp_time = time.time() - start_time
-        print(f"run completed... It took {mp_time:.3f} secs)")
+        print(f"Run {n_run} completed... It took {mp_time:.3f} secs)")
 
         # Extract the population
         pop = result[0]
@@ -266,10 +267,13 @@ def single_run_mock(L, min_delta, max_delta, dmutpb, dms, dmsp, dmsr, seed,
         # Add strategy here for adaptive version
         results_dict = {
             "dataset": [Datapoint.data_name] * config["num_indivs"],
-            "run": [0 + 1] * config["num_indivs"],
+            'config': [config_number] * config["num_indivs"],
+            'run': [config_run_number] * config["num_indivs"],
             "indiv": list(range(config["num_indivs"])),
             "L": [L] * config["num_indivs"],
             "delta": delta_vals,
+            "min_delta": [min_delta] * config["num_indivs"],
+            "max_delta": [max_delta] * config["num_indivs"],
             "delta_mutpb": [dmutpb] * config["num_indivs"],
             "delta_sigma": [dms] * config["num_indivs"],
             "delta_sigma_as_perct": [dmsp] * config["num_indivs"],
@@ -284,34 +288,35 @@ def single_run_mock(L, min_delta, max_delta, dmutpb, dms, dmsp, dmsr, seed,
         # Add the new results
         results_df = pd.DataFrame(results_dict)
         hvs_df = pd.DataFrame({'N': [i for i in range(len(hvs))],
-                               'Run': [0 + 1] * len(hvs),
+                               'config': [config_number] * len(hvs),
+                               'run': [config_run_number] * len(hvs),
                                'HV': hvs})
 
     return results_df, hvs_df
 
 
-def multi_run_mock(**cl_args):
+def multi_run_mock(config, validate):
     # Load the data file paths
-    print('Loading data...')
-
-    if cl_args['validate']:
+    if validate:
+        print('Loading validation data...')
         config_path = Path.cwd() / "configs" / "validate.json"
         config = utils.load_json(config_path)
         data_file_paths, experiment_folder = load_data(
             config["exp_name"],
             config["data_folder"],
-            cl_args['validate'],
+            validate,
             config["data_subset"]
         )
         # Just validating so don't save results
         save_results = False
     else:
-        config_path = Path.cwd() / "configs" / cl_args["config"]
+        print(f'Loading {config} configuration...')
+        config_path = Path.cwd() / "configs" / config
         config = utils.load_json(config_path)
         data_file_paths, experiment_folder = load_data(
             config["exp_name"],
             config["data_folder"],
-            None,
+            validate,
             config["data_subset"]
         )
         # Save experimental results
@@ -320,9 +325,8 @@ def multi_run_mock(**cl_args):
     # Check the config and amend if needed
     config = utils.check_config(config)
     # Create the seed list
-    seed_list, config = create_seeds(
-        config
-    )
+    seed_list, config = create_seeds(config)
+
     # Restrict seed_list to the actual number of runs that we need
     # Truncating like this allows us to know that the run numbers and order of seeds correspond
     seed_list = seed_list[:config["num_runs"]]
@@ -336,11 +340,12 @@ def multi_run_mock(**cl_args):
     print(f"{config['num_gens']} generations")
     print(f"{config['num_indivs']} individuals per generation.")
     print(f"{config['min_deltas']}-{config['max_deltas']} delta range")
+    print(f"{len(config['delta_mutation_probability'])} sigma variations")
     print(f"{len(data_file_paths)} dataset(s)")
     print("---------------------------")
 
     # Save the config
-    utils.save_config(config, experiment_folder, cl_args["validate"])
+    utils.save_config(config, experiment_folder, validate)
 
     # df for results
     results_df = pd.DataFrame()
@@ -357,32 +362,36 @@ def multi_run_mock(**cl_args):
         # Do the precomputation for MOCK
         argsortdists, nn_rankings = setup_mock(data)
         # Wrap the arguments up for the main MOCK function
-        mock_args = prepare_mock_args(data, data_dict, argsortdists, nn_rankings, config)
+        mock_args = prepare_mock_args(data_dict, argsortdists, nn_rankings, config)
         print("Precomputation complete!")
         print("---------------------------")
 
         runs_list = []
 
         # Loop through the Ls
+        n_run = 0
+        config_number = 0
         for L, d in product(config["L"], deltas):
             # Loop through delta mutation values
             for dmutpb, dms, dmsp, dmsr in zip(config["delta_mutation_probability"],
                                                config["delta_gauss_mutation_sigma"],
                                                config["delta_gauss_mutation_sigma_as_perct"],
                                                config["delta_gauss_mutation_inverse"]):
+                config_number += 1
                 # And finally through each run
-                for seed in seed_list:
-                    runs_list.append([L, d[0], d[1], dmutpb, dms, dmsp, dmsr, seed])
+                for config_run_number, seed in enumerate(seed_list):
+                    n_run += 1
+                    runs_list.append([L, d[0], d[1], dmutpb, dms, dmsp, dmsr, seed, config_number,
+                                      config_run_number+1, n_run])
 
-        n_runs = len(runs_list)
-        print('Beginning {} runs.'.format(n_runs))
+        print('Beginning {} runs.'.format(n_run))
 
-        if n_runs == 1:
+        if n_run == 1:
             # Don't enter multiprocessing if only one run
-            results = [single_run_mock(mock_args=mock_args, argsortdists=argsortdists,
+            results = [single_run_mock(mock_args=mock_args, validate=validate,
                             data=data, config=config, *runs_list[0])]
         else:
-            mock_func = partial(single_run_mock, mock_args=mock_args, argsortdists=argsortdists,
+            mock_func = partial(single_run_mock, mock_args=mock_args, validate=validate,
                             data=data, config=config)
             with multiprocessing.Pool() as pool:
                 results = pool.starmap(mock_func, runs_list)
@@ -396,7 +405,7 @@ def multi_run_mock(**cl_args):
         print(f"{file_path.name} complete!")
 
     # Validate the results
-    if cl_args['validate']:
+    if validate:
         tests.validate_results(results_df)
         print("Test passed!")
     # Save results
@@ -412,7 +421,12 @@ if __name__ == '__main__':
     cl_args = vars(cl_args)
     utils.check_cl_args(cl_args)
 
-    multi_run_mock(**cl_args)
+    if cl_args['validate']:
+        multi_run_mock(None, True)
+    else:
+        print(f'Running {len(cl_args["config"])} configuration file(s).')
+        for config in cl_args['config']:
+            multi_run_mock(config, False)
 
     ######## TO DO ########
     # look at how results are saved and named

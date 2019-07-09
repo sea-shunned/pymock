@@ -19,6 +19,7 @@ def build_parser():
     group.add_argument(
         '-c', '--config',
         help='Name of the config file (must be in configs/ subdirectory)',
+        nargs='+',
         type=str
     )
     return parser
@@ -27,13 +28,16 @@ def build_parser():
 def check_cl_args(cl_args):
     # Check that the provided config exists
     if cl_args["config"] is not None:
-        config_path = Path.cwd() / "configs" / cl_args["config"]
+        config_paths = [Path.cwd() / "configs" / config for config in cl_args['config']]
+
     # Or make sure that there is a config for validation
     elif cl_args["validate"] is not None:
-        config_path = Path.cwd() / "configs" / "validate.json"
+        config_paths = [Path.cwd() / "configs" / "validate.json"]
+
     # Check that the config actually exists
-    if not config_path.is_file():
-        raise FileNotFoundError(f"Config file does not exist, expected {config_path}")
+    for path in config_paths:
+        if not path.is_file():
+            raise FileNotFoundError(f"Config file does not exist, expected {path}")
 
 
 def load_json(f_path):
@@ -96,6 +100,22 @@ def set_config_defaults(config):
         deltas.append(warning_min_max_delta(min_delta, max_delta))
     config['min_deltas'] = [d[0] for d in deltas]
     config['max_deltas'] = [d[1] for d in deltas]
+
+    # Make sure crossover is well written
+    if isinstance(config['crossover'], str):
+        config['crossover'] = config['crossover'].lower()
+        if config['crossover'] not in ['uniform']:
+            raise ValueError("Crossover method '{}' not yet implemented!".format(config['crossover']))
+    elif config['crossover'] is not None:
+        raise ValueError("Error in crossover method '{}'".format(config['crossover']))
+
+    # Same for delta mutation
+    if isinstance(config['delta_mutation'], str):
+        config['delta_mutation'] = config['delta_mutation'].lower()
+        if config['delta_mutation'] not in ['gauss', 'random']:
+            raise ValueError("Crossover method '{}' not yet implemented!".format(config['delta_mutation']))
+    else:
+        raise ValueError("Error in delta mutation method '{}'".format(config['delta_mutation']))
 
     return config
 

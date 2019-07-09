@@ -22,10 +22,10 @@ creator.create("Individual", list, fitness=creator.Fitness, fairmut=None)
 
 
 # Consider trying to integrate the use of **kwargs here
-def create_base_toolbox(num_indivs, argsortdists, L, Lnn, data, data_dict,
+def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
                         nn_rankings, mut_meth_params, min_delta, max_delta,
-                        delta_precision, delta_mutpb, delta_sigma,
-                        delta_sigma_as_perct, delta_inverse):
+                        delta_mutation, delta_precision, delta_mutpb, delta_sigma,
+                        delta_sigma_as_perct, delta_inverse, crossover, flexible_limits):
     """
     Create the toolbox object used by the DEAP package, and register our relevant functions
     """
@@ -80,11 +80,17 @@ def create_base_toolbox(num_indivs, argsortdists, L, Lnn, data, data_dict,
     )
 
     # Register the crossover function
-    toolbox.register(
-        "mate",
-        operators.uniform_xover,
-        cxpb=1.0
-    )
+    if crossover == 'uniform':
+        toolbox.register(
+            "mate",
+            operators.uniform_xover,
+            cxpb=1.0
+        )
+    elif crossover is None:
+        toolbox.register(
+            "mate",
+            operators.no_xover
+        )
 
     # Register the mutation function
     if mut_meth_params['mut_method'] == "original":
@@ -117,16 +123,25 @@ def create_base_toolbox(num_indivs, argsortdists, L, Lnn, data, data_dict,
         )
 
     # Register delta mutation
-    toolbox.register(
-        "mutate_delta", operators.gaussian_mutation_delta,
-        sigma=delta_sigma,
-        MUTPB=delta_mutpb,
-        precision=delta_precision,
-        min_delta=min_delta,
-        max_delta=max_delta,
-        sigma_perct=delta_sigma_as_perct,
-        inverse=delta_inverse
-    )
+    if delta_mutation == 'gauss':
+        toolbox.register(
+            "mutate_delta", operators.gaussian_mutation_delta,
+            sigma=delta_sigma,
+            MUTPB=delta_mutpb,
+            precision=delta_precision,
+            min_delta=min_delta,
+            max_delta=max_delta,
+            sigma_perct=delta_sigma_as_perct,
+            inverse=delta_inverse,
+            flexible_limits=flexible_limits
+        )
+    elif delta_mutation == 'random':
+        toolbox.register(
+            "mutate_delta", operators.random_delta,
+            precision=delta_precision,
+            min_delta=min_delta,
+            max_delta=max_delta
+        )
 
     # Register the selection function (built-in with DEAP for NSGA2)
     toolbox.register(
@@ -147,7 +162,6 @@ def initial_setup(toolbox, HV, HV_ref):
     # Easier than modifying population function
     for index, indiv in enumerate(init_pop):
         pop[index] = indiv
-    print(f'{len(init_pop)} Individuals created')
 
     # Lists to capture the initial population fitness (if desired)
     VAR_init = []
@@ -193,7 +207,6 @@ def generation(pop, toolbox, HV, HV_ref, num_indivs):
 
     # Tournament
     for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
-        # Crossover
         toolbox.mate(ind1, ind2)
 
         # Mutate delta
@@ -249,11 +262,12 @@ def get_mutation_params(mut_method, mock_args, L_comp=None):
 
 
 def runMOCK(
-        seed_num, data, data_dict, hv_ref, argsortdists,
-        nn_rankings, L, Lnn, num_indivs,
+        seed_num, data_dict, hv_ref, argsortdists,
+        nn_rankings, L, num_indivs,
         num_gens, mut_meth_params, min_delta, max_delta,
-        delta_precision, delta_mutpb, delta_sigma,
-        delta_sigma_as_perct, delta_inverse,
+        delta_mutation, delta_precision, delta_mutpb, delta_sigma,
+        delta_sigma_as_perct, delta_inverse, crossover, flexible_limits,
+        run_number=''
     ):
     """
     Run MOCK with specified inputs
@@ -279,7 +293,6 @@ def runMOCK(
     # Set the seed
     random.seed(seed_num)
     np.random.seed(seed_num)  # Currently unused, should switch to in future
-    print(f"Seed number: {seed_num}")
 
     start_time = time.time()
     # Initialise local varibles
@@ -288,14 +301,13 @@ def runMOCK(
 
     # Create the DEAP toolbox
     toolbox = create_base_toolbox(
-        num_indivs, argsortdists, L, Lnn, data, data_dict, nn_rankings, mut_meth_params,
-        min_delta, max_delta, delta_precision, delta_mutpb, delta_sigma, delta_sigma_as_perct,
-        delta_inverse
+        num_indivs, argsortdists, L, data_dict, nn_rankings, mut_meth_params, min_delta, max_delta,
+        delta_mutation, delta_precision, delta_mutpb, delta_sigma, delta_sigma_as_perct, delta_inverse,
+        crossover, flexible_limits
     )
 
     # Create the initial population
     pop, hv, VAR_init, CNN_init = initial_setup(toolbox, hv, hv_ref)
-    print(f'{seed_num}: Initial population done.')
 
     # Check that the initial population is within the hv reference point
     # check_hv_violation(pop, hv_ref)
@@ -305,9 +317,8 @@ def runMOCK(
     #     raise ValueError(f"Max CNN value ({PartialClust.max_cnn}) has exceeded that set for hv reference point ({hv_ref[1]}); hv values may be unreliable")
 
     # Go through each generation
-    print(f"{seed_num}: Generations:")
     with tqdm(total=num_gens) as pbar:
-        pbar.set_description(f"Running generations")
+        pbar.set_description(f"Run {run_number}")
         for gen in range(1, num_gens+1):
             # Perform a single generation
             pop, hv = generation(pop, toolbox, hv, hv_ref, num_indivs)

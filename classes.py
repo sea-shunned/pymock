@@ -256,6 +256,21 @@ class MOCKGenotype:
         return full_genotype
 
     @classmethod
+    def expand_reduce_genotype(cls, parent, old_delta):
+        # Number of genes that the new delta represents
+        n = cls.get_n_genes(parent.delta)
+
+        # Lock genes if delta has been increased
+        if parent.delta > old_delta:
+            parent[:] = parent[:n]
+
+        # Otherwise, unlock new genes
+        else:
+            parent[:] += cls.interest_sorted_mst_genotype[len(parent):n]
+
+        return parent
+
+    @classmethod
     def setup_genotype_vars(cls):
         # Calculate the length of the reduced genotype
         cls.calc_red_length()

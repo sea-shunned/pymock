@@ -1,4 +1,5 @@
 import random
+from numpy.random import randint
 from classes import MOCKGenotype
 
 
@@ -46,6 +47,10 @@ def uniform_xover(parent1, parent2, cxpb):
         del parent1.fitness.values, parent2.fitness.values
     # If we change cxpb to be <1 then we may not enter loop, so return unchanged
     # We'll keep their fitnesses so we don't need to re-evaluate (unless mutation changes)
+    return parent1, parent2
+
+
+def no_xover(parent1, parent2):
     return parent1, parent2
 
 
@@ -122,7 +127,7 @@ def neighbour_comp_mut(parent, MUTPB, interest_indices, nn_rankings, component_n
 
 
 def gaussian_mutation_delta(parent, sigma, MUTPB, min_delta, max_delta, precision=3,
-                            sigma_perct=False, inverse=False):
+                            sigma_perct=False, inverse=False, flexible_limits=False):
     # Set parameters
     mu = parent.delta
     if sigma_perct:
@@ -136,17 +141,27 @@ def gaussian_mutation_delta(parent, sigma, MUTPB, min_delta, max_delta, precisio
         old_delta = parent.delta
 
         # Mutate
-        parent.delta = round(max(min(random.gauss(mu, sigma), max_delta), min_delta), precision)
-
-        # Number of genes that the new delta represents
-        n = MOCKGenotype.get_n_genes(parent.delta)
-
-        # Lock genes if delta has been increased
-        if parent.delta > old_delta:
-            parent[:] = parent[:n]
-
-        # Otherwise, unlock new genes
+        new_delta = random.gauss(mu, sigma)
+        if flexible_limits:
+            # Flexible limits means that no hard min/max limits are imposed on delta
+            parent.delta = round(max(min(new_delta, 100), 0), precision)
         else:
-            parent[:] += MOCKGenotype.interest_sorted_mst_genotype[len(parent):n]
+            parent.delta = round(max(min(new_delta, max_delta), min_delta), precision)
+
+        # Update its genotype
+        parent = MOCKGenotype.expand_reduce_genotype(parent, old_delta)
+
+    return parent
+
+
+def random_delta(parent, min_delta, max_delta, precision):
+    old_delta = parent.delta
+
+    # Change the delta of the parent to a new random number
+    new_delta = randint(min_delta*10**precision, max_delta*10**precision+precision)
+    parent.delta = new_delta*10**precision
+
+    # Update its genotype
+    parent = MOCKGenotype.expand_reduce_genotype(parent, old_delta)
 
     return parent
