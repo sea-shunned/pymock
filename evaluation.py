@@ -5,6 +5,7 @@ import igraph
 
 import classes
 
+
 def finalPopMetrics2(pop, mst_genotype, int_links_indices, relev_links_len):
     final_pop_metrics = pd.DataFrame()
 
@@ -63,6 +64,7 @@ def finalPopMetrics2(pop, mst_genotype, int_links_indices, relev_links_len):
     #### Might be best to return all of this individually
     
     return final_pop_metrics
+
 
 # @profile
 def final_pop_metrics(pop, mst_genotype, int_links_indices, relev_links_len):

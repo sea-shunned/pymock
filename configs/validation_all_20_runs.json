@@ -7,6 +7,8 @@
     "num_indivs": 100,
     "min_deltas": [0, 60],
     "max_deltas": [99, 99],
+    "flexible_limits": null,
+    "stair_limits": null,
     "crossover": true,
     "delta_precision": 0,
     "mut_method": "original",

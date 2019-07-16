@@ -129,7 +129,6 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
             sigma=delta_sigma,
             MUTPB=delta_mutpb,
             precision=delta_precision,
-            min_delta=min_delta,
             max_delta=max_delta,
             sigma_perct=delta_sigma_as_perct,
             inverse=delta_inverse,
@@ -139,7 +138,6 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
         toolbox.register(
             "mutate_delta", operators.random_delta,
             precision=delta_precision,
-            min_delta=min_delta,
             max_delta=max_delta
         )
 
@@ -193,7 +191,7 @@ def check_hv_violation(pop, hv_ref):
         raise ValueError("Connectivity has exceeded hv reference point")
 
 
-def generation(pop, toolbox, HV, HV_ref, num_indivs):
+def generation(pop, toolbox, HV, HV_ref, num_indivs, min_delta, gen_n=0):
     """
     Perform a single generation of MOCK
     """
@@ -210,8 +208,8 @@ def generation(pop, toolbox, HV, HV_ref, num_indivs):
         toolbox.mate(ind1, ind2)
 
         # Mutate delta
-        toolbox.mutate_delta(ind1)
-        toolbox.mutate_delta(ind2)
+        toolbox.mutate_delta(ind1, min_delta=min_delta, gen_n=gen_n)
+        toolbox.mutate_delta(ind2, min_delta=min_delta, gen_n=gen_n)
 
         # Mutation
         toolbox.mutate(ind1)
@@ -267,7 +265,7 @@ def runMOCK(
         num_gens, mut_meth_params, min_delta, max_delta,
         delta_mutation, delta_precision, delta_mutpb, delta_sigma,
         delta_sigma_as_perct, delta_inverse, crossover, flexible_limits,
-        run_number=''
+        gens_step=0.1, stair_limits=None, run_number=''
     ):
     """
     Run MOCK with specified inputs
@@ -320,8 +318,12 @@ def runMOCK(
     with tqdm(total=num_gens) as pbar:
         pbar.set_description(f"Run {run_number}")
         for gen in range(1, num_gens+1):
+            # Calculate new min_delta:
+            if gen % gens_step == 0:
+                min_delta -= stair_limits
+
             # Perform a single generation
-            pop, hv = generation(pop, toolbox, hv, hv_ref, num_indivs)
+            pop, hv = generation(pop, toolbox, hv, hv_ref, num_indivs, min_delta, gen)
             pbar.update(1)
     # Measure the time taken
     time_taken = time.time() - start_time

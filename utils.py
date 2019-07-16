@@ -94,6 +94,17 @@ def set_config_defaults(config):
             # Set as a list to use product
             config["L_comp"] = [5]
 
+    # Standardize limits behaviour
+    if config['stair_limits'] is not None:
+        config['flexible_limits'] = 0
+        config['min_deltas'] = [100 - config['stair_limits']]
+        config['max_deltas'] = [100 - 1 / 10**config['delta_precision']]
+        config['gens_step'] = int(config['num_gens'] / (config['min_deltas'][0] / config['stair_limits']))
+    elif config['flexible_limits'] is None or config['flexible_limits'] is False:
+        config['flexible_limits'] = 0
+    elif 0 < config['flexible_limits'] < 1:
+        config['flexible_limits'] *= config['num_gens']
+
     # Check/change min/max delta
     deltas = []
     for min_delta, max_delta in zip(config['min_deltas'], config['max_deltas']):

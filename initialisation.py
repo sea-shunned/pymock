@@ -24,7 +24,7 @@ def create_solution(n, argsortdists, L):
         yield indiv
 
 
-def init_deltamock(k_user, num_indivs, argsortdists, L, indiv_creator):
+def init_deltamock(k_user, num_indivs, argsortdists, L, indiv_creator, adaptive=True):
     """Initialisation routine for Delta-MOCK
     
     Arguments:
@@ -39,7 +39,12 @@ def init_deltamock(k_user, num_indivs, argsortdists, L, indiv_creator):
     # Create empty list for population
     pop = []
     # Add MST to population
-    pop.append(indiv_creator())
+    if adaptive:
+        pop.append(indiv_creator())
+    else:
+        indiv = MOCKGenotype.mst_genotype[:]
+        pop.append([indiv[i] for i in MOCKGenotype.reduced_genotype_indices])
+
     # Set k_max to be 2* the k_user
     k_max = k_user*2
     # Generate set of k values to use

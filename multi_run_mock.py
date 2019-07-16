@@ -126,6 +126,8 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         "min_delta": None,
         "max_delta": None,
         "flexible_limits": config['flexible_limits'],
+        "stair_limits": config['stair_limits'],
+        "gens_step": config['gens_step'],
         "delta_mutation": config['delta_mutation'],
         "delta_precision": config['delta_precision'],
         "delta_mutpb": None,
@@ -295,32 +297,18 @@ def single_run_mock(L, min_delta, max_delta, dmutpb, dms, dmsp, dmsr, seed, conf
     return results_df, hvs_df
 
 
-def multi_run_mock(config, validate):
+def multi_run_mock(config, validate, name=None):
     # Load the data file paths
-    if validate:
-        print('Loading validation data...')
-        config_path = Path.cwd() / "configs" / "validate.json"
-        config = utils.load_json(config_path)
-        data_file_paths, experiment_folder = load_data(
-            config["exp_name"],
-            config["data_folder"],
-            validate,
-            config["data_subset"]
-        )
-        # Just validating so don't save results
-        save_results = False
-    else:
-        print(f'Loading {config} configuration...')
-        config_path = Path.cwd() / "configs" / config
-        config = utils.load_json(config_path)
-        data_file_paths, experiment_folder = load_data(
-            config["exp_name"],
-            config["data_folder"],
-            validate,
-            config["data_subset"]
-        )
-        # Save experimental results
-        save_results = True
+    if name is not None:
+        print(f'Loading {name} configuration...')
+
+    save_results = validate is False  # opposite of validate
+    data_file_paths, experiment_folder = load_data(
+        config["exp_name"],
+        config["data_folder"],
+        validate,
+        config["data_subset"]
+    )
 
     # Check the config and amend if needed
     config = utils.check_config(config)
@@ -330,7 +318,7 @@ def multi_run_mock(config, validate):
     # Restrict seed_list to the actual number of runs that we need
     # Truncating like this allows us to know that the run numbers and order of seeds correspond
     seed_list = seed_list[:config["num_runs"]]
-    seed_list = [(i,) for i in seed_list] # for starmap
+    seed_list = [(i,) for i in seed_list]  # for starmap
 
     # Print the number of runs to get an idea of runtime (sort of)
     print("---------------------------")
@@ -421,12 +409,23 @@ if __name__ == '__main__':
     cl_args = vars(cl_args)
     utils.check_cl_args(cl_args)
 
+    # Check that all config files are ok
     if cl_args['validate']:
-        multi_run_mock(None, True)
+        config_path = Path.cwd() / "configs" / "validate.json"
+        configs = [utils.load_json(config_path)]
+        cl_args['config'] = ['VALIDATION']
     else:
-        print(f'Running {len(cl_args["config"])} configuration file(s).')
+        configs = []
         for config in cl_args['config']:
-            multi_run_mock(config, False)
+            config_path = Path.cwd() / "configs" / config
+            configs.append(utils.load_json(config_path))
+
+    configs = [utils.check_config(config) for config in configs]
+
+    # Run Algorithm
+    print(f'Running {len(configs)} configuration file(s).')
+    for config, name in zip(configs, cl_args['config']):
+        multi_run_mock(config, cl_args['validate'], name)
 
     ######## TO DO ########
     # look at how results are saved and named

@@ -192,8 +192,7 @@ class MOCKGenotype:
     interest_indices = None  # Indices of the most to least interesting links in the MST (formerly int_links_indices)
     interest_sorted_mst_genotype = None
     # Delta value
-    #### In the future, can set this as the start
-    #### And we redefine individual deltas as attributes if we have varying levels
+    delta_val = None  # Used in original Delta-MOCK
     min_delta_val = None
     n_min_delta = None
     # Length of the reduced genotype
@@ -292,6 +291,23 @@ class MOCKGenotype:
             kind='mergesort'
         ).tolist()
         cls.interest_sorted_mst_genotype = [cls.mst_genotype[i] for i in cls.interest_indices]
+
+    @classmethod
+    def calc_delta(cls, sr_val):
+        # Calculate the delta value from the square root value
+        cls.delta_val = 100 - (
+                (100 * sr_val * np.sqrt(Datapoint.num_examples))
+                / Datapoint.num_examples
+        )
+        # Error handle the resulting delta
+        if cls.delta_val is None:  # When would this happen?
+            raise ValueError("Delta value has not been set")
+        elif cls.delta_val < 0:
+            print("Delta value is below 0, setting to 0...")
+            cls.delta_val = 0
+        elif cls.delta_val > 100:
+            raise ValueError("Delta value is over 100")
+        return cls.delta_val
 
     @classmethod
     def calc_base_genotype(cls):

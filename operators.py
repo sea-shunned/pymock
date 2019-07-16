@@ -14,10 +14,8 @@ def uniform_xover(parent1, parent2, cxpb):
     Returns:
         [type] -- [description]
     """
-    # Standardize parent's length
-    child_len = min(len(parent1), len(parent2))
-    parent1[:] = parent1[:child_len]
-    parent2[:] = parent2[:child_len]
+    # xover only the minimum length
+    target_len = min(len(parent1), len(parent2))
 
     # Make copies of the parents
     child1 = parent1[:]
@@ -25,7 +23,7 @@ def uniform_xover(parent1, parent2, cxpb):
 
     # Test if we undergo crossover
     if cxpb == 1:
-        for i in range(len(parent1)):
+        for i in range(target_len):
             if random.random() < 0.5:
                 parent1[i] = child1[i]
                 parent2[i] = child2[i]
@@ -37,7 +35,7 @@ def uniform_xover(parent1, parent2, cxpb):
 
     # In case another probability is used; we avoid a random.random() call in normal case
     elif random.random() <= cxpb:
-        for i in range(len(parent1)):
+        for i in range(target_len):
             if random.random() < 0.5:
                 parent1[i] = child1[i]
                 parent2[i] = child2[i]
@@ -79,7 +77,6 @@ def neighbour_mut(parent, MUTPB, argsortdists, L, interest_indices, nn_rankings)
             for index, value in enumerate(parent)
         ]
         # Now just loop over the probabilities
-        # As we're using assignment, can't really do this part in a comprehension!
         for index, mutprob in enumerate(mutprobs):
             if random.random() < mutprob:
                 parent[index] = MOCKGenotype.replace_link(
@@ -99,7 +96,6 @@ def comp_centroid_mut(parent, MUTPB, argsortdists_cen, L_comp, interest_indices,
             for index,value in enumerate(parent)
         ]
         # Now just loop over the probabilities
-        # As we're using assignment, can't really do this part in a comprehension!
         for index, mutprob in enumerate(mutprobs):
             if random.random() < mutprob:
                 parent[index] = MOCKGenotype.centroid_replace_link(
@@ -126,10 +122,10 @@ def neighbour_comp_mut(parent, MUTPB, interest_indices, nn_rankings, component_n
     return parent
 
 
-def gaussian_mutation_delta(parent, sigma, MUTPB, min_delta, max_delta, precision=3,
-                            sigma_perct=False, inverse=False, flexible_limits=False):
+def gaussian_mutation_delta(parent, sigma, MUTPB, min_delta, max_delta, gen_n, precision=3,
+                            sigma_perct=False, inverse=False, flexible_limits=0, bias=0):
     # Set parameters
-    mu = parent.delta
+    mu = parent.delta + bias
     if sigma_perct:
         if inverse:
             sigma = (100-mu)*sigma + 1/(101-mu)
@@ -142,7 +138,7 @@ def gaussian_mutation_delta(parent, sigma, MUTPB, min_delta, max_delta, precisio
 
         # Mutate
         new_delta = random.gauss(mu, sigma)
-        if flexible_limits:
+        if gen_n >= flexible_limits:
             # Flexible limits means that no hard min/max limits are imposed on delta
             parent.delta = round(max(min(new_delta, 100), 0), precision)
         else:
