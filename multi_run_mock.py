@@ -342,8 +342,29 @@ def multi_run_mock(config, validate, name=None):
     # Prepare deltas for looping
     deltas = zip(config['min_deltas'], config['max_deltas'])
 
+    # Prepare the list of runs
+    runs_list = []
+
+    # Loop through the Ls
+    n_run = 0
+    config_number = 0
+    for L, d in product(config["L"], deltas):
+        # Loop through delta mutation values
+        for dmutpb, dms, dmsp, dmsr in zip(config["delta_mutation_probability"],
+                                           config["delta_gauss_mutation_sigma"],
+                                           config["delta_gauss_mutation_sigma_as_perct"],
+                                           config["delta_gauss_mutation_inverse"]):
+            config_number += 1
+            # And finally through each run
+            for config_run_number, seed in enumerate(seed_list):
+                n_run += 1
+                runs_list.append([L, d[0], d[1], dmutpb, dms, dmsp, dmsr, seed, config_number,
+                                  config_run_number + 1, n_run])
+
     # Loop through the data to test
     for file_path in data_file_paths:
+        data_name = file_path._parts[-1]
+
         print(f"Beginning precomputation for {file_path.name}...")
         # Prepare the data
         data, data_dict = prepare_data(file_path)
@@ -353,24 +374,6 @@ def multi_run_mock(config, validate, name=None):
         mock_args = prepare_mock_args(data_dict, argsortdists, nn_rankings, config)
         print("Precomputation complete!")
         print("---------------------------")
-
-        runs_list = []
-
-        # Loop through the Ls
-        n_run = 0
-        config_number = 0
-        for L, d in product(config["L"], deltas):
-            # Loop through delta mutation values
-            for dmutpb, dms, dmsp, dmsr in zip(config["delta_mutation_probability"],
-                                               config["delta_gauss_mutation_sigma"],
-                                               config["delta_gauss_mutation_sigma_as_perct"],
-                                               config["delta_gauss_mutation_inverse"]):
-                config_number += 1
-                # And finally through each run
-                for config_run_number, seed in enumerate(seed_list):
-                    n_run += 1
-                    runs_list.append([L, d[0], d[1], dmutpb, dms, dmsp, dmsr, seed, config_number,
-                                      config_run_number+1, n_run])
 
         print('Beginning {} runs.'.format(n_run))
 
@@ -392,15 +395,15 @@ def multi_run_mock(config, validate, name=None):
         
         print(f"{file_path.name} complete!")
 
-    # Validate the results
-    if validate:
-        tests.validate_results(results_df)
-        print("Test passed!")
-    # Save results
-    if save_results:
-        results_df.to_csv(f"{experiment_folder}/{config['exp_name']}_results.csv", index=False)
-        hvs_df.to_csv(f"{experiment_folder}/{config['exp_name']}_hvs.csv", index=False)
-        print('Results saved!')
+        # Validate the results
+        if validate:
+            tests.validate_results(results_df)
+            print("Test passed!")
+        # Save results
+        if save_results:
+            results_df.to_csv(f"{experiment_folder}/{data_name}_results.csv", index=False)
+            hvs_df.to_csv(f"{experiment_folder}/{data_name}_hvs.csv", index=False)
+            print('Results saved!')
 
 
 if __name__ == '__main__':

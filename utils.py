@@ -95,6 +95,7 @@ def set_config_defaults(config):
             config["L_comp"] = [5]
 
     # Standardize limits behaviour
+    config['gens_step'] = 0.1
     if config['stair_limits'] is not None:
         config['flexible_limits'] = 0
         config['min_deltas'] = [100 - config['stair_limits']]
