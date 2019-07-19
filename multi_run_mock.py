@@ -26,7 +26,7 @@ import tests
 def load_data(exp_name, data_folder, validate, data_subset=""):
     # Generate experiment name if not given
     if exp_name is None:
-        exp_name = f"experiment_{datetime.today().strftime('%Y%m%d')}"
+        exp_name = "experiment_" + str(datetime.today().strftime('%Y%m%d'))
     # Create the folder to store the results
     experiment_folder = Path.cwd() / "experiments" / exp_name
     # Warn if already made
