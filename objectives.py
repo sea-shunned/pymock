@@ -71,10 +71,10 @@ def objVAR(chains, comp_dict, base_members, base_centres, superclusts):
 # @profile
 def eval_mock(genotype, comp_dict, reduced_clust_nums, cnn_array, max_cnn, num_examples, data_dict, cnn_pairs,
               base_members, base_centres, toolbox, adaptive=True):
-    #if adaptive:
-    #    # Extend genotype to match min_delta length
-    #    genotype = toolbox.clone(genotype)
-    #    genotype[:] += MOCKGenotype.interest_sorted_mst_genotype[len(genotype):MOCKGenotype.n_min_delta]
+    if adaptive:
+        # Extend genotype to match min_delta length
+        genotype = toolbox.clone(genotype)
+        genotype[:] += MOCKGenotype.interest_sorted_mst_genotype[len(genotype):MOCKGenotype.n_min_delta]
 
     # Identifies which components are connected (delta-evaluation)
     chains, superclusts = cluster_chains(genotype, data_dict, comp_dict, reduced_clust_nums)
@@ -82,7 +82,7 @@ def eval_mock(genotype, comp_dict, reduced_clust_nums, cnn_array, max_cnn, num_e
     CNN = objCNN(chains, superclusts, cnn_pairs, cnn_array, max_cnn)
     VAR = objVAR(chains, comp_dict, base_members, base_centres, superclusts)
     # Edge cases with large datasets, as single cluster solutions get given a 0 score
-    if CNN < 0.00001: # Value that Garza/Handl uses, presumably to smooth small values
+    if CNN < 0.00001:  # Value that Garza/Handl uses, presumably to smooth small values
         CNN = 0
     # Divide by number of examples as per the paper and Mario's code
     return np.sum(VAR)/num_examples, CNN

@@ -1,8 +1,7 @@
 import argparse
 import json
 from pathlib import Path
-
-from custom_warnings import warning_min_max_delta
+import warnings
 
 
 def build_parser():
@@ -58,18 +57,19 @@ def check_config(config):
     config = set_config_defaults(config)
 
     # Some of the parameters need to be lists
-    list_params = ["L_comp", "min_deltas", "max_deltas", "delta_mutation_probability",
-                   "delta_gauss_mutation_sigma", "delta_gauss_mutation_sigma_as_perct",
+    list_params = ["L_comp", "delta_mutation_probability",
+                   "delta_gauss_mutation_variance", "delta_gauss_mutation_sigma_as_perct",
                    "delta_gauss_mutation_inverse"]
     # If a value has been provided but isn't a list, convert it
     for key in list_params:
-        if config[key] is not None and not isinstance(config[key], list):
+        if config[key] is None:
+            config[key] = [None]
+        elif not isinstance(config[key], list):
             config[key] = [config[key]]
 
     # Check parameter lengths are congruent
-    assert len(config['min_deltas']) == len(config['max_deltas']), "Min/Max delta should have the same length"
-    assert len(config['delta_mutation_probability']) == len(config['delta_gauss_mutation_sigma']), \
-        "delta_gauss_mutation_sigma and delta_mutation_probability should have the same length"
+    assert len(config['delta_mutation_probability']) == len(config['delta_gauss_mutation_variance']), \
+        "delta_gauss_mutation_variance and delta_mutation_probability should have the same length"
     assert len(config['delta_mutation_probability']) == len(config['delta_gauss_mutation_sigma_as_perct']), \
         "delta_gauss_mutation_sigma_as_perct and delta_mutation_probability should have the same length"
     assert len(config['delta_mutation_probability']) == len(config['delta_gauss_mutation_inverse']), \
@@ -106,12 +106,17 @@ def set_config_defaults(config):
     elif 0 < config['flexible_limits'] < 1:
         config['flexible_limits'] *= config['num_gens']
 
-    # Check/change min/max delta
-    deltas = []
-    for min_delta, max_delta in zip(config['min_deltas'], config['max_deltas']):
-        deltas.append(warning_min_max_delta(min_delta, max_delta))
-    config['min_deltas'] = [d[0] for d in deltas]
-    config['max_deltas'] = [d[1] for d in deltas]
+    # Check min/init delta
+    if config['init_delta'] is None:
+        if config['min_delta'] is None:
+            warnings.warn("min delta not provided, setting to 0...")
+            config['init_delta'] = 0
+            config['min_delta'] = 0
+        else:
+            config['init_delta'] = config['min_delta']
+    else:
+        if config['min_delta'] is None:
+            config['min_delta'] = config['init_delta']
 
     # Make sure crossover is well written
     if isinstance(config['crossover'], str):
@@ -124,7 +129,7 @@ def set_config_defaults(config):
     # Same for delta mutation
     if isinstance(config['delta_mutation'], str):
         config['delta_mutation'] = config['delta_mutation'].lower()
-        if config['delta_mutation'] not in ['gauss', 'random']:
+        if config['delta_mutation'] not in ['gauss', 'uniform', 'random']:
             raise ValueError("Crossover method '{}' not yet implemented!".format(config['delta_mutation']))
     else:
         raise ValueError("Error in delta mutation method '{}'".format(config['delta_mutation']))

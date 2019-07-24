@@ -123,18 +123,21 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         "num_indivs": config["num_indivs"],
         "num_gens": config["num_gens"],
         "mut_meth_params": None,
-        "min_delta": None,
-        "max_delta": None,
+        "init_delta": config["init_delta"],
+        "min_delta": config["min_delta"],
+        "max_delta": 100 - config['delta_precision'],
         "flexible_limits": config['flexible_limits'],
         "stair_limits": config['stair_limits'],
         "gens_step": config['gens_step'],
         "delta_mutation": config['delta_mutation'],
+        "squash": config['squash'],
         "delta_precision": config['delta_precision'],
         "delta_mutpb": None,
         "delta_sigma": None,
         "delta_sigma_as_perct": None,
         "delta_inverse": None,
-        "crossover": config['crossover']
+        "crossover": config['crossover'],
+        "save_history": config['save_history']
     }
     return mock_args
 
@@ -201,12 +204,10 @@ def calc_hv_ref(mock_args):
     return hv_ref
 
 
-def single_run_mock(L, min_delta, max_delta, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_number,
+def single_run_mock(L, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_number,
                     n_run, mock_args, data, config, validate):
     # Set the mock_args for this layer
     mock_args["L"] = L
-    mock_args['min_delta'] = min_delta
-    mock_args['max_delta'] = max_delta
     mock_args["delta_mutpb"] = dmutpb
     mock_args["delta_sigma"] = dms
     mock_args["delta_sigma_as_perct"] = dmsp
@@ -248,7 +249,7 @@ def single_run_mock(L, min_delta, max_delta, dmutpb, dms, dmsp, dmsr, seed, conf
         print(f"Run {n_run} completed... It took {mp_time:.3f} secs)")
 
         # Extract the population
-        pop = result[0]
+        all_pop = result[0]
         # Extract hv list
         hvs = result[1]
         # Extract final interesting links
@@ -258,34 +259,52 @@ def single_run_mock(L, min_delta, max_delta, dmutpb, dms, dmsp, dmsr, seed, conf
         # Get the running time for each run
         time_taken = result[5]
         # Calculate the number of clusters and ARIs
-        num_clusts, aris = evaluation.final_pop_metrics(
-            pop, MOCKGenotype.mst_genotype,
-            final_interest_inds, final_gen_len
-        )
+        clust_aris = [evaluation.final_pop_metrics(pop, MOCKGenotype.mst_genotype, final_interest_inds, final_gen_len)
+                      for pop in all_pop]
+        aris = []
+        num_clusts = []
+        for clust_ari in clust_aris:
+            num_clusts.append(clust_ari[0])
+            aris.append(clust_ari[1])
         # Extract the fitness values
-        var_vals = [indiv.fitness.values[0] for indiv in pop]
-        cnn_vals = [indiv.fitness.values[1] for indiv in pop]
-        delta_vals = [indiv.delta for indiv in pop]
+        var_vals = [[indiv.fitness.values[0] for indiv in pop] for pop in all_pop]
+        cnn_vals = [[indiv.fitness.values[1] for indiv in pop] for pop in all_pop]
+        delta_vals = [[indiv.delta for indiv in pop] for pop in all_pop]
+        # Flatten list of lists
+        var_vals = np.array(var_vals).flatten()
+        cnn_vals = np.array(cnn_vals).flatten()
+        delta_vals = np.array(delta_vals).flatten()
+        aris = np.array(aris).flatten()
+        num_clusts = np.array(num_clusts).flatten()
+
+        # Generation numbers
+        gen_number = []
+        for i in range(1, len(all_pop)+1):
+            gen_number += [i] * config['num_indivs']
+
         # Add strategy here for adaptive version
+        n_obs = config['num_indivs'] * len(all_pop)
         results_dict = {
-            "dataset": [Datapoint.data_name] * config["num_indivs"],
-            'config': [config_number] * config["num_indivs"],
-            'run': [config_run_number] * config["num_indivs"],
-            "indiv": list(range(config["num_indivs"])),
-            "L": [L] * config["num_indivs"],
+            "dataset": [Datapoint.data_name] * n_obs,
+            'config': [config_number] * n_obs,
+            'run': [config_run_number] * n_obs,
+            'gen': gen_number,
+            "indiv": list(range(config["num_indivs"])) * len(all_pop),
+            "L": [L] * n_obs,
             "delta": delta_vals,
-            "min_delta": [min_delta] * config["num_indivs"],
-            "max_delta": [max_delta] * config["num_indivs"],
-            "delta_mutpb": [dmutpb] * config["num_indivs"],
-            "delta_sigma": [dms] * config["num_indivs"],
-            "delta_sigma_as_perct": [dmsp] * config["num_indivs"],
-            "delta_inverse": [dmsr] * config["num_indivs"],
+            "min_delta": [mock_args['min_delta']] * n_obs,
+            "init_delta": [mock_args['init_delta']] * n_obs,
+            "max_delta": [mock_args['max_delta']] * n_obs,
+            "delta_mutpb": [dmutpb] * n_obs,
+            "delta_sigma": [dms] * n_obs,
+            "delta_sigma_as_perct": [dmsp] * n_obs,
+            "delta_inverse": [dmsr] * n_obs,
             "VAR": var_vals,
             "CNN": cnn_vals,
             # "HV": hvs, This is evaluated per generation and not per individual
             "ARI": aris,
             "clusters": num_clusts,
-            "time": [time_taken] * config["num_indivs"]
+            "time": [time_taken] * n_obs
         }
         # Add the new results
         results_df = pd.DataFrame(results_dict)
@@ -327,7 +346,8 @@ def multi_run_mock(config, validate, name=None):
     print(f"{len(config['strategies'])} strategy/-ies")
     print(f"{config['num_gens']} generations")
     print(f"{config['num_indivs']} individuals per generation.")
-    print(f"{config['min_deltas']}-{config['max_deltas']} delta range")
+    print(f"Init delta: {config['init_delta']}.")
+    print(f"Min delta: {config['min_delta']}.")
     print(f"{len(config['delta_mutation_probability'])} sigma variations")
     print(f"{len(data_file_paths)} dataset(s)")
     print("---------------------------")
@@ -335,37 +355,30 @@ def multi_run_mock(config, validate, name=None):
     # Save the config
     utils.save_config(config, experiment_folder, validate)
 
-    # df for results
-    results_df = pd.DataFrame()
-    hvs_df = pd.DataFrame()
-
-    # Prepare deltas for looping
-    deltas = zip(config['min_deltas'], config['max_deltas'])
-
     # Prepare the list of runs
     runs_list = []
 
     # Loop through the Ls
     n_run = 0
     config_number = 0
-    for L, d in product(config["L"], deltas):
+    for L in config["L"]:
         # Loop through delta mutation values
         for dmutpb, dms, dmsp, dmsr in zip(config["delta_mutation_probability"],
-                                           config["delta_gauss_mutation_sigma"],
+                                           config["delta_gauss_mutation_variance"],
                                            config["delta_gauss_mutation_sigma_as_perct"],
                                            config["delta_gauss_mutation_inverse"]):
             config_number += 1
             # And finally through each run
             for config_run_number, seed in enumerate(seed_list):
                 n_run += 1
-                runs_list.append([L, d[0], d[1], dmutpb, dms, dmsp, dmsr, seed, config_number,
+                runs_list.append([L, dmutpb, dms, dmsp, dmsr, seed, config_number,
                                   config_run_number + 1, n_run])
 
     # Loop through the data to test
     for file_path in data_file_paths:
-        data_name = file_path._parts[-1]
+        data_name = file_path.name
 
-        print(f"Beginning precomputation for {file_path.name}...")
+        print(f"Beginning precomputation for {data_name}...")
         # Prepare the data
         data, data_dict = prepare_data(file_path)
         # Do the precomputation for MOCK

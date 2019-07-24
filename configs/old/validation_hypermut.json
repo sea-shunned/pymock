@@ -14,7 +14,7 @@
     "mut_method": "original",
     "delta_mutation": "gauss",
     "delta_mutation_probability": [0.1, 1, 0.1],
-    "delta_gauss_mutation_sigma": [1, 5, 5],
+    "delta_gauss_mutation_variance": [1, 5, 5],
     "delta_gauss_mutation_sigma_as_perct": [false, false, false],
     "delta_gauss_mutation_inverse": [false, false, false],
     "crossover_prob": 1.0,

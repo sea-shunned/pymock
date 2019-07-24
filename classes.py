@@ -20,9 +20,9 @@ class PartialClust(object):
     base_centres = None
 
     def __init__(self, cluster):
-        self.id = next(PartialClust.id_value) # Starts at cluster 0
+        self.id = next(PartialClust.id_value)  # Starts at cluster 0
         self.members = cluster
-        self.num_members = len(cluster) # To avoid repeated len() calls for delta-VAR
+        self.num_members = len(cluster)  # To avoid repeated len() calls for delta-VAR
         # Can call the two below if we convert them to method
         self.centroid = None # Call the function here?
         self.intraclust_var = None # Same as above
@@ -339,7 +339,7 @@ class MOCKGenotype:
         """Identify the component IDs of where the link originates for the most interest points (i.e. the index). Speeds up objective evaluation.
         """
         cls.reduced_cluster_nums = [
-            data_dict[i].base_cluster_num for i in MOCKGenotype.reduced_genotype_indices
+            data_dict[i].base_cluster_num for i in cls.reduced_genotype_indices
         ]
 
     @staticmethod
@@ -384,5 +384,5 @@ class MOCKGenotype:
         """Calculate the reduced length of the genotype
         """
         cls.reduced_length = int(
-            np.ceil(((100-MOCKGenotype.min_delta_val)/100) * Datapoint.num_examples)
+            np.ceil(((100 - cls.min_delta_val) / 100) * Datapoint.num_examples)
         )

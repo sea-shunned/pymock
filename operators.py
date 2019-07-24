@@ -122,27 +122,32 @@ def neighbour_comp_mut(parent, MUTPB, interest_indices, nn_rankings, component_n
     return parent
 
 
-def gaussian_mutation_delta(parent, sigma, MUTPB, min_delta, max_delta, gen_n, precision=3,
-                            sigma_perct=False, inverse=False, flexible_limits=0, bias=0):
-    # Set parameters
-    mu = parent.delta + bias
-    if sigma_perct:
-        if inverse:
-            sigma = (100-mu)*sigma + 1/(101-mu)
-        else:
-            sigma = mu * sigma + (100-mu)/100
-
+def gaussian_mutation_delta(parent, sigma, mutpb, init_delta, min_delta, max_delta, gen_n, precision=3,
+                            sigma_perct=False, inverse=False, flexible_limits=0, squash=False):
     # Test if mutation is happening
-    if random.random() < MUTPB:
+    if random.random() < mutpb:
+        # Set parameters
+        mu = parent.delta
+        if sigma_perct:
+            if inverse:
+                sigma = (100 - mu) * sigma + 1 / (101 - mu)
+            else:
+                sigma = mu * sigma + (100 - mu) / 100
+
+        if squash:
+            sigma = min(min(sigma, (100-mu)/3), mu/3)
+            if sigma <= 0:
+                sigma = 0.1
+
         old_delta = parent.delta
 
         # Mutate
         new_delta = random.gauss(mu, sigma)
         if gen_n >= flexible_limits:
             # Flexible limits means that no hard min/max limits are imposed on delta
-            parent.delta = round(max(min(new_delta, 100), 0), precision)
+            parent.delta = round(max(min(new_delta, 100), min_delta), precision)
         else:
-            parent.delta = round(max(min(new_delta, max_delta), min_delta), precision)
+            parent.delta = round(max(min(new_delta, max_delta), init_delta), precision)
 
         # Update its genotype
         parent = MOCKGenotype.expand_reduce_genotype(parent, old_delta)
@@ -150,12 +155,42 @@ def gaussian_mutation_delta(parent, sigma, MUTPB, min_delta, max_delta, gen_n, p
     return parent
 
 
-def random_delta(parent, min_delta, max_delta, precision):
+def uniform_mutation_delta(parent, spread, mutpb, init_delta, min_delta, max_delta, gen_n, precision=3,
+                           flexible_limits=0, squash=False):
+    if random.random() < mutpb:
+        # Set parameters
+        mu = parent.delta
+
+        if gen_n >= flexible_limits:
+            init_delta = min_delta
+            max_delta = 100
+
+        if squash:
+            diff = min(min(spread, 100-mu), mu)
+            if diff == 0:
+                diff = 0.2
+        else:
+            diff = spread
+
+        lb = max(mu - diff, init_delta)
+        ub = min(mu + diff, max_delta)
+
+        # Mutate delta
+        old_delta = parent.delta
+        parent.delta = round(random.uniform(lb, ub), precision)
+
+        # Update its genotype
+        parent = MOCKGenotype.expand_reduce_genotype(parent, old_delta)
+
+    return parent
+
+
+def random_delta(parent, min_delta, max_delta, precision, init_delta=None, gen_n=None):
     old_delta = parent.delta
 
     # Change the delta of the parent to a new random number
     new_delta = randint(min_delta*10**precision, max_delta*10**precision+precision)
-    parent.delta = new_delta*10**precision
+    parent.delta = new_delta/10**precision
 
     # Update its genotype
     parent = MOCKGenotype.expand_reduce_genotype(parent, old_delta)
