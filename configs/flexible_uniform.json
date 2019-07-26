@@ -23,5 +23,6 @@
     "L_comp": null,
     "strategies": ["base"],
     "seed_file": "seed_list_validate.json",
-    "save_history": true
+    "save_history": true,
+    "verbose": true
 }

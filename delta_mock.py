@@ -279,7 +279,7 @@ def runMOCK(
         num_gens, mut_meth_params, min_delta, max_delta, init_delta,
         delta_mutation, delta_precision, delta_mutpb, delta_sigma,
         delta_sigma_as_perct, delta_inverse, crossover, flexible_limits, squash=False,
-        gens_step=0.1, stair_limits=None, run_number='', save_history=False
+        gens_step=0.1, stair_limits=None, run_number='', save_history=False, verbose=True
     ):
     """
     Run MOCK with specified inputs
@@ -330,21 +330,27 @@ def runMOCK(
 
     # Go through each generation
     all_pop = []
-    with tqdm(total=num_gens) as pbar:
+    if verbose:
+        pbar = tqdm(total=num_gens)
         pbar.set_description(f"Run {run_number}")
-        for gen in range(1, num_gens+1):
-            # Calculate new init_delta:
-            if gen % gens_step == 0:
-                init_delta -= stair_limits
+    for gen in range(1, num_gens+1):
+        # Calculate new init_delta:
+        if gen % gens_step == 0:
+            init_delta -= stair_limits
 
-            # Perform a single generation
-            pop, hv = generation(pop, toolbox, hv, hv_ref, num_indivs, init_delta, gen)
+        # Perform a single generation
+        pop, hv = generation(pop, toolbox, hv, hv_ref, num_indivs, init_delta, gen)
 
-            # Save the results
-            if save_history:
-                all_pop.append(pop)
+        # Save the results
+        if save_history:
+            all_pop.append(pop)
 
+        if verbose:
             pbar.update(1)
+
+    if verbose:
+        pbar.close()
+
     # Measure the time taken
     time_taken = time.time() - start_time
 

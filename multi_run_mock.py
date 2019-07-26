@@ -137,7 +137,8 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         "delta_sigma_as_perct": None,
         "delta_inverse": None,
         "crossover": config['crossover'],
-        "save_history": config['save_history']
+        "save_history": config['save_history'],
+        "verbose": config['verbose']
     }
     return mock_args
 
