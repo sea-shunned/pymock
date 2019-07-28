@@ -67,6 +67,13 @@ def check_config(config):
         elif not isinstance(config[key], list):
             config[key] = [config[key]]
 
+    # If mutation is gauss, then sigma_perct should not be none
+    if config['delta_mutation'] == 'gauss':
+        if config['delta_gauss_mutation_sigma_as_perct'][0] is None or \
+          config['delta_gauss_mutation_inverse'][0] is None:
+            raise ValueError('"delta_gauss_mutation_sigma_as_perct" and "delta_gauss_mutation_inverse"' +
+                             ' must be given for gaussian mutation')
+
     # Check parameter lengths are congruent
     assert len(config['delta_mutation_probability']) == len(config['delta_gauss_mutation_variance']), \
         "delta_gauss_mutation_variance and delta_mutation_probability should have the same length"
@@ -113,10 +120,17 @@ def set_config_defaults(config):
             config['init_delta'] = 0
             config['min_delta'] = 0
         else:
+            warnings.warn(f"init delta not provided, setting to {config['min_delta']}...")
             config['init_delta'] = config['min_delta']
     else:
         if config['min_delta'] is None:
+            warnings.warn(f"min delta not provided, setting to {config['init_delta']}...")
             config['min_delta'] = config['init_delta']
+
+    for var in ['min_delta', 'init_delta']:
+        if isinstance(config[var], str):
+            if config[var][:2].lower() != 'sr':
+                raise ValueError(f'{var} must be either an integer or an string starting with "sr"')
 
     # Make sure crossover is well written
     if isinstance(config['crossover'], str):

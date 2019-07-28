@@ -17,6 +17,7 @@ from classes import Datapoint, MOCKGenotype, PartialClust
 import precompute
 import evaluation
 import objectives
+from custom_warnings import warning_min_max_delta
 # import no_precomp_objectives
 import delta_mock
 import utils
@@ -140,6 +141,13 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         "save_history": config['save_history'],
         "verbose": config['verbose']
     }
+
+    for var in ['min_delta', 'init_delta']:
+        if isinstance(mock_args[var], str):
+            value = float(mock_args[var][2:])
+            mock_args[var] = round(MOCKGenotype.calc_delta(value), config['delta_precision'])
+    mock_args['min_delta'], mock_args['init_delta'] = warning_min_max_delta(mock_args['min_delta'],
+                                                                            mock_args['init_delta'])
     return mock_args
 
 
@@ -231,7 +239,6 @@ def single_run_mock(L, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_
         mock_args['hv_ref'] = [3.0, 1469.0]
     else:
         mock_args['hv_ref'] = calc_hv_ref(mock_args)
-    # print(f"HV ref point: {mock_args['hv_ref']}")
 
     # Strategy is not used, but kept for result consistency with adaptive
     # Same with L_comp
@@ -386,6 +393,11 @@ def multi_run_mock(config, validate, name=None):
         argsortdists, nn_rankings = setup_mock(data)
         # Wrap the arguments up for the main MOCK function
         mock_args = prepare_mock_args(data_dict, argsortdists, nn_rankings, config)
+
+        # Decode square root deltas
+        print(f'Min delta: {mock_args["min_delta"]}')
+        print(f'Init delta: {mock_args["init_delta"]}')
+
         print("Precomputation complete!")
         print("---------------------------")
 

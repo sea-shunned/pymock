@@ -106,7 +106,7 @@ def init_uniformly_distributed_population(num_indivs, k_user, min_delta, max_del
     deltas = np.linspace(min_delta, max_delta, num_indivs)
     deltas = np.round(deltas, precision)
 
-    # And the Ks
+    # And the number of clusters (Ks)
     k_max = 2 * k_user
     ks = list(range(2, k_max+1))
     if len(ks) > len(deltas):
