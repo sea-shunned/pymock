@@ -101,7 +101,20 @@ def set_config_defaults(config):
             # Set as a list to use product
             config["L_comp"] = [5]
 
-    # Standardize limits behaviour
+    # Domain default
+    if config['domain_delta'] is None:
+        config['domain_delta'] = 'real'
+    elif config['domain_delta'].lower() not in ['real', 'sr']:
+        raise ValueError(f'{config["domain_delta"]} not implemented!')
+    else:
+        config['domain_delta'] = config['domain_delta'].lower()
+
+    if config['domain_delta'] == 'sr':
+        if config['delta_precision'] != 0:
+            warnings.warn("Setting precision to 0...")
+            config['delta_precision'] = 0
+
+        # Standardize limits behaviour
     config['gens_step'] = 0.1
     if config['stair_limits'] is not None:
         config['flexible_limits'] = 0

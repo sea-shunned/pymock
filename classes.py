@@ -1,5 +1,6 @@
 import itertools
 import random
+from math import sqrt
 
 import igraph
 import numpy as np
@@ -207,6 +208,8 @@ class MOCKGenotype:
     # Base components
     base_genotype = None
     base_clusters = None
+    sr_vals = None
+    sr_upper_bound = None
 
     def __init__(self):
         # Set full genotype as None - don't store a potentially long list unless we need to
@@ -230,7 +233,7 @@ class MOCKGenotype:
         return delta
 
     @classmethod
-    def delta_individual(cls, icls, min_delta, max_delta, delta=None, precision=3):
+    def delta_individual(cls, icls, min_delta, max_delta, delta=None, sr=None, precision=3):
         """Generates an individual with a random delta in a given interval or value"""
         if delta is None:
             # Get the value for delta and the number of genes it represents
@@ -240,6 +243,8 @@ class MOCKGenotype:
 
         ind = icls(cls.interest_sorted_mst_genotype[:n_genes])
         ind.delta = delta
+        ind.sr = sr
+
         return ind
 
     @classmethod
@@ -270,7 +275,9 @@ class MOCKGenotype:
         return parent
 
     @classmethod
-    def setup_genotype_vars(cls):
+    def setup_genotype_vars(cls, min_delta, data, data_dict, argsortdists, L, domain, max_sr=None):
+        cls.min_delta_val = min_delta
+        cls.n_min_delta = MOCKGenotype.get_n_genes(min_delta)
         # Calculate the length of the reduced genotype
         cls.calc_red_length()
         # Find the indices of the most to least interesting links
@@ -282,6 +289,15 @@ class MOCKGenotype:
         cls.calc_base_genotype()
         # Identify these base clusters as the connected components of the defined base genotype
         cls.calc_base_clusters()
+
+        # Setup the components class
+        PartialClust.partial_clusts(data, data_dict, argsortdists, L)
+
+        # Identify the component IDs of the link origins
+        cls.calc_reduced_clusts(data_dict)
+
+        if domain == 'sr':
+            cls.calc_sr_values(max_sr)
     
     @classmethod
     def interest_links_indices(cls):
@@ -308,6 +324,12 @@ class MOCKGenotype:
         elif cls.delta_val > 100:
             raise ValueError("Delta value is over 100")
         return cls.delta_val
+
+    @classmethod
+    def calc_sr_values(cls, max_sr_val):
+        assert max_sr_val is not None
+        cls.sr_vals = {i: cls.calc_delta(i) for i in range(1, max_sr_val+1)}
+        cls.sr_upper_bound = int(sqrt(Datapoint.num_examples))
 
     @classmethod
     def calc_base_genotype(cls):

@@ -23,7 +23,7 @@ creator.create("Individual", list, fitness=creator.Fitness, fairmut=None)
 
 # Consider trying to integrate the use of **kwargs here
 def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
-                        nn_rankings, mut_meth_params, init_delta, min_delta, max_delta,
+                        nn_rankings, mut_meth_params, domain, min_sr, init_sr, min_delta, init_delta, max_delta,
                         delta_mutation, delta_precision, delta_mutpb, delta_sigma,
                         delta_sigma_as_perct, delta_inverse, crossover, flexible_limits,
                         squash):
@@ -36,7 +36,7 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
     toolbox.register(
         "individual",
         MOCKGenotype.delta_individual,
-        icls = creator.Individual,
+        icls=creator.Individual,
         min_delta=init_delta,
         max_delta=max_delta,
         precision=delta_precision
@@ -47,12 +47,13 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
         "initDelta",
         initialisation.init_uniformly_distributed_population,
         num_indivs=num_indivs,
-        k_user = Datapoint.k_user,
+        k_user=Datapoint.k_user,
         min_delta=init_delta,
         max_delta=max_delta,
         argsortdists=argsortdists,
         L=L,
         indiv_creator=toolbox.individual,
+        domain=domain,
         precision=delta_precision
     )
 
@@ -130,6 +131,8 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
             sigma=delta_sigma,
             mutpb=delta_mutpb,
             precision=delta_precision,
+            min_sr=min_sr,
+            init_sr=init_sr,
             min_delta=min_delta,
             max_delta=max_delta,
             sigma_perct=delta_sigma_as_perct,
@@ -143,6 +146,8 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
             spread=delta_sigma,
             mutpb=delta_mutpb,
             precision=delta_precision,
+            min_sr=min_sr,
+            init_sr=init_sr,
             min_delta=min_delta,
             max_delta=max_delta,
             flexible_limits=flexible_limits,
@@ -152,6 +157,8 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
         toolbox.register(
             "mutate_delta", operators.random_delta,
             precision=delta_precision,
+            min_sr=min_sr,
+            init_sr=init_sr,
             max_delta=max_delta
         )
 
@@ -274,12 +281,12 @@ def get_mutation_params(mut_method, mock_args, L_comp=None):
 
 
 def runMOCK(
-        seed_num, data_dict, hv_ref, argsortdists,
+        seed_num, data, data_dict, hv_ref, argsortdists,
         nn_rankings, L, num_indivs,
-        num_gens, mut_meth_params, min_delta, max_delta, init_delta,
+        num_gens, mut_meth_params, domain, min_sr, init_sr, min_delta, max_delta, init_delta,
         delta_mutation, delta_precision, delta_mutpb, delta_sigma,
         delta_sigma_as_perct, delta_inverse, crossover, flexible_limits, squash=False,
-        gens_step=0.1, stair_limits=None, run_number='', save_history=False, verbose=True
+        gens_step=None, stair_limits=None, run_number='', save_history=False, verbose=True
     ):
     """
     Run MOCK with specified inputs
@@ -302,6 +309,9 @@ def runMOCK(
         reduced_length [int] -- Final length of genotype
         time_taken [float] -- The time taken for this run
     """
+    if gens_step is None:
+        gens_step = 0.1
+
     # Set the seed
     random.seed(seed_num)
     np.random.seed(seed_num)  # Currently unused, should switch to in future
@@ -312,11 +322,15 @@ def runMOCK(
     hv = []
 
     # Create the DEAP toolbox
-    toolbox = create_base_toolbox(
-        num_indivs, argsortdists, L, data_dict, nn_rankings, mut_meth_params, init_delta, min_delta, max_delta,
-        delta_mutation, delta_precision, delta_mutpb, delta_sigma, delta_sigma_as_perct, delta_inverse,
-        crossover, flexible_limits, squash
-    )
+    toolbox_params = {
+        'num_indivs': num_indivs, 'argsortdists':argsortdists, 'L':L, 'data_dict':data_dict,
+        'nn_rankings':nn_rankings, 'mut_meth_params':mut_meth_params, 'domain':domain, 'min_sr':min_sr,
+        'init_sr':init_sr, 'init_delta':init_delta, 'min_delta':min_delta, 'max_delta':max_delta,
+        'delta_mutation':delta_mutation, 'delta_precision':delta_precision, 'delta_mutpb':delta_mutpb,
+        'delta_sigma':delta_sigma, 'delta_sigma_as_perct':delta_sigma_as_perct, 'delta_inverse':delta_inverse,
+        'crossover':crossover, 'flexible_limits':flexible_limits, 'squash':squash
+    }
+    toolbox = create_base_toolbox(**toolbox_params)
 
     # Create the initial population
     pop, hv, VAR_init, CNN_init = initial_setup(toolbox, hv, hv_ref)
@@ -337,6 +351,11 @@ def runMOCK(
         # Calculate new init_delta:
         if gen % gens_step == 0:
             init_delta -= stair_limits
+
+        if gen == int(flexible_limits):
+            # Recalculate precomputation
+            MOCKGenotype.setup_genotype_vars(min_delta, data, data_dict, argsortdists, L, domain=domain, max_sr=min_sr)
+            toolbox = create_base_toolbox(**toolbox_params)
 
         # Perform a single generation
         pop, hv = generation(pop, toolbox, hv, hv_ref, num_indivs, init_delta, gen)

@@ -112,6 +112,22 @@ def setup_mock(data):
 
 
 def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
+    init_sr = None
+    min_sr = None
+    srs = []
+    # Parse 'sr' delta values
+    for var in ['min_delta', 'init_delta']:
+        if isinstance(config[var], str):
+            value = int(config[var][2:])
+            srs.append(value)
+            config[var] = round(MOCKGenotype.calc_delta(value), config['delta_precision'])
+
+    if config['domain_delta'] == 'sr':
+        min_sr, init_sr = srs
+        init_sr, min_sr = warning_min_max_delta(init_sr, min_sr)
+
+    config['min_delta'], config['init_delta'] = warning_min_max_delta(config['min_delta'], config['init_delta'])
+
     # Bundle all of the arguments together in a dict to pass to the function
     # This is in order of runMOCK() so that we can easily turn it into a partial func for multiprocessing
     mock_args = {
@@ -124,9 +140,12 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         "num_indivs": config["num_indivs"],
         "num_gens": config["num_gens"],
         "mut_meth_params": None,
+        "domain": config['domain_delta'],
         "init_delta": config["init_delta"],
         "min_delta": config["min_delta"],
         "max_delta": 100 - config['delta_precision'],
+        "init_sr": init_sr,
+        "min_sr": min_sr,
         "flexible_limits": config['flexible_limits'],
         "stair_limits": config['stair_limits'],
         "gens_step": config['gens_step'],
@@ -142,12 +161,6 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         "verbose": config['verbose']
     }
 
-    for var in ['min_delta', 'init_delta']:
-        if isinstance(mock_args[var], str):
-            value = float(mock_args[var][2:])
-            mock_args[var] = round(MOCKGenotype.calc_delta(value), config['delta_precision'])
-    mock_args['min_delta'], mock_args['init_delta'] = warning_min_max_delta(mock_args['min_delta'],
-                                                                            mock_args['init_delta'])
     return mock_args
 
 
@@ -223,15 +236,12 @@ def single_run_mock(L, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_
     mock_args["delta_inverse"] = dmsr
 
     # Setup some of the variables for the genotype
-    MOCKGenotype.min_delta_val = mock_args['min_delta']
-    MOCKGenotype.n_min_delta = MOCKGenotype.get_n_genes(mock_args['min_delta'])
-    MOCKGenotype.setup_genotype_vars()
-    # Setup the components class
-    PartialClust.partial_clusts(
-        data, mock_args["data_dict"], mock_args["argsortdists"], mock_args["L"]
-    )
-    # Identify the component IDs of the link origins
-    MOCKGenotype.calc_reduced_clusts(mock_args["data_dict"])
+    MOCKGenotype.setup_genotype_vars(min_delta=mock_args['init_delta'], data=data, data_dict=mock_args["data_dict"],
+                                     argsortdists=mock_args["argsortdists"], L=L, domain=mock_args['domain'],
+                                     max_sr=mock_args['init_sr'])
+
+    if mock_args['min_sr'] is not None and mock_args['min_sr'] > MOCKGenotype.sr_upper_bound:
+        mock_args['min_sr'] = MOCKGenotype.sr_upper_bound
 
     # Set the nadir point
     if validate:
@@ -252,7 +262,7 @@ def single_run_mock(L, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_
         
         # Run MOCK
         start_time = time.time()
-        result = delta_mock.runMOCK(seed, run_number=n_run, **mock_args)
+        result = delta_mock.runMOCK(seed_num=seed, data=data, run_number=n_run, **mock_args)
         mp_time = time.time() - start_time
         print(f"Run {n_run} completed... It took {mp_time:.3f} secs)")
 
@@ -287,8 +297,11 @@ def single_run_mock(L, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_
 
         # Generation numbers
         gen_number = []
-        for i in range(1, len(all_pop)+1):
-            gen_number += [i] * config['num_indivs']
+        if config['save_history']:
+            for i in range(1, len(all_pop)+1):
+                gen_number += [i] * config['num_indivs']
+        else:
+            gen_number += [config['num_gens']] * config['num_indivs']
 
         # Add strategy here for adaptive version
         n_obs = config['num_indivs'] * len(all_pop)
@@ -455,8 +468,3 @@ if __name__ == '__main__':
     print(f'Running {len(configs)} configuration file(s).')
     for config, name in zip(configs, cl_args['config']):
         multi_run_mock(config, cl_args['validate'], name)
-
-    ######## TO DO ########
-    # look at how results are saved and named
-    # evaluation.py is a shit show
-    # should clean up and define the required environment at some point

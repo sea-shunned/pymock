@@ -75,7 +75,7 @@ def init_deltamock(k_user, num_indivs, argsortdists, L, indiv_creator, adaptive=
     return pop
 
 
-def create_delta_solution(k, delta, argsortdists, L, indiv_creator):
+def create_delta_solution(k, delta, sr, argsortdists, L, indiv_creator):
     """Creates a single solution with a specific delta.
     Instead of forcing a number of clusters, this function if flexible when delta is high enough to not allow
     sufficient free links.
@@ -88,7 +88,7 @@ def create_delta_solution(k, delta, argsortdists, L, indiv_creator):
         indiv_creator -- DEAP toolbox individual
     """
     # Init the individual
-    indiv = indiv_creator(delta=delta)
+    indiv = indiv_creator(delta=delta, sr=sr)
     n = min(k-1, len(indiv))
 
     while True:
@@ -101,10 +101,15 @@ def create_delta_solution(k, delta, argsortdists, L, indiv_creator):
 
 
 def init_uniformly_distributed_population(num_indivs, k_user, min_delta, max_delta, argsortdists, L,
-                                          indiv_creator, precision):
+                                          indiv_creator, domain, precision):
     # Get the deltas
-    deltas = np.linspace(min_delta, max_delta, num_indivs)
-    deltas = np.round(deltas, precision)
+    if domain == 'real':
+        deltas = np.linspace(min_delta, max_delta, num_indivs)
+        deltas = np.round(deltas, precision)
+        sqrs = [None for _ in deltas]
+    elif domain == 'sr':
+        sqrs = random.choices(list(MOCKGenotype.sr_vals.keys()), k=num_indivs)
+        deltas = [MOCKGenotype.sr_vals[d] for d in sqrs]
 
     # And the number of clusters (Ks)
     k_max = 2 * k_user
@@ -123,8 +128,8 @@ def init_uniformly_distributed_population(num_indivs, k_user, min_delta, max_del
     pop = []
 
     # Add individuals
-    for k, delta in zip(ks, deltas):
-        indiv = next(create_delta_solution(k, delta, argsortdists, L, indiv_creator))
+    for k, delta, sr in zip(ks, deltas, sqrs):
+        indiv = next(create_delta_solution(k, delta, sr, argsortdists, L, indiv_creator))
         pop.append(indiv)
 
     return pop
