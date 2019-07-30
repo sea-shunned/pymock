@@ -286,7 +286,7 @@ def runMOCK(
         num_gens, mut_meth_params, domain, min_sr, init_sr, min_delta, max_delta, init_delta,
         delta_mutation, delta_precision, delta_mutpb, delta_sigma,
         delta_sigma_as_perct, delta_inverse, crossover, flexible_limits, squash=False,
-        gens_step=None, stair_limits=None, run_number='', save_history=False, verbose=True
+        gens_step=None, stair_limits=None, run_number='', save_history=False, verbose=False
     ):
     """
     Run MOCK with specified inputs

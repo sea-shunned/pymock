@@ -128,7 +128,7 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         init_sr = int(config['init_delta'][2:])
         init_sr, min_sr = warning_min_max_delta(init_sr, min_sr)
 
-    config['min_delta'], config['init_delta'] = warning_min_max_delta(config['min_delta'], config['init_delta'])
+    deltas = warning_min_max_delta(deltas[1], deltas[0])
 
     # Bundle all of the arguments together in a dict to pass to the function
     # This is in order of runMOCK() so that we can easily turn it into a partial func for multiprocessing
