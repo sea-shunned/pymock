@@ -114,16 +114,18 @@ def setup_mock(data):
 def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
     init_sr = None
     min_sr = None
-    srs = []
+    deltas = []
     # Parse 'sr' delta values
-    for var in ['min_delta', 'init_delta']:
+    for var in ['init_delta', 'min_delta']:
         if isinstance(config[var], str):
             value = int(config[var][2:])
-            srs.append(value)
-            config[var] = round(MOCKGenotype.calc_delta(value), config['delta_precision'])
+            deltas.append(round(MOCKGenotype.calc_delta(value), config['delta_precision']))
+        else:
+            deltas.append(config[var])
 
     if config['domain_delta'] == 'sr':
-        min_sr, init_sr = srs
+        min_sr = config['min_delta'][2:]
+        init_sr = config['init_delta'][2:]
         init_sr, min_sr = warning_min_max_delta(init_sr, min_sr)
 
     config['min_delta'], config['init_delta'] = warning_min_max_delta(config['min_delta'], config['init_delta'])
@@ -141,8 +143,8 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         "num_gens": config["num_gens"],
         "mut_meth_params": None,
         "domain": config['domain_delta'],
-        "init_delta": config["init_delta"],
-        "min_delta": config["min_delta"],
+        "init_delta": deltas[0],
+        "min_delta": deltas[1],
         "max_delta": 100 - config['delta_precision'],
         "init_sr": init_sr,
         "min_sr": min_sr,
