@@ -124,8 +124,8 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
             deltas.append(config[var])
 
     if config['domain_delta'] == 'sr':
-        min_sr = config['min_delta'][2:]
-        init_sr = config['init_delta'][2:]
+        min_sr = int(config['min_delta'][2:])
+        init_sr = int(config['init_delta'][2:])
         init_sr, min_sr = warning_min_max_delta(init_sr, min_sr)
 
     config['min_delta'], config['init_delta'] = warning_min_max_delta(config['min_delta'], config['init_delta'])
