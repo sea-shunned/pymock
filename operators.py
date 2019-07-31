@@ -160,6 +160,7 @@ def gaussian_mutation_delta(parent, sigma, mutpb, min_sr, init_sr, min_delta,  i
             else:
                 new_sr = min_max(new_sr, 1, init_sr, precision)
 
+            new_sr = int(new_sr)
             new_delta = MOCKGenotype.sr_vals[new_sr]
         else:
             new_sr = None
@@ -170,7 +171,7 @@ def gaussian_mutation_delta(parent, sigma, mutpb, min_sr, init_sr, min_delta,  i
             else:
                 new_delta = min_max(new_delta, init_delta, max_delta, precision)
 
-        parent.sr = int(new_sr)
+        parent.sr = new_sr
         parent.delta = new_delta
 
         # Update its genotype

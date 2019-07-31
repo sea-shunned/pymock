@@ -140,10 +140,13 @@ def set_config_defaults(config):
             warnings.warn(f"min delta not provided, setting to {config['init_delta']}...")
             config['min_delta'] = config['init_delta']
 
-    for var in ['min_delta', 'init_delta']:
+    for var in ['min_delta', 'init_delta', 'max_delta']:
         if isinstance(config[var], str):
             if config[var][:2].lower() != 'sr':
-                raise ValueError(f'{var} must be either an integer or an string starting with "sr"')
+                raise ValueError(f'{var} must be either an integer or a string starting with "sr"')
+
+    if config['max_delta'] is None:
+        config['max_delta'] = 100 - config['delta_precision']
 
     # Make sure crossover is well written
     if isinstance(config['crossover'], str):

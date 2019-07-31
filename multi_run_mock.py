@@ -2,6 +2,7 @@
 import json
 import random
 import time
+import pickle
 from itertools import product
 from datetime import datetime
 from functools import partial
@@ -116,7 +117,7 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
     min_sr = None
     deltas = []
     # Parse 'sr' delta values
-    for var in ['init_delta', 'min_delta']:
+    for var in ['init_delta', 'min_delta', 'max_delta']:
         if isinstance(config[var], str):
             value = int(config[var][2:])
             deltas.append(round(MOCKGenotype.calc_delta(value), config['delta_precision']))
@@ -128,7 +129,7 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         init_sr = int(config['init_delta'][2:])
         init_sr, min_sr = warning_min_max_delta(init_sr, min_sr)
 
-    deltas = warning_min_max_delta(deltas[1], deltas[0])
+    deltas[1], deltas[0] = warning_min_max_delta(deltas[1], deltas[0])
 
     # Bundle all of the arguments together in a dict to pass to the function
     # This is in order of runMOCK() so that we can easily turn it into a partial func for multiprocessing
@@ -145,7 +146,7 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         "domain": config['domain_delta'],
         "init_delta": deltas[0],
         "min_delta": deltas[1],
-        "max_delta": 100 - config['delta_precision'],
+        "max_delta": deltas[2],
         "init_sr": init_sr,
         "min_sr": min_sr,
         "flexible_limits": config['flexible_limits'],
@@ -279,13 +280,16 @@ def single_run_mock(L, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_
         # Get the running time for each run
         time_taken = result[5]
         # Calculate the number of clusters and ARIs
-        clust_aris = [evaluation.final_pop_metrics(pop, MOCKGenotype.mst_genotype, final_interest_inds, final_gen_len)
-                      for pop in all_pop]
+        clust_aris = [evaluation.final_pop_metrics(pop) for pop in all_pop]
         aris = []
         num_clusts = []
         for clust_ari in clust_aris:
             num_clusts.append(clust_ari[0])
             aris.append(clust_ari[1])
+
+        # Get the labels [2] for the best solution [np.argmax(aris[-1])] in the last generation [-1]
+        best_labels = clust_aris[-1][2][np.argmax(aris[-1])]
+
         # Extract the fitness values
         var_vals = [[indiv.fitness.values[0] for indiv in pop] for pop in all_pop]
         cnn_vals = [[indiv.fitness.values[1] for indiv in pop] for pop in all_pop]
@@ -336,7 +340,7 @@ def single_run_mock(L, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_
                                'run': [config_run_number] * len(hvs),
                                'HV': hvs})
 
-    return results_df, hvs_df
+    return results_df, hvs_df, best_labels
 
 
 def multi_run_mock(config, validate, name=None):
@@ -430,9 +434,11 @@ def multi_run_mock(config, validate, name=None):
                 
         results_df = pd.DataFrame()
         hvs_df = pd.DataFrame()
+        labels = []
         for result in results:
             results_df = results_df.append(result[0], sort=False)
             hvs_df = hvs_df.append(result[1], sort=False)
+            labels.append(result[2])
         
         print(f"{file_path.name} complete!")
 
@@ -444,6 +450,9 @@ def multi_run_mock(config, validate, name=None):
         if save_results:
             results_df.to_csv(f"{experiment_folder}/{data_name}_results.csv", index=False)
             hvs_df.to_csv(f"{experiment_folder}/{data_name}_hvs.csv", index=False)
+            with open(f'{experiment_folder}/{data_name}_labels.pickle', 'wb') as file:
+                pickle.dump(labels, file, protocol=pickle.HIGHEST_PROTOCOL)
+
             print('Results saved!')
 
 

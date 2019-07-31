@@ -67,12 +67,13 @@ def finalPopMetrics2(pop, mst_genotype, int_links_indices, relev_links_len):
 
 
 # @profile
-def final_pop_metrics(pop, mst_genotype, int_links_indices, relev_links_len):
+def final_pop_metrics(pop):
 
     num_examples = classes.Datapoint.num_examples
 
     sol_num_clusters = []
     ari_values = []
+    labels = []
 
     for indiv in pop:
         # Create a graph
@@ -101,6 +102,7 @@ def final_pop_metrics(pop, mst_genotype, int_links_indices, relev_links_len):
         for i, component in enumerate(conn_components):
             pred_labels[component] = i
 
+        labels.append(pred_labels)
         assert np.any(np.isnan(pred_labels)) != True
 
         # Add the ARI value
@@ -117,7 +119,7 @@ def final_pop_metrics(pop, mst_genotype, int_links_indices, relev_links_len):
     #     print(sol_num_clusters)
     #     print(test,"\n")
 
-    return sol_num_clusters, ari_values
+    return sol_num_clusters, ari_values, labels
 
 
 def numClusters(pop, mst_genotype, int_links_indices, relev_links_len):
