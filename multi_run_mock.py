@@ -349,6 +349,7 @@ def multi_run_mock(config, validate, name=None):
         print(f'Loading {name} configuration...')
 
     save_results = validate is False  # opposite of validate
+    save_labels = config['save_labels']
     data_file_paths, experiment_folder = load_data(
         config["exp_name"],
         config["data_folder"],
@@ -450,8 +451,9 @@ def multi_run_mock(config, validate, name=None):
         if save_results:
             results_df.to_csv(f"{experiment_folder}/{data_name}_results.csv", index=False)
             hvs_df.to_csv(f"{experiment_folder}/{data_name}_hvs.csv", index=False)
-            with open(f'{experiment_folder}/{data_name}_labels.pickle', 'wb') as file:
-                pickle.dump(labels, file, protocol=pickle.HIGHEST_PROTOCOL)
+            if save_labels:
+                with open(f'{experiment_folder}/{data_name}_labels.pickle', 'wb') as file:
+                    pickle.dump(labels, file, protocol=pickle.HIGHEST_PROTOCOL)
 
             print('Results saved!')
 
