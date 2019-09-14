@@ -1,6 +1,5 @@
 __pycache__/
 .vscode/
-/data/
 .DS_Store
 /.idea
 /experiments
@@ -11,3 +10,4 @@ data/*
 /snippets
 /jobscripts
 /configs
+
