@@ -1,4 +1,4 @@
-# Delta-MOCK in Python
+# MOCK in Python
 This is Python code for MOCK, Delta-MOCK and Auto-MOCK (still to include Adaptive Delta-MOCK, used in the paper *"Towards an Adaptive Encoding for Evolutionary Data Clustering"*<sup>1</sup>).
 
 <sup>1</sup>Cameron Shand, Richard Allmendinger, Julia Handl, and John Keane. 2018. Towards an Adaptive Encoding for Evolutionary Data Clustering. In GECCO’18: Genetic and Evolutionary Computation Conference, July 15–19, 2018, Kyoto, Japan. ACM, New York, NY, USA, 8 pages. https://doi.org/10.1145/3205455.3205506
@@ -34,7 +34,7 @@ y = df.iloc[:, -1]  # y is only needed for ARI computation
 auto_mock = AutoMOCK(k_user=60, num_gens=50)
 auto_mock.fit(X, y)
 
-# There are two main datasets as output: results (individuals), hvs (hipervolumes)
+# There are two main datasets as output: results (individuals), hvs (hypervolumes)
 auto_mock.results_df.head()
 auto_mock.hvs_df.head()
 
