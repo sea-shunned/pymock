@@ -2,13 +2,10 @@
 import json
 import random
 import time
-import pickle
-from itertools import product
 from datetime import datetime
 from functools import partial
 from pathlib import Path
 import multiprocessing
-# import pdb
 
 import numpy as np
 import pandas as pd
@@ -19,7 +16,6 @@ import precompute
 import evaluation
 import objectives
 from custom_warnings import warning_min_max_delta
-# import no_precomp_objectives
 import delta_mock
 import utils
 import tests
@@ -52,38 +48,22 @@ def load_data(exp_name, data_folder, validate, data_subset=""):
     return list(data_file_paths), experiment_folder
 
 
-def prepare_data(file_path):
-    # Some of this function is hard-coded for strings, so convert the Path
-    if isinstance(file_path, Path):
-        file_path = str(file_path)
-    # Get prettier names for the data
-    if "tevc" in file_path:
-        Datapoint.data_name = file_path.split("/")[-1].split(".")[0][:-15]
-    elif "UKC" in file_path:
-        Datapoint.data_name = file_path.split("/")[-1].split(".")[0]
-    # Current data has header with metadata
-    with open(file_path) as file:
-        head = [int(next(file)[:-1]) for _ in range(4)]
-    # Read the data in as an array
-    # The skip_header is for the header info in this data specifically
-    data = np.genfromtxt(file_path, delimiter="\t", skip_header=4)
+def prepare_data(c, X, y):
+    data = np.asarray(X)
+    target = np.asarray(y)
 
     # Set the values for the data
-    Datapoint.num_examples = head[0] # Num examples
-    Datapoint.num_features = head[1] # Num features/dimensions
-    Datapoint.k_user = head[3] # Num real clusters
-    
-    print("Num examples:", Datapoint.num_examples)
-    print("Num features:", Datapoint.num_features)
-    print("Num (actual) clusters:", Datapoint.k_user)
-    # Do we have labels?
-    if head[2] == 1:
-        Datapoint.labels = True
-    else:
-        Datapoint.labels = False
+    Datapoint.num_examples = data.shape[0]
+    Datapoint.num_features = data.shape[1]
+    Datapoint.k_user = c.k_user  # Number of presumed real clusters
+
+    if c.verbose:
+        print("Num examples:", Datapoint.num_examples)
+        print("Num features:", Datapoint.num_features)
+        print("Num of clusters (user):", Datapoint.k_user)
 
     # Remove labels if present and create data_dict
-    data, data_dict = Datapoint.create_dataset_garza(data)
+    data, data_dict = Datapoint.create_dataset_garza(data, target)
     return data, data_dict
 
 
@@ -112,21 +92,21 @@ def setup_mock(data):
     return argsortdists, nn_rankings
 
 
-def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
+def prepare_mock_args(data_dict, argsortdists, nn_rankings, c):
     init_sr = None
     min_sr = None
     deltas = []
     # Parse 'sr' delta values
-    for var in ['init_delta', 'min_delta', 'max_delta']:
-        if isinstance(config[var], str):
-            value = int(config[var][2:])
-            deltas.append(round(MOCKGenotype.calc_delta(value), config['delta_precision']))
+    for var in [c.init_delta, c.min_delta, c.max_delta]:
+        if isinstance(var, str):
+            value = int(var[2:])
+            deltas.append(round(MOCKGenotype.calc_delta(value), c.delta_precision))
         else:
-            deltas.append(config[var])
+            deltas.append(var)
 
-    if config['domain_delta'] == 'sr':
-        min_sr = int(config['min_delta'][2:])
-        init_sr = int(config['init_delta'][2:])
+    if c.domain_delta == 'sr':
+        min_sr = int(c.min_delta[2:])
+        init_sr = int(c.init_delta[2:])
         init_sr, min_sr = warning_min_max_delta(init_sr, min_sr)
 
     deltas[1], deltas[0] = warning_min_max_delta(deltas[1], deltas[0])
@@ -139,29 +119,29 @@ def prepare_mock_args(data_dict, argsortdists, nn_rankings, config):
         "hv_ref": None,
         "argsortdists": argsortdists,
         "nn_rankings": nn_rankings,
-        "L": None,
-        "num_indivs": config["num_indivs"],
-        "num_gens": config["num_gens"],
+        "L": c.L,
+        "num_indvs": c.num_indvs,
+        "num_gens": c.num_gens,
         "mut_meth_params": None,
-        "domain": config['domain_delta'],
+        "domain": c.domain_delta,
         "init_delta": deltas[0],
         "min_delta": deltas[1],
         "max_delta": deltas[2],
         "init_sr": init_sr,
         "min_sr": min_sr,
-        "flexible_limits": config['flexible_limits'],
-        "stair_limits": config['stair_limits'],
-        "gens_step": config['gens_step'],
-        "delta_mutation": config['delta_mutation'],
-        "squash": config['squash'],
-        "delta_precision": config['delta_precision'],
-        "delta_mutpb": None,
-        "delta_sigma": None,
-        "delta_sigma_as_perct": None,
-        "delta_inverse": None,
-        "crossover": config['crossover'],
-        "save_history": config['save_history'],
-        "verbose": config['verbose']
+        "flexible_limits": c.flexible_limits,
+        "stair_limits": c.stair_limits,
+        "gens_step": c.gens_step,
+        "delta_mutation": c.delta_mutation,
+        "squash": c.squash,
+        "delta_precision": c.delta_precision,
+        "delta_mutpb": c.delta_mutation_probability,
+        "delta_sigma": c.delta_mutation_variance,
+        "delta_sigma_as_perct": c.delta_as_perct,
+        "delta_inverse": c.delta_inverse,
+        "crossover": c.crossover,
+        "save_history": c.save_history,
+        "verbose": c.verbose
     }
 
     return mock_args
@@ -229,18 +209,14 @@ def calc_hv_ref(mock_args):
     return hv_ref
 
 
-def single_run_mock(L, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_number,
-                    n_run, mock_args, data, config, validate):
-    # Set the mock_args for this layer
-    mock_args["L"] = L
-    mock_args["delta_mutpb"] = dmutpb
-    mock_args["delta_sigma"] = dms
-    mock_args["delta_sigma_as_perct"] = dmsp
-    mock_args["delta_inverse"] = dmsr
-
+def single_run_mock(seed, run_number, mock_args, data, c, validate):
     # Setup some of the variables for the genotype
-    MOCKGenotype.setup_genotype_vars(min_delta=mock_args['init_delta'], data=data, data_dict=mock_args["data_dict"],
-                                     argsortdists=mock_args["argsortdists"], L=L, domain=mock_args['domain'],
+    MOCKGenotype.setup_genotype_vars(min_delta=mock_args['init_delta'],
+                                     data=data,
+                                     data_dict=mock_args["data_dict"],
+                                     argsortdists=mock_args["argsortdists"],
+                                     L=mock_args["L"],
+                                     domain=mock_args['domain'],
                                      max_sr=mock_args['init_sr'])
 
     if mock_args['min_sr'] is not None and mock_args['min_sr'] > MOCKGenotype.sr_upper_bound:
@@ -253,231 +229,143 @@ def single_run_mock(L, dmutpb, dms, dmsp, dmsr, seed, config_number, config_run_
     else:
         mock_args['hv_ref'] = calc_hv_ref(mock_args)
 
-    # Strategy is not used, but kept for result consistency with adaptive
-    # Same with L_comp
-    for strategy, L_comp in product(
-            config["strategies"], config["L_comp"]
-    ):
-        # Add mutation method-specific arguments
-        mock_args = delta_mock.get_mutation_params(
-            config["mut_method"], mock_args, L_comp
-        )
-        
-        # Run MOCK
-        start_time = time.time()
-        result = delta_mock.runMOCK(seed_num=seed, data=data, run_number=n_run, **mock_args)
-        mp_time = time.time() - start_time
-        print(f"Run {n_run} completed... It took {mp_time:.3f} secs)")
+    # Add mutation method-specific arguments
+    mock_args = delta_mock.get_mutation_params(c.mut_method, mock_args, c.L_comp)
 
-        # Extract the population
-        all_pop = result[0]
-        # Extract hv list
-        hvs = result[1]
-        # Extract final interesting links
-        final_interest_inds = result[3]
-        # Extract final genotype length
-        final_gen_len = result[4]
-        # Get the running time for each run
-        time_taken = result[5]
-        # Calculate the number of clusters and ARIs
-        clust_aris = [evaluation.final_pop_metrics(pop) for pop in all_pop]
-        aris = []
-        num_clusts = []
-        for clust_ari in clust_aris:
-            num_clusts.append(clust_ari[0])
-            aris.append(clust_ari[1])
+    # Run MOCK
+    start_time = time.time()
+    result = delta_mock.runMOCK(seed_num=seed, data=data, run_number=run_number, **mock_args)
+    mp_time = time.time() - start_time
 
-        # Get the labels [2] for the best solution [np.argmax(aris[-1])] in the last generation [-1]
-        best_labels = clust_aris[-1][2][np.argmax(aris[-1])]
+    if c.verbose:
+        print(f"Run {run_number} completed... It took {mp_time:.3f} secs)")
 
-        # Extract the fitness values
-        var_vals = [[indiv.fitness.values[0] for indiv in pop] for pop in all_pop]
-        cnn_vals = [[indiv.fitness.values[1] for indiv in pop] for pop in all_pop]
-        delta_vals = [[indiv.delta for indiv in pop] for pop in all_pop]
-        # Flatten list of lists
-        var_vals = np.array(var_vals).flatten()
-        cnn_vals = np.array(cnn_vals).flatten()
-        delta_vals = np.array(delta_vals).flatten()
-        aris = np.array(aris).flatten()
-        num_clusts = np.array(num_clusts).flatten()
+    # Extract the population
+    all_pop = result[0]
+    # Extract hv list
+    hvs = result[1]
+    # Extract final interesting links. For future ref.
+    final_interest_inds = result[3]
+    # Extract final genotype length. For future ref.
+    final_gen_len = result[4]
+    # Get the running time for each run
+    time_taken = result[5]
+    # Calculate the number of clusters and ARIs
+    clust_aris = [evaluation.final_pop_metrics(pop) for pop in all_pop]
+    aris = []
+    num_clusts = []
+    for clust_ari in clust_aris:
+        num_clusts.append(clust_ari[0])
+        aris.append(clust_ari[1])
 
-        # Generation numbers
-        gen_number = []
-        if config['save_history']:
-            for i in range(1, len(all_pop)+1):
-                gen_number += [i] * config['num_indivs']
-        else:
-            gen_number += [config['num_gens']] * config['num_indivs']
+    # Get the labels [2] for the best solution [np.argmax(aris[-1])] in the last generation [-1]
+    pred_labels = clust_aris[-1][2][np.argmax(aris[-1])]
 
-        # Add strategy here for adaptive version
-        n_obs = config['num_indivs'] * len(all_pop)
-        results_dict = {
-            "dataset": [Datapoint.data_name] * n_obs,
-            'config': [config_number] * n_obs,
-            'run': [config_run_number] * n_obs,
-            'gen': gen_number,
-            "indiv": list(range(config["num_indivs"])) * len(all_pop),
-            "L": [L] * n_obs,
-            "delta": delta_vals,
-            "min_delta": [mock_args['min_delta']] * n_obs,
-            "init_delta": [mock_args['init_delta']] * n_obs,
-            "max_delta": [mock_args['max_delta']] * n_obs,
-            "delta_mutpb": [dmutpb] * n_obs,
-            "delta_sigma": [dms] * n_obs,
-            "delta_sigma_as_perct": [dmsp] * n_obs,
-            "delta_inverse": [dmsr] * n_obs,
-            "VAR": var_vals,
-            "CNN": cnn_vals,
-            # "HV": hvs, This is evaluated per generation and not per individual
-            "ARI": aris,
-            "clusters": num_clusts,
-            "time": [time_taken] * n_obs
-        }
-        # Add the new results
-        results_df = pd.DataFrame(results_dict)
-        hvs_df = pd.DataFrame({'N': [i for i in range(len(hvs))],
-                               'config': [config_number] * len(hvs),
-                               'run': [config_run_number] * len(hvs),
-                               'HV': hvs})
+    # Extract the fitness values
+    var_vals = [[indiv.fitness.values[0] for indiv in pop] for pop in all_pop]
+    cnn_vals = [[indiv.fitness.values[1] for indiv in pop] for pop in all_pop]
+    delta_vals = [[indiv.delta for indiv in pop] for pop in all_pop]
+    # Flatten list of lists
+    var_vals = np.array(var_vals).flatten()
+    cnn_vals = np.array(cnn_vals).flatten()
+    delta_vals = np.array(delta_vals).flatten()
+    aris = np.array(aris).flatten() if aris[0] is not None else np.full_like(delta_vals, np.nan)
+    num_clusts = np.array(num_clusts).flatten()
 
-    return results_df, hvs_df, best_labels
+    # Generation numbers
+    gen_number = []
+    if c.save_history:
+        for i in range(1, len(all_pop)+1):
+            gen_number += [i] * c.num_indvs
+    else:
+        gen_number += [c.num_gens] * c.num_indvs
+
+    # Add strategy here for adaptive version
+    n_obs = c.num_indvs * len(all_pop)
+    results_dict = {
+        "dataset": [Datapoint.data_name] * n_obs,
+        'run': [run_number] * n_obs,
+        'gen': gen_number,
+        "indiv": list(range(c.num_indvs)) * len(all_pop),
+        "L": [c.L] * n_obs,
+        "delta": delta_vals,
+        "min_delta": [mock_args['min_delta']] * n_obs,
+        "init_delta": [mock_args['init_delta']] * n_obs,
+        "max_delta": [mock_args['max_delta']] * n_obs,
+        "delta_mutation_probability": [c.delta_mutation_probability] * n_obs,
+        "delta_mutation_variance": [c.delta_mutation_variance] * n_obs,
+        "delta_as_perct": [c.delta_as_perct] * n_obs,
+        "delta_inverse": [c.delta_inverse] * n_obs,
+        "VAR": var_vals,
+        "CNN": cnn_vals,
+        "ARI": aris,
+        "clusters": num_clusts,
+        "time": [time_taken] * n_obs
+    }
+    # Add the new results
+    results_df = pd.DataFrame(results_dict)
+    hvs_df = pd.DataFrame({'indiv': [i for i in range(len(hvs))],
+                           'run': [run_number] * len(hvs),
+                           'HV': hvs})
+
+    return results_df, hvs_df, pred_labels
 
 
-def multi_run_mock(config, validate, name=None):
-    # Load the data file paths
-    if name is not None:
-        print(f'Loading {name} configuration...')
+def multi_run_mock(c, X, y):
+    """Main flow controller for MOCK
+    :param c: PyMOCK instance
+    :param X: Features.
+    :param y: Labels (if available)"""
+    if c.verbose:
+        # Print the number of runs to get an idea of runtime (sort of)
+        print("--*"*15)
+        print("Init information:")
+        print(f"{c.num_runs} run(s)")
+        print(f"{c.num_gens} generations")
+        print(f"{c.num_indvs} individuals per generation.")
+        print(f"Init delta: {c.init_delta}.")
+        print(f"Min delta: {c.min_delta}.")
+        print("--*"*15)
 
-    save_results = validate is False  # opposite of validate
-    save_labels = config['save_labels']
-    data_file_paths, experiment_folder = load_data(
-        config["exp_name"],
-        config["data_folder"],
-        validate,
-        config["data_subset"]
-    )
+        print(f"Beginning precomputation...")
 
-    # Check the config and amend if needed
-    config = utils.check_config(config)
-    # Create the seed list
-    seed_list, config = create_seeds(config)
+    # Prepare the data
+    data, data_dict = prepare_data(c, X, y)
+    # Do the precomputation for MOCK
+    argsortdists, nn_rankings = setup_mock(data)
+    # Wrap the arguments up for the main MOCK function
+    mock_args = prepare_mock_args(data_dict, argsortdists, nn_rankings, c)
 
-    # Restrict seed_list to the actual number of runs that we need
-    # Truncating like this allows us to know that the run numbers and order of seeds correspond
-    seed_list = seed_list[:config["num_runs"]]
-    seed_list = [(i,) for i in seed_list]  # for starmap
-
-    # Print the number of runs to get an idea of runtime (sort of)
-    print("---------------------------")
-    print("Init information:")
-    print(f"{config['num_runs']} run(s)")
-    print(f"{len(config['strategies'])} strategy/-ies")
-    print(f"{config['num_gens']} generations")
-    print(f"{config['num_indivs']} individuals per generation.")
-    print(f"Init delta: {config['init_delta']}.")
-    print(f"Min delta: {config['min_delta']}.")
-    print(f"{len(config['delta_mutation_probability'])} sigma variations")
-    print(f"{len(data_file_paths)} dataset(s)")
-    print("---------------------------")
-
-    # Save the config
-    utils.save_config(config, experiment_folder, validate)
-
-    # Prepare the list of runs
-    runs_list = []
-
-    # Loop through the Ls
-    n_run = 0
-    config_number = 0
-    for L in config["L"]:
-        # Loop through delta mutation values
-        for dmutpb, dms, dmsp, dmsr in zip(config["delta_mutation_probability"],
-                                           config["delta_gauss_mutation_variance"],
-                                           config["delta_gauss_mutation_sigma_as_perct"],
-                                           config["delta_gauss_mutation_inverse"]):
-            config_number += 1
-            # And finally through each run
-            for config_run_number, seed in enumerate(seed_list):
-                n_run += 1
-                runs_list.append([L, dmutpb, dms, dmsp, dmsr, seed, config_number,
-                                  config_run_number + 1, n_run])
-
-    # Loop through the data to test
-    for file_path in data_file_paths:
-        data_name = file_path.name
-
-        print(f"Beginning precomputation for {data_name}...")
-        # Prepare the data
-        data, data_dict = prepare_data(file_path)
-        # Do the precomputation for MOCK
-        argsortdists, nn_rankings = setup_mock(data)
-        # Wrap the arguments up for the main MOCK function
-        mock_args = prepare_mock_args(data_dict, argsortdists, nn_rankings, config)
-
-        # Decode square root deltas
+    if c.verbose:
         print(f'Min delta: {mock_args["min_delta"]}')
         print(f'Init delta: {mock_args["init_delta"]}')
-
         print("Precomputation complete!")
-        print("---------------------------")
+        print("--*"*15)
+        print('Beginning {} runs.'.format(c.num_runs))
 
-        print('Beginning {} runs.'.format(n_run))
-
-        if n_run == 1:
-            # Don't enter multiprocessing if only one run
-            results = [single_run_mock(mock_args=mock_args, validate=validate,
-                            data=data, config=config, *runs_list[0])]
-        else:
-            mock_func = partial(single_run_mock, mock_args=mock_args, validate=validate,
-                            data=data, config=config)
-            with multiprocessing.Pool() as pool:
-                results = pool.starmap(mock_func, runs_list)
-                
-        results_df = pd.DataFrame()
-        hvs_df = pd.DataFrame()
-        labels = []
-        for result in results:
-            results_df = results_df.append(result[0], sort=False)
-            hvs_df = hvs_df.append(result[1], sort=False)
-            labels.append(result[2])
-        
-        print(f"{file_path.name} complete!")
-
-        # Validate the results
-        if validate:
-            tests.validate_results(results_df)
-            print("Test passed!")
-        # Save results
-        if save_results:
-            results_df.to_csv(f"{experiment_folder}/{data_name}_results.csv", index=False)
-            hvs_df.to_csv(f"{experiment_folder}/{data_name}_hvs.csv", index=False)
-            if save_labels:
-                with open(f'{experiment_folder}/{data_name}_labels.pickle', 'wb') as file:
-                    pickle.dump(labels, file, protocol=pickle.HIGHEST_PROTOCOL)
-
-            print('Results saved!')
-
-
-if __name__ == '__main__':
-    parser = utils.build_parser()
-    cl_args = parser.parse_args()
-    cl_args = vars(cl_args)
-    utils.check_cl_args(cl_args)
-
-    # Check that all config files are ok
-    if cl_args['validate']:
-        config_path = Path.cwd() / "configs" / "validate.json"
-        configs = [utils.load_json(config_path)]
-        cl_args['config'] = ['VALIDATION']
+    if c.num_runs == 1:
+        # Don't enter multiprocessing if only one run
+        results = [single_run_mock(mock_args=mock_args, validate=c.validate,
+                                   data=data, c=c, **c.runs_list[0])]
     else:
-        configs = []
-        for config in cl_args['config']:
-            config_path = Path.cwd() / "configs" / config
-            configs.append(utils.load_json(config_path))
+        mock_func = partial(single_run_mock, mock_args=mock_args, validate=c.validate,
+                            data=data, c=c)
+        with multiprocessing.Pool() as pool:
+            results = pool.starmap(mock_func, c.runs_list)
 
-    configs = [utils.check_config(config) for config in configs]
+    # Save results back into instance
+    c.results_df = pd.DataFrame()
+    c.hvs_df = pd.DataFrame()
+    c.labels = []
+    for result in results:
+        c.results_df = c.results_df.append(result[0], sort=False)
+        c.hvs_df = c.hvs_df.append(result[1], sort=False)
+        c.labels.append(result[2])
 
-    # Run Algorithm
-    print(f'Running {len(configs)} configuration file(s).')
-    for config, name in zip(configs, cl_args['config']):
-        multi_run_mock(config, cl_args['validate'], name)
+    if c.verbose:
+        print(f"Done!")
+
+    # Validate the results
+    if c.validate:
+        tests.validate_results(c.results_df)
+        print("Test passed!")

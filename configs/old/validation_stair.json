@@ -4,7 +4,7 @@
     "data_subset": null,
     "num_runs": 20,
     "num_gens": 100,
-    "num_indivs": 100,
+    "num_indvs": 100,
     "min_deltas": null,
     "max_deltas": null,
     "flexible_limits": null,

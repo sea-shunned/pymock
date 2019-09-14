@@ -106,18 +106,10 @@ def final_pop_metrics(pop):
         assert np.any(np.isnan(pred_labels)) != True
 
         # Add the ARI value
-        ari_values.append(adjusted_rand_score(labels_true=classes.Datapoint.label_vals, labels_pred=pred_labels))
-
-    ### Can use this attribute to get the number directly
-    # Still need components though so may not be useful
-    # There may be a better way of doing this - may not be important though
-    ###
-    # test = [indiv.num_clusts for indiv in pop]
-    # if test == sol_num_clusters:
-    #     print("Same!")
-    # else:
-    #     print(sol_num_clusters)
-    #     print(test,"\n")
+        if classes.Datapoint.label_vals.shape:
+            ari_values.append(adjusted_rand_score(labels_true=classes.Datapoint.label_vals, labels_pred=pred_labels))
+        else:
+            ari_values = None
 
     return sol_num_clusters, ari_values, labels
 

@@ -4,7 +4,7 @@
     "data_subset": null,
     "num_runs": 1,
     "num_gens": 100,
-    "num_indivs": 100,
+    "num_indvs": 100,
     "domain_delta": "real",
     "init_delta": "sr1",
     "min_delta": "sr1",

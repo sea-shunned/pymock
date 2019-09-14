@@ -24,12 +24,12 @@ def create_solution(n, argsortdists, L):
         yield indiv
 
 
-def init_deltamock(k_user, num_indivs, argsortdists, L, indiv_creator, adaptive=True):
+def init_deltamock(k_user, num_indvs, argsortdists, L, indiv_creator, adaptive=True):
     """Initialisation routine for Delta-MOCK
     
     Arguments:
         k_user {int} -- Rough estimate of the number of clusters
-        num_indivs {int} -- Number of individuals in population
+        num_indvs {int} -- Number of individuals in population
         argsortdists {np.array} -- Argsorted distance array
         L {int} -- Neighbourhood hyperparameter
     
@@ -55,8 +55,8 @@ def init_deltamock(k_user, num_indivs, argsortdists, L, indiv_creator, adaptive=
     # Empty list to hold selected k values
     k_values = []
     # If we don't have enough k values we need to resample
-    if len(k_all) < num_indivs-1:
-        while len(k_values) < num_indivs-1:
+    if len(k_all) < num_indvs-1:
+        while len(k_values) < num_indvs-1:
             try:
                 k_values.append(k_set.pop())
             except IndexError:
@@ -64,8 +64,8 @@ def init_deltamock(k_user, num_indivs, argsortdists, L, indiv_creator, adaptive=
                 random.shuffle(k_set)
     # Otherwise just take the number of k values we need from the shuffled set
     else:
-        k_values = k_set[:num_indivs-1] # Minus one due to use of MST genotype
-    assert len(k_values) == num_indivs-1, "Different number of k values to P (pop size)"
+        k_values = k_set[:num_indvs-1] # Minus one due to use of MST genotype
+    assert len(k_values) == num_indvs-1, "Different number of k values to P (pop size)"
     # Generate each individual
     for k in k_values:
         # n = k-1, with n being used in the Garza/Handl paper
@@ -100,22 +100,22 @@ def create_delta_solution(k, delta, sr, argsortdists, L, indiv_creator):
         yield indiv
 
 
-def init_uniformly_distributed_population(num_indivs, k_user, min_delta, max_delta, argsortdists, L,
+def init_uniformly_distributed_population(num_indvs, k_user, min_delta, max_delta, argsortdists, L,
                                           indiv_creator, domain, precision):
     # Get the deltas
     if domain == 'real':
-        deltas = np.linspace(min_delta, max_delta, num_indivs)
+        deltas = np.linspace(min_delta, max_delta, num_indvs)
         deltas = np.round(deltas, precision)
         sqrs = [None for _ in deltas]
     elif domain == 'sr':
-        sqrs = random.choices(list(MOCKGenotype.sr_vals.keys()), k=num_indivs)
+        sqrs = random.choices(list(MOCKGenotype.sr_vals.keys()), k=num_indvs)
         deltas = [MOCKGenotype.sr_vals[d] for d in sqrs]
 
     # And the number of clusters (Ks)
     k_max = 2 * k_user
     ks = list(range(2, k_max+1))
     if len(ks) > len(deltas):
-        ks = ks[:num_indivs]
+        ks = ks[:num_indvs]
     elif len(ks) < len(deltas):
         ks += list(random.choices(ks, k=len(deltas)-len(ks)))
 

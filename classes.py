@@ -128,7 +128,7 @@ class Datapoint(object):
 
     def __init__(self, id_value, values):
         self.id = id_value
-        self.values = values # what is this used for? Doesn't seem to be anything
+        self.values = values  # what is this used for? Doesn't seem to be anything
         self.base_cluster_num = None
 
     @staticmethod
@@ -144,7 +144,7 @@ class Datapoint(object):
         # Assign name to dataset
         # Assuming file path split by / and filename only has one . character
         Datapoint.data_name = data_path.split("/")[-1].split(".")[0]
-        print("Data Name:",Datapoint.data_name)
+        print("Data Name:", Datapoint.data_name)
 
         # If we have labels, split array
         if labels:
@@ -171,19 +171,23 @@ class Datapoint(object):
         return data, data_dict
 
     @staticmethod
-    def create_dataset_garza(data):
-        if Datapoint.labels == True:
-            Datapoint.label_vals = data[:, -1]
-            data = np.delete(data, -1, 1)
+    def create_dataset_garza(X, y):
         # Create dictionary to store data points
         data_dict = {}
         # Loop over the dataset
-        for id_value, row in enumerate(data):
+        for id_value, row in enumerate(X):
             # Create current datapoint object
             curr_datapoint = Datapoint(id_value, row)
             # Store object in dictionary
             data_dict[curr_datapoint.id] = curr_datapoint
-        return data, data_dict
+
+        if y is not None:
+            Datapoint.labels = True
+            Datapoint.label_vals = y
+        else:
+            Datapoint.labels = False
+
+        return X, data_dict
 
 
 class MOCKGenotype:
@@ -222,7 +226,7 @@ class MOCKGenotype:
 
     @classmethod
     def get_n_genes(cls, delta):
-        return int(round((100 - delta) / 100 * cls.n_links, 0))
+        return int(np.ceil((100 - delta) / 100 * cls.n_links))
 
     @classmethod
     def get_random_delta(cls, min_delta, max_delta, precision=3):
@@ -277,7 +281,7 @@ class MOCKGenotype:
     @classmethod
     def setup_genotype_vars(cls, min_delta, data, data_dict, argsortdists, L, domain, max_sr=None):
         cls.min_delta_val = min_delta
-        cls.n_min_delta = MOCKGenotype.get_n_genes(min_delta)
+        cls.n_min_delta = cls.get_n_genes(min_delta)
         # Calculate the length of the reduced genotype
         cls.calc_red_length()
         # Find the indices of the most to least interesting links

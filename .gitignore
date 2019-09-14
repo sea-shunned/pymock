@@ -4,6 +4,10 @@ __pycache__/
 .DS_Store
 /.idea
 /experiments
-/data
+
+data/*
+!data/tevc_20_60_9_labels_headers.data
+
 /snippets
 /jobscripts
+/configs

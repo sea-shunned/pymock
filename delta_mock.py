@@ -22,7 +22,7 @@ creator.create("Individual", list, fitness=creator.Fitness, fairmut=None)
 
 
 # Consider trying to integrate the use of **kwargs here
-def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
+def create_base_toolbox(num_indvs, argsortdists, L, data_dict,
                         nn_rankings, mut_meth_params, domain, min_sr, init_sr, min_delta, init_delta, max_delta,
                         delta_mutation, delta_precision, delta_mutpb, delta_sigma,
                         delta_sigma_as_perct, delta_inverse, crossover, flexible_limits,
@@ -46,7 +46,7 @@ def create_base_toolbox(num_indivs, argsortdists, L, data_dict,
     toolbox.register(
         "initDelta",
         initialisation.init_uniformly_distributed_population,
-        num_indivs=num_indivs,
+        num_indvs=num_indvs,
         k_user=Datapoint.k_user,
         min_delta=init_delta,
         max_delta=max_delta,
@@ -212,7 +212,7 @@ def check_hv_violation(pop, hv_ref):
         raise ValueError("Connectivity has exceeded hv reference point")
 
 
-def generation(pop, toolbox, HV, HV_ref, num_indivs, init_delta, gen_n=0):
+def generation(pop, toolbox, HV, HV_ref, num_indvs, init_delta, gen_n=0):
     """
     Perform a single generation of MOCK
     """
@@ -242,7 +242,7 @@ def generation(pop, toolbox, HV, HV_ref, num_indivs, init_delta, gen_n=0):
         ind.fitness.values = (var, cnn)
 
     # Select from the current population and new offspring
-    pop = toolbox.select(pop + offspring, num_indivs)
+    pop = toolbox.select(pop + offspring, num_indvs)
 
     # Add the hypervolume for this generation to the list
     HV.append(hypervolume(pop, HV_ref))
@@ -282,11 +282,11 @@ def get_mutation_params(mut_method, mock_args, L_comp=None):
 
 def runMOCK(
         seed_num, data, data_dict, hv_ref, argsortdists,
-        nn_rankings, L, num_indivs,
+        nn_rankings, L, num_indvs,
         num_gens, mut_meth_params, domain, min_sr, init_sr, min_delta, max_delta, init_delta,
         delta_mutation, delta_precision, delta_mutpb, delta_sigma,
-        delta_sigma_as_perct, delta_inverse, crossover, flexible_limits, squash=False,
-        gens_step=None, stair_limits=None, run_number='', save_history=False, verbose=False
+        delta_sigma_as_perct, delta_inverse, crossover, flexible_limits, squash,
+        gens_step, stair_limits, run_number, save_history, verbose
     ):
     """
     Run MOCK with specified inputs
@@ -297,7 +297,7 @@ def runMOCK(
         argsortdists {np.array} -- distance array of data argsorted
         nn_rankings {np.array} -- Neareast neighbour rankings for each data point
         L {int} -- MOCK neighbourhood parameter
-        num_indivs {int} -- Number of individuals in population
+        num_indvs {int} -- Number of individuals in population
         num_gens {int} -- Number of generations
         reduced_clust_nums {list} -- List of the cluster id numbers for the base clusters/components that are available in the search
     
@@ -323,12 +323,12 @@ def runMOCK(
 
     # Create the DEAP toolbox
     toolbox_params = {
-        'num_indivs': num_indivs, 'argsortdists':argsortdists, 'L':L, 'data_dict':data_dict,
-        'nn_rankings':nn_rankings, 'mut_meth_params':mut_meth_params, 'domain':domain, 'min_sr':min_sr,
-        'init_sr':init_sr, 'init_delta':init_delta, 'min_delta':min_delta, 'max_delta':max_delta,
-        'delta_mutation':delta_mutation, 'delta_precision':delta_precision, 'delta_mutpb':delta_mutpb,
-        'delta_sigma':delta_sigma, 'delta_sigma_as_perct':delta_sigma_as_perct, 'delta_inverse':delta_inverse,
-        'crossover':crossover, 'flexible_limits':flexible_limits, 'squash':squash
+        'num_indvs': num_indvs, 'argsortdists': argsortdists, 'L': L, 'data_dict': data_dict,
+        'nn_rankings': nn_rankings, 'mut_meth_params': mut_meth_params, 'domain': domain, 'min_sr': min_sr,
+        'init_sr': init_sr, 'init_delta': init_delta, 'min_delta':min_delta, 'max_delta': max_delta,
+        'delta_mutation': delta_mutation, 'delta_precision': delta_precision, 'delta_mutpb': delta_mutpb,
+        'delta_sigma': delta_sigma, 'delta_sigma_as_perct': delta_sigma_as_perct, 'delta_inverse': delta_inverse,
+        'crossover': crossover, 'flexible_limits': flexible_limits, 'squash': squash
     }
     toolbox = create_base_toolbox(**toolbox_params)
 
@@ -339,8 +339,8 @@ def runMOCK(
     # check_hv_violation(pop, hv_ref)
 
     # # Check that the hv_ref reference point is valid
-    # if PartialClust.max_cnn >= hv_ref[1]:
-    #     raise ValueError(f"Max CNN value ({PartialClust.max_cnn}) has exceeded that set for hv reference point ({hv_ref[1]}); hv values may be unreliable")
+    if PartialClust.max_cnn >= hv_ref[1]:
+        raise ValueError(f"Max CNN value ({PartialClust.max_cnn}) has exceeded that set for hv reference point ({hv_ref[1]}); hv values may be unreliable")
 
     # Go through each generation
     all_pop = []
@@ -352,13 +352,13 @@ def runMOCK(
         if gen % gens_step == 0:
             init_delta -= stair_limits
 
-        if gen == int(flexible_limits):
+        if gen == int(flexible_limits) + 1:
             # Recalculate precomputation
             MOCKGenotype.setup_genotype_vars(min_delta, data, data_dict, argsortdists, L, domain=domain, max_sr=min_sr)
             toolbox = create_base_toolbox(**toolbox_params)
 
         # Perform a single generation
-        pop, hv = generation(pop, toolbox, hv, hv_ref, num_indivs, init_delta, gen)
+        pop, hv = generation(pop, toolbox, hv, hv_ref, num_indvs, init_delta, gen)
 
         # Save the results
         if save_history:

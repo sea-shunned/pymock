@@ -26,7 +26,7 @@ Below is a short explanation of each of the fields for the config file. An examp
 * `"data_subset"`: A string that will select a subset of the data in the folder. Leave as `null` for every file in the folder to be used.
 * `"num_runs"`: The number of runs (e.g. independent seeds)
 * `"num_gens"`: The number of generations
-* `"num_indivs"`: The number of individuals in a population
+* `"num_indvs"`: The number of individuals in a population
 * `"delta_sr_vals"`: Which values of delta to use, in terms of multiples of the square root (as in Mario's paper)
 * `"delta_raw_vals"`: Raw delta values to use (between 0 and 100)
 * `"mut_method"`: Which mutation method to use (choice of "original", "centroid", or "neighbour")

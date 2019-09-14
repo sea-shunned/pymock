@@ -4,7 +4,7 @@
     "data_subset": null,
     "num_runs": 2,
     "num_gens": 100,
-    "num_indivs": 100,
+    "num_indvs": 100,
     "delta_sr_vals": [1],
     "delta_raw_vals": null,
     "mut_method": "original",
