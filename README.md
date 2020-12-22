@@ -24,4 +24,4 @@ To ensure that your setup works, run `python run_mock.py -v`. If no errors occur
 To then run experiments, you need to create a config file, save it in the `configs` sub-folder, and then run `python run_mock.py -c configname.json`.
 
 ## User Guide
-The full user guide can be found [here](https://github.com/sea-shunned/PyMOCK/user_guide.md), which explains some aspects of the code and the different files.
+The full user guide can be found [here](https://github.com/sea-shunned/PyMOCK/blob/master/user_guide.md), which explains some aspects of the code and the different files.
