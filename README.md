@@ -5,7 +5,7 @@ This is Python code for Delta-MOCK, including Adaptive Delta-MOCK, used in the p
 
 For the original Delta-MOCK in high performance C++, please see Mario Garza-Fabre's code [here](https://github.com/garzafabre/Delta-MOCK). This repo is intended for easy development, extensions, and, simple application of Delta-MOCK.
 
-If you are having issues using this code, please don't hesitate to contact the repo owner (cameron.shand (at) manchester.ac.uk). 
+If you are having issues using this code, please [raise an issue](https://github.com/sea-shunned/PyMOCK/issues/new). 
 
 ## Requirements
 The key requirements are:
